@@ -5,9 +5,11 @@ import { SellTab } from '@/components/pos/SellTab';
 import { InventoryTab } from '@/components/pos/InventoryTab';
 import { CustomersTab } from '@/components/pos/CustomersTab';
 import { ReportsTab } from '@/components/pos/ReportsTab';
+import { SettingsTab } from '@/components/pos/SettingsTab';
 import { useCart } from '@/hooks/useCart';
 import { useProducts } from '@/hooks/useProducts';
 import { useCustomers } from '@/hooks/useCustomers';
+import { useSettings } from '@/hooks/useSettings';
 import { Sale, Customer } from '@/types/pos';
 import { toast } from 'sonner';
 
@@ -18,6 +20,7 @@ const Index = () => {
   const cart = useCart();
   const products = useProducts();
   const customers = useCustomers();
+  const { settings, updateSettings, resetSettings } = useSettings();
 
   const handleCheckout = (paymentMethod: 'cash' | 'credit', customer?: Customer) => {
     if (cart.items.length === 0) return;
@@ -66,7 +69,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header lowStockCount={products.lowStockProducts.length} />
+      <Header 
+        lowStockCount={products.lowStockProducts.length}
+        kioskName={settings.kioskName}
+        kioskNameFr={settings.kioskNameFr}
+        logo={settings.logo}
+      />
       
       <main className="flex-1 overflow-hidden">
         {activeTab === 'sell' && (
@@ -113,6 +121,14 @@ const Index = () => {
 
         {activeTab === 'reports' && (
           <ReportsTab sales={sales} />
+        )}
+
+        {activeTab === 'settings' && (
+          <SettingsTab
+            settings={settings}
+            onUpdateSettings={updateSettings}
+            onResetSettings={resetSettings}
+          />
         )}
       </main>
 

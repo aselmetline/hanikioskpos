@@ -3,9 +3,12 @@ import { useState, useEffect } from 'react';
 
 interface HeaderProps {
   lowStockCount: number;
+  kioskName?: string;
+  kioskNameFr?: string;
+  logo?: string | null;
 }
 
-export function Header({ lowStockCount }: HeaderProps) {
+export function Header({ lowStockCount, kioskName = 'كشك هاني', kioskNameFr = 'Hani Kiosk', logo }: HeaderProps) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -37,12 +40,16 @@ export function Header({ lowStockCount }: HeaderProps) {
     <header className="bg-primary text-primary-foreground px-4 py-3 safe-top">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary-foreground/20 rounded-xl flex items-center justify-center">
-            <Store className="w-6 h-6" />
-          </div>
+          {logo ? (
+            <img src={logo} alt={kioskName} className="w-10 h-10 rounded-xl object-cover" />
+          ) : (
+            <div className="w-10 h-10 bg-primary-foreground/20 rounded-xl flex items-center justify-center">
+              <Store className="w-6 h-6" />
+            </div>
+          )}
           <div>
-            <h1 className="text-lg font-bold">كشك هاني</h1>
-            <p className="text-xs text-primary-foreground/80">Hani Kiosk</p>
+            <h1 className="text-lg font-bold">{kioskName}</h1>
+            <p className="text-xs text-primary-foreground/80">{kioskNameFr}</p>
           </div>
         </div>
 
