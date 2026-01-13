@@ -1,0 +1,114 @@
+import { ShoppingBag } from 'lucide-react';
+import { Product, CartItem, Customer } from '@/types/pos';
+import { CURRENCY } from '@/data/sampleData';
+import { SearchBar } from './SearchBar';
+import { CategoryFilter } from './CategoryFilter';
+import { ProductCard } from './ProductCard';
+import { CartSheet } from './CartSheet';
+import { useState } from 'react';
+
+interface SellTabProps {
+  products: Product[];
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  selectedCategory: string | null;
+  onCategoryChange: (category: string | null) => void;
+  cartItems: CartItem[];
+  onAddToCart: (product: Product) => void;
+  onUpdateQuantity: (productId: string, quantity: number) => void;
+  onRemoveItem: (productId: string) => void;
+  subtotal: number;
+  tax: number;
+  total: number;
+  itemCount: number;
+  globalDiscount: number;
+  onSetDiscount: (discount: number) => void;
+  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer) => void;
+  customers: Customer[];
+}
+
+export function SellTab({
+  products,
+  searchQuery,
+  onSearchChange,
+  selectedCategory,
+  onCategoryChange,
+  cartItems,
+  onAddToCart,
+  onUpdateQuantity,
+  onRemoveItem,
+  subtotal,
+  tax,
+  total,
+  itemCount,
+  globalDiscount,
+  onSetDiscount,
+  onCheckout,
+  customers
+}: SellTabProps) {
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Search */}
+      <div className="p-4 space-y-3">
+        <SearchBar value={searchQuery} onChange={onSearchChange} />
+        <CategoryFilter 
+          selectedCategory={selectedCategory} 
+          onSelectCategory={onCategoryChange} 
+        />
+      </div>
+
+      {/* Products Grid */}
+      <div className="flex-1 overflow-y-auto px-4 pb-32">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAdd={onAddToCart}
+            />
+          ))}
+        </div>
+        
+        {products.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <p className="text-lg">لا توجد منتجات</p>
+            <p className="text-sm">جرب البحث بكلمة أخرى</p>
+          </div>
+        )}
+      </div>
+
+      {/* Floating Cart Button */}
+      {itemCount > 0 && (
+        <button
+          onClick={() => setIsCartOpen(true)}
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground rounded-2xl shadow-lg px-6 py-4 flex items-center gap-4 animate-slide-up z-40"
+        >
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5" />
+            <span className="font-bold">{itemCount} منتج</span>
+          </div>
+          <div className="w-px h-6 bg-primary-foreground/30" />
+          <span className="font-bold text-lg">{total.toFixed(3)} {CURRENCY}</span>
+        </button>
+      )}
+
+      {/* Cart Sheet */}
+      <CartSheet
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        items={cartItems}
+        subtotal={subtotal}
+        tax={tax}
+        total={total}
+        globalDiscount={globalDiscount}
+        onUpdateQuantity={onUpdateQuantity}
+        onRemoveItem={onRemoveItem}
+        onSetDiscount={onSetDiscount}
+        onCheckout={onCheckout}
+        customers={customers}
+      />
+    </div>
+  );
+}

@@ -1,0 +1,20 @@
+{
+  "name": "كشك هاني - نقاط البيع",
+  "short_name": "كشك هاني",
+  "description": "نظام نقاط بيع سريع لكشك هاني",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E40AF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "ar",
+  "dir": "rtl"
+}
