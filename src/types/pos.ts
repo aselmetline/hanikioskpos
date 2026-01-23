@@ -54,3 +54,18 @@ export type Category = {
   icon: string;
   color: string;
 };
+
+export interface CashBoxTransaction {
+  id: string;
+  type: 'add' | 'deduct';
+  amount: number;
+  description: string;
+  date: Date;
+  category: 'manual' | 'sales' | 'purchases' | 'expenses';
+}
+
+export interface CashBoxSettings {
+  autoAddSales: boolean;
+  autoDeductPurchases: boolean;
+  autoDeductExpenses: boolean;
+}

@@ -6,10 +6,12 @@ import { InventoryTab } from '@/components/pos/InventoryTab';
 import { CustomersTab } from '@/components/pos/CustomersTab';
 import { ReportsTab } from '@/components/pos/ReportsTab';
 import { SettingsTab } from '@/components/pos/SettingsTab';
+import CashBoxTab from '@/components/pos/CashBoxTab';
 import { useCart } from '@/hooks/useCart';
 import { useProducts } from '@/hooks/useProducts';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useSettings } from '@/hooks/useSettings';
+import { useCashBox } from '@/hooks/useCashBox';
 import { Sale, Customer } from '@/types/pos';
 import { toast } from 'sonner';
 
@@ -21,6 +23,7 @@ const Index = () => {
   const products = useProducts();
   const customers = useCustomers();
   const { settings, updateSettings, resetSettings } = useSettings();
+  const cashBox = useCashBox();
 
   const handleCheckout = (paymentMethod: 'cash' | 'credit', customer?: Customer) => {
     if (cart.items.length === 0) return;
@@ -121,6 +124,16 @@ const Index = () => {
 
         {activeTab === 'reports' && (
           <ReportsTab sales={sales} />
+        )}
+
+        {activeTab === 'cashbox' && (
+          <CashBoxTab
+            balance={cashBox.balance}
+            transactions={cashBox.transactions}
+            settings={cashBox.settings}
+            onAddTransaction={cashBox.addTransaction}
+            onUpdateSettings={cashBox.updateSettings}
+          />
         )}
 
         {activeTab === 'settings' && (
