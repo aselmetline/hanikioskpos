@@ -3,6 +3,7 @@ export interface Product {
   name: string;
   nameAr: string;
   price: number;
+  cost?: number;
   category: string;
   barcode?: string;
   image?: string;
@@ -69,3 +70,21 @@ export interface CashBoxSettings {
   autoDeductPurchases: boolean;
   autoDeductExpenses: boolean;
 }
+
+export interface PurchaseItem {
+  product: Product;
+  cost: number;
+  quantity: number;
+  total: number;
+}
+
+export interface Purchase {
+  id: string;
+  invoiceNumber: string;
+  invoiceDate: Date;
+  items: PurchaseItem[];
+  total: number;
+  createdAt: Date;
+}
+
+export const TAX_RATE = 0.19;
