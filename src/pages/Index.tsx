@@ -7,11 +7,13 @@ import { CustomersTab } from '@/components/pos/CustomersTab';
 import { ReportsTab } from '@/components/pos/ReportsTab';
 import { SettingsTab } from '@/components/pos/SettingsTab';
 import CashBoxTab from '@/components/pos/CashBoxTab';
+import PurchasesTab from '@/components/pos/PurchasesTab';
 import { useCart } from '@/hooks/useCart';
 import { useProducts } from '@/hooks/useProducts';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useSettings } from '@/hooks/useSettings';
 import { useCashBox } from '@/hooks/useCashBox';
+import { usePurchases } from '@/hooks/usePurchases';
 import { Sale, Customer } from '@/types/pos';
 import { toast } from 'sonner';
 
@@ -24,7 +26,7 @@ const Index = () => {
   const customers = useCustomers();
   const { settings, updateSettings, resetSettings } = useSettings();
   const cashBox = useCashBox();
-
+  const purchases = usePurchases();
   const handleCheckout = (paymentMethod: 'cash' | 'credit', customer?: Customer) => {
     if (cart.items.length === 0) return;
 
@@ -72,10 +74,13 @@ const Index = () => {
     );
   };
 
-  // Handle adding purchase (restocking inventory)
-  const handleAddPurchase = (amount: number, description: string) => {
+  // Handle saving purchase and auto-deduct from cash box
+  const handleSavePurchase = (invoiceDate: Date) => {
+    const purchaseTotal = purchases.currentTotal;
+    const purchase = purchases.savePurchase(invoiceDate);
+    
     if (cashBox.settings.autoDeductPurchases) {
-      cashBox.addTransaction('deduct', amount, description || 'مشتريات', 'purchases');
+      cashBox.addTransaction('deduct', purchaseTotal, `فاتورة مشتريات رقم ${purchase.invoiceNumber}`, 'purchases');
     }
   };
 
@@ -134,6 +139,22 @@ const Index = () => {
           />
         )}
 
+        {activeTab === 'purchases' && (
+          <PurchasesTab
+            products={products.products}
+            currentItems={purchases.currentItems}
+            currentTotal={purchases.currentTotal}
+            invoiceNumber={purchases.invoiceNumber}
+            onSetInvoiceNumber={purchases.setInvoiceNumber}
+            onAddItem={purchases.addItemToPurchase}
+            onUpdateQuantity={purchases.updateItemQuantity}
+            onUpdateCost={purchases.updateItemCost}
+            onRemoveItem={purchases.removeItem}
+            onSavePurchase={handleSavePurchase}
+            onUpdateStock={products.updateStock}
+          />
+        )}
+
         {activeTab === 'customers' && (
           <CustomersTab
             customers={customers.filteredCustomers}
@@ -154,7 +175,6 @@ const Index = () => {
             settings={cashBox.settings}
             onAddTransaction={cashBox.addTransaction}
             onUpdateSettings={cashBox.updateSettings}
-            onAddPurchase={handleAddPurchase}
             onAddExpense={handleAddExpense}
           />
         )}

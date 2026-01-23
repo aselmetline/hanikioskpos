@@ -40,9 +40,9 @@ export function useProducts() {
     setProducts(prev => prev.filter(p => p.id !== id));
   }, []);
 
-  const updateStock = useCallback((id: string, quantity: number) => {
+  const updateStock = useCallback((id: string, quantity: number, isAddition: boolean = false) => {
     setProducts(prev => prev.map(p =>
-      p.id === id ? { ...p, stock: Math.max(0, p.stock - quantity) } : p
+      p.id === id ? { ...p, stock: isAddition ? p.stock + quantity : Math.max(0, p.stock - quantity) } : p
     ));
   }, []);
 
