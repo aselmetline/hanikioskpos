@@ -17,6 +17,8 @@ interface CashBoxTabProps {
   settings: CashBoxSettings;
   onAddTransaction: (type: 'add' | 'deduct', amount: number, description: string) => void;
   onUpdateSettings: (settings: Partial<CashBoxSettings>) => void;
+  onAddPurchase: (amount: number, description: string) => void;
+  onAddExpense: (amount: number, description: string) => void;
 }
 
 const CashBoxTab: React.FC<CashBoxTabProps> = ({
@@ -25,6 +27,8 @@ const CashBoxTab: React.FC<CashBoxTabProps> = ({
   settings,
   onAddTransaction,
   onUpdateSettings,
+  onAddPurchase,
+  onAddExpense,
 }) => {
   const [transactionType, setTransactionType] = useState<'add' | 'deduct'>('add');
   const [amount, setAmount] = useState('');

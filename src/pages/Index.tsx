@@ -28,13 +28,15 @@ const Index = () => {
   const handleCheckout = (paymentMethod: 'cash' | 'credit', customer?: Customer) => {
     if (cart.items.length === 0) return;
 
+    const saleTotal = cart.total;
+
     const newSale: Sale = {
       id: Date.now().toString(),
       items: [...cart.items],
       subtotal: cart.subtotal,
       tax: cart.tax,
       discount: cart.globalDiscount + cart.itemsDiscount,
-      total: cart.total,
+      total: saleTotal,
       paymentMethod,
       customerId: customer?.id,
       createdAt: new Date()
@@ -47,11 +49,16 @@ const Index = () => {
       products.updateStock(item.product.id, item.quantity);
     });
 
+    // Auto-add to cash box if enabled and payment is cash
+    if (paymentMethod === 'cash' && cashBox.settings.autoAddSales) {
+      cashBox.addTransaction('add', saleTotal, `مبيعات - ${cart.itemCount} منتج`, 'sales');
+    }
+
     // Add points to customer
     if (customer) {
-      const pointsAdded = customers.addPoints(customer.id, cart.total);
+      const pointsAdded = customers.addPoints(customer.id, saleTotal);
       if (paymentMethod === 'credit') {
-        customers.updateCreditBalance(customer.id, cart.total);
+        customers.updateCreditBalance(customer.id, saleTotal);
       }
       toast.success(`تم إضافة ${pointsAdded} نقطة لـ ${customer.name}`);
     }
@@ -60,9 +67,23 @@ const Index = () => {
     
     toast.success(
       paymentMethod === 'cash' 
-        ? `تم البيع بنجاح - ${cart.total.toFixed(3)} TND` 
-        : `تم تسجيل البيع الآجل - ${cart.total.toFixed(3)} TND`
+        ? `تم البيع بنجاح - ${saleTotal.toFixed(3)} TND` 
+        : `تم تسجيل البيع الآجل - ${saleTotal.toFixed(3)} TND`
     );
+  };
+
+  // Handle adding purchase (restocking inventory)
+  const handleAddPurchase = (amount: number, description: string) => {
+    if (cashBox.settings.autoDeductPurchases) {
+      cashBox.addTransaction('deduct', amount, description || 'مشتريات', 'purchases');
+    }
+  };
+
+  // Handle adding expense
+  const handleAddExpense = (amount: number, description: string) => {
+    if (cashBox.settings.autoDeductExpenses) {
+      cashBox.addTransaction('deduct', amount, description || 'مصروفات', 'expenses');
+    }
   };
 
   const handleAddCustomer = (customerData: { name: string; phone: string }) => {
@@ -133,6 +154,8 @@ const Index = () => {
             settings={cashBox.settings}
             onAddTransaction={cashBox.addTransaction}
             onUpdateSettings={cashBox.updateSettings}
+            onAddPurchase={handleAddPurchase}
+            onAddExpense={handleAddExpense}
           />
         )}
 
