@@ -118,7 +118,13 @@ const Index = () => {
         logo={settings.logo}
       />
       
-      <main className="flex-1 overflow-hidden">
+      <BottomNav
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        cartItemCount={cart.itemCount}
+      />
+      
+      <main className="flex-1 overflow-auto">
         {activeTab === 'sell' && (
           <SellTab
             products={products.filteredProducts}
@@ -214,11 +220,6 @@ const Index = () => {
         )}
       </main>
 
-      <BottomNav
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        cartItemCount={cart.itemCount}
-      />
     </div>
   );
 };

@@ -21,8 +21,8 @@ export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavPr
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border safe-bottom z-50">
-      <div className="flex items-center justify-around py-2 px-2">
+    <nav className="sticky top-0 left-0 right-0 bg-card border-b border-border z-50">
+      <div className="flex items-center justify-around py-2 px-1 overflow-x-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -31,17 +31,17 @@ export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavPr
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`pos-nav-item flex-1 relative ${isActive ? 'active' : 'text-muted-foreground'}`}
+              className={`pos-nav-item flex-shrink-0 relative px-2 ${isActive ? 'active' : 'text-muted-foreground'}`}
             >
               <div className="relative">
-                <Icon className="w-6 h-6" />
+                <Icon className="w-5 h-5" />
                 {tab.id === 'sell' && cartItemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-success text-success-foreground rounded-full text-[10px] flex items-center justify-center font-bold animate-pulse-success">
+                  <span className="absolute -top-2 -right-2 w-4 h-4 bg-success text-success-foreground rounded-full text-[9px] flex items-center justify-center font-bold animate-pulse-success">
                     {cartItemCount}
                   </span>
                 )}
               </div>
-              <span className="text-xs font-medium mt-1">{tab.label}</span>
+              <span className="text-[10px] font-medium mt-0.5">{tab.label}</span>
             </button>
           );
         })}
