@@ -8,13 +8,15 @@ import { ReportsTab } from '@/components/pos/ReportsTab';
 import { SettingsTab } from '@/components/pos/SettingsTab';
 import CashBoxTab from '@/components/pos/CashBoxTab';
 import PurchasesTab from '@/components/pos/PurchasesTab';
+import ExpensesTab from '@/components/pos/ExpensesTab';
 import { useCart } from '@/hooks/useCart';
 import { useProducts } from '@/hooks/useProducts';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useSettings } from '@/hooks/useSettings';
 import { useCashBox } from '@/hooks/useCashBox';
 import { usePurchases } from '@/hooks/usePurchases';
-import { Sale, Customer } from '@/types/pos';
+import { useExpenses } from '@/hooks/useExpenses';
+import { Sale, Customer, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { toast } from 'sonner';
 
 const Index = () => {
@@ -27,6 +29,7 @@ const Index = () => {
   const { settings, updateSettings, resetSettings } = useSettings();
   const cashBox = useCashBox();
   const purchases = usePurchases();
+  const expensesHook = useExpenses();
   const handleCheckout = (paymentMethod: 'cash' | 'credit', customer?: Customer) => {
     if (cart.items.length === 0) return;
 
@@ -84,11 +87,21 @@ const Index = () => {
     }
   };
 
-  // Handle adding expense
-  const handleAddExpense = (amount: number, description: string) => {
+  // Handle adding expense with auto-deduct from cash box
+  const handleAddExpense = (amount: number, category: ExpenseCategory, description: string, date?: Date) => {
+    const expense = expensesHook.addExpense(amount, category, description, date);
+    const catInfo = EXPENSE_CATEGORIES.find(c => c.id === category);
+    
     if (cashBox.settings.autoDeductExpenses) {
-      cashBox.addTransaction('deduct', amount, description || 'مصروفات', 'expenses');
+      cashBox.addTransaction('deduct', amount, `${catInfo?.label || 'مصروفات'}: ${description || '-'}`, 'expenses');
     }
+    
+    toast.success(`تم تسجيل المصروف: ${amount.toFixed(3)} TND`);
+  };
+
+  const handleDeleteExpense = (id: string) => {
+    expensesHook.deleteExpense(id);
+    toast.success('تم حذف المصروف');
   };
 
   const handleAddCustomer = (customerData: { name: string; phone: string }) => {
@@ -168,6 +181,16 @@ const Index = () => {
           <ReportsTab sales={sales} />
         )}
 
+        {activeTab === 'expenses' && (
+          <ExpensesTab
+            expenses={expensesHook.expenses}
+            onAddExpense={handleAddExpense}
+            onDeleteExpense={handleDeleteExpense}
+            monthTotal={expensesHook.getMonthExpenses().reduce((sum, e) => sum + e.amount, 0)}
+            todayTotal={expensesHook.getTodayExpenses().reduce((sum, e) => sum + e.amount, 0)}
+          />
+        )}
+
         {activeTab === 'cashbox' && (
           <CashBoxTab
             balance={cashBox.balance}
@@ -175,7 +198,6 @@ const Index = () => {
             settings={cashBox.settings}
             onAddTransaction={cashBox.addTransaction}
             onUpdateSettings={cashBox.updateSettings}
-            onAddExpense={handleAddExpense}
           />
         )}
 
