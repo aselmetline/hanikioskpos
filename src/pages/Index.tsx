@@ -178,7 +178,11 @@ const Index = () => {
         )}
 
         {activeTab === 'reports' && (
-          <ReportsTab sales={sales} />
+          <ReportsTab 
+            sales={sales} 
+            purchases={purchases.purchases}
+            expenses={expensesHook.expenses}
+          />
         )}
 
         {activeTab === 'expenses' && (
