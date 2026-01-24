@@ -87,4 +87,26 @@ export interface Purchase {
   createdAt: Date;
 }
 
+// Expense types
+export type ExpenseCategory = 'electricity' | 'rent' | 'salaries' | 'supplies' | 'maintenance' | 'transport' | 'other';
+
+export interface Expense {
+  id: string;
+  amount: number;
+  category: ExpenseCategory;
+  description: string;
+  date: Date;
+  createdAt: Date;
+}
+
+export const EXPENSE_CATEGORIES: { id: ExpenseCategory; label: string; labelFr: string; icon: string }[] = [
+  { id: 'electricity', label: 'كهرباء', labelFr: 'Électricité', icon: '⚡' },
+  { id: 'rent', label: 'إيجار', labelFr: 'Loyer', icon: '🏠' },
+  { id: 'salaries', label: 'رواتب', labelFr: 'Salaires', icon: '👷' },
+  { id: 'supplies', label: 'لوازم', labelFr: 'Fournitures', icon: '📦' },
+  { id: 'maintenance', label: 'صيانة', labelFr: 'Maintenance', icon: '🔧' },
+  { id: 'transport', label: 'نقل', labelFr: 'Transport', icon: '🚗' },
+  { id: 'other', label: 'أخرى', labelFr: 'Autres', icon: '📋' },
+];
+
 export const TAX_RATE = 0.19;

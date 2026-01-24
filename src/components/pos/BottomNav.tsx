@@ -1,6 +1,6 @@
-import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag } from 'lucide-react';
+import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt } from 'lucide-react';
 
-export type TabType = 'sell' | 'inventory' | 'purchases' | 'customers' | 'reports' | 'cashbox' | 'settings';
+export type TabType = 'sell' | 'inventory' | 'purchases' | 'expenses' | 'customers' | 'reports' | 'cashbox' | 'settings';
 
 interface BottomNavProps {
   activeTab: TabType;
@@ -13,6 +13,7 @@ export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavPr
     { id: 'sell' as TabType, icon: ShoppingCart, label: 'بيع', labelFr: 'Vente' },
     { id: 'inventory' as TabType, icon: Package, label: 'مخزون', labelFr: 'Stock' },
     { id: 'purchases' as TabType, icon: ShoppingBag, label: 'مشتريات', labelFr: 'Achats' },
+    { id: 'expenses' as TabType, icon: Receipt, label: 'مصروفات', labelFr: 'Dépenses' },
     { id: 'cashbox' as TabType, icon: Wallet, label: 'صندوق', labelFr: 'Caisse' },
     { id: 'customers' as TabType, icon: Users, label: 'عملاء', labelFr: 'Clients' },
     { id: 'reports' as TabType, icon: BarChart3, label: 'تقارير', labelFr: 'Rapports' },
