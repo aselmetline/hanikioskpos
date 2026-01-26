@@ -1,5 +1,7 @@
-import { Store, Wifi, WifiOff, Bell } from 'lucide-react';
+import { Store, Wifi, WifiOff, Bell, LogOut } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface HeaderProps {
   lowStockCount: number;
@@ -9,8 +11,14 @@ interface HeaderProps {
 }
 
 export function Header({ lowStockCount, kioskName = 'كشك هاني', kioskNameFr = 'Hani Kiosk', logo }: HeaderProps) {
+  const { signOut } = useAuth();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success('تم تسجيل الخروج بنجاح');
+  };
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -53,7 +61,7 @@ export function Header({ lowStockCount, kioskName = 'كشك هاني', kioskName
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <span className="text-sm font-medium">{formatTime(currentTime)}</span>
           
           {lowStockCount > 0 && (
@@ -80,6 +88,15 @@ export function Header({ lowStockCount, kioskName = 'كشك هاني', kioskName
               </>
             )}
           </div>
+
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors"
+            title="تسجيل الخروج"
+          >
+            <LogOut className="w-3 h-3" />
+            <span>خروج</span>
+          </button>
         </div>
       </div>
     </header>
