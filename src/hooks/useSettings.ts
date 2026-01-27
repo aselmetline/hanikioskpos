@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export interface AppSettings {
   kioskName: string;
@@ -28,40 +31,116 @@ const DEFAULT_SETTINGS: AppSettings = {
   whatsappNumber: '+21622123456',
 };
 
-const STORAGE_KEY = 'hani-kiosk-settings';
-
 export function useSettings() {
-  const [settings, setSettings] = useState<AppSettings>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
-      }
-    } catch (e) {
-      console.error('Error loading settings:', e);
-    }
-    return DEFAULT_SETTINGS;
-  });
+  const { user } = useAuth();
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch settings from Supabase
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    } catch (e) {
-      console.error('Error saving settings:', e);
+    if (!user) {
+      setSettings(DEFAULT_SETTINGS);
+      setLoading(false);
+      return;
     }
-  }, [settings]);
 
-  const updateSettings = (updates: Partial<AppSettings>) => {
+    const fetchSettings = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching settings:', error);
+      } else if (data) {
+        setSettings({
+          kioskName: data.kiosk_name || DEFAULT_SETTINGS.kioskName,
+          kioskNameFr: data.kiosk_name_fr || DEFAULT_SETTINGS.kioskNameFr,
+          logo: data.logo_url || null,
+          taxRate: data.tax_rate ? Number(data.tax_rate) : DEFAULT_SETTINGS.taxRate,
+          currency: data.currency || DEFAULT_SETTINGS.currency,
+          printerWidth: (data.printer_width as '58mm' | '80mm') || DEFAULT_SETTINGS.printerWidth,
+          printerEnabled: data.printer_enabled ?? DEFAULT_SETTINGS.printerEnabled,
+          printerIP: data.printer_ip || DEFAULT_SETTINGS.printerIP,
+          pointsPerDinar: data.points_per_dinar ?? DEFAULT_SETTINGS.pointsPerDinar,
+          lowStockThreshold: data.low_stock_threshold ?? DEFAULT_SETTINGS.lowStockThreshold,
+          whatsappNumber: data.whatsapp_number || DEFAULT_SETTINGS.whatsappNumber,
+        });
+      }
+      setLoading(false);
+    };
+
+    fetchSettings();
+  }, [user]);
+
+  const updateSettings = useCallback(async (updates: Partial<AppSettings>) => {
+    if (!user) return;
+
+    const dbUpdates: Record<string, unknown> = {};
+    
+    if (updates.kioskName !== undefined) dbUpdates.kiosk_name = updates.kioskName;
+    if (updates.kioskNameFr !== undefined) dbUpdates.kiosk_name_fr = updates.kioskNameFr;
+    if (updates.logo !== undefined) dbUpdates.logo_url = updates.logo;
+    if (updates.taxRate !== undefined) dbUpdates.tax_rate = updates.taxRate;
+    if (updates.currency !== undefined) dbUpdates.currency = updates.currency;
+    if (updates.printerWidth !== undefined) dbUpdates.printer_width = updates.printerWidth;
+    if (updates.printerEnabled !== undefined) dbUpdates.printer_enabled = updates.printerEnabled;
+    if (updates.printerIP !== undefined) dbUpdates.printer_ip = updates.printerIP;
+    if (updates.pointsPerDinar !== undefined) dbUpdates.points_per_dinar = updates.pointsPerDinar;
+    if (updates.lowStockThreshold !== undefined) dbUpdates.low_stock_threshold = updates.lowStockThreshold;
+    if (updates.whatsappNumber !== undefined) dbUpdates.whatsapp_number = updates.whatsappNumber;
+
+    const { error } = await supabase
+      .from('user_settings')
+      .update(dbUpdates)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error updating settings:', error);
+      toast.error('خطأ في تحديث الإعدادات');
+      return;
+    }
+
     setSettings(prev => ({ ...prev, ...updates }));
-  };
+    toast.success('تم تحديث الإعدادات');
+  }, [user]);
 
-  const resetSettings = () => {
+  const resetSettings = useCallback(async () => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('user_settings')
+      .update({
+        kiosk_name: DEFAULT_SETTINGS.kioskName,
+        kiosk_name_fr: DEFAULT_SETTINGS.kioskNameFr,
+        logo_url: null,
+        tax_rate: DEFAULT_SETTINGS.taxRate,
+        currency: DEFAULT_SETTINGS.currency,
+        printer_width: DEFAULT_SETTINGS.printerWidth,
+        printer_enabled: DEFAULT_SETTINGS.printerEnabled,
+        printer_ip: DEFAULT_SETTINGS.printerIP,
+        points_per_dinar: DEFAULT_SETTINGS.pointsPerDinar,
+        low_stock_threshold: DEFAULT_SETTINGS.lowStockThreshold,
+        whatsapp_number: DEFAULT_SETTINGS.whatsappNumber,
+      })
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error resetting settings:', error);
+      toast.error('خطأ في استعادة الإعدادات');
+      return;
+    }
+
     setSettings(DEFAULT_SETTINGS);
-  };
+    toast.success('تم استعادة الإعدادات الافتراضية');
+  }, [user]);
 
   return {
     settings,
     updateSettings,
     resetSettings,
+    loading
   };
 }
