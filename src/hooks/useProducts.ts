@@ -1,11 +1,66 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Product } from '@/types/pos';
-import { sampleProducts } from '@/data/sampleData';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const { user } = useAuth();
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch products from Supabase
+  useEffect(() => {
+    if (!user) {
+      setProducts([]);
+      setLoading(false);
+      return;
+    }
+
+    const fetchProducts = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching products:', error);
+        toast.error('خطأ في تحميل المنتجات');
+      } else {
+        setProducts(data.map(p => ({
+          id: p.id,
+          name: p.name,
+          nameAr: p.name_ar,
+          price: Number(p.price),
+          cost: p.cost ? Number(p.cost) : undefined,
+          category: p.category,
+          barcode: p.barcode || undefined,
+          image: p.image_url || undefined,
+          stock: p.stock,
+          unit: p.unit,
+          lowStockAlert: p.low_stock_alert
+        })));
+      }
+      setLoading(false);
+    };
+
+    fetchProducts();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel('products-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        fetchProducts();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
@@ -21,30 +76,116 @@ export function useProducts() {
     });
   }, [products, searchQuery, selectedCategory]);
 
-  const addProduct = useCallback((product: Omit<Product, 'id'>) => {
-    const newProduct: Product = {
-      ...product,
-      id: Date.now().toString()
-    };
-    setProducts(prev => [...prev, newProduct]);
-    return newProduct;
-  }, []);
+  const addProduct = useCallback(async (product: Omit<Product, 'id'>) => {
+    if (!user) return null;
 
-  const updateProduct = useCallback((id: string, updates: Partial<Product>) => {
+    const { data, error } = await supabase
+      .from('products')
+      .insert({
+        user_id: user.id,
+        name: product.name,
+        name_ar: product.nameAr,
+        price: product.price,
+        cost: product.cost || 0,
+        category: product.category,
+        barcode: product.barcode || null,
+        image_url: product.image || null,
+        stock: product.stock,
+        unit: product.unit,
+        low_stock_alert: product.lowStockAlert
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding product:', error);
+      toast.error('خطأ في إضافة المنتج');
+      return null;
+    }
+
+    const newProduct: Product = {
+      id: data.id,
+      name: data.name,
+      nameAr: data.name_ar,
+      price: Number(data.price),
+      cost: data.cost ? Number(data.cost) : undefined,
+      category: data.category,
+      barcode: data.barcode || undefined,
+      image: data.image_url || undefined,
+      stock: data.stock,
+      unit: data.unit,
+      lowStockAlert: data.low_stock_alert
+    };
+
+    setProducts(prev => [newProduct, ...prev]);
+    return newProduct;
+  }, [user]);
+
+  const updateProduct = useCallback(async (id: string, updates: Partial<Product>) => {
+    const dbUpdates: Record<string, unknown> = {};
+    
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.nameAr !== undefined) dbUpdates.name_ar = updates.nameAr;
+    if (updates.price !== undefined) dbUpdates.price = updates.price;
+    if (updates.cost !== undefined) dbUpdates.cost = updates.cost;
+    if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.barcode !== undefined) dbUpdates.barcode = updates.barcode;
+    if (updates.image !== undefined) dbUpdates.image_url = updates.image;
+    if (updates.stock !== undefined) dbUpdates.stock = updates.stock;
+    if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
+    if (updates.lowStockAlert !== undefined) dbUpdates.low_stock_alert = updates.lowStockAlert;
+
+    const { error } = await supabase
+      .from('products')
+      .update(dbUpdates)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating product:', error);
+      toast.error('خطأ في تحديث المنتج');
+      return;
+    }
+
     setProducts(prev => prev.map(p => 
       p.id === id ? { ...p, ...updates } : p
     ));
   }, []);
 
-  const deleteProduct = useCallback((id: string) => {
+  const deleteProduct = useCallback(async (id: string) => {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting product:', error);
+      toast.error('خطأ في حذف المنتج');
+      return;
+    }
+
     setProducts(prev => prev.filter(p => p.id !== id));
   }, []);
 
-  const updateStock = useCallback((id: string, quantity: number, isAddition: boolean = false) => {
+  const updateStock = useCallback(async (id: string, quantity: number, isAddition: boolean = false) => {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+
+    const newStock = isAddition ? product.stock + quantity : Math.max(0, product.stock - quantity);
+
+    const { error } = await supabase
+      .from('products')
+      .update({ stock: newStock })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating stock:', error);
+      return;
+    }
+
     setProducts(prev => prev.map(p =>
-      p.id === id ? { ...p, stock: isAddition ? p.stock + quantity : Math.max(0, p.stock - quantity) } : p
+      p.id === id ? { ...p, stock: newStock } : p
     ));
-  }, []);
+  }, [products]);
 
   const lowStockProducts = useMemo(() => {
     return products.filter(p => p.stock <= p.lowStockAlert && p.lowStockAlert > 0);
@@ -61,6 +202,7 @@ export function useProducts() {
     updateProduct,
     deleteProduct,
     updateStock,
-    lowStockProducts
+    lowStockProducts,
+    loading
   };
 }

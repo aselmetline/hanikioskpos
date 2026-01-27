@@ -16,12 +16,12 @@ import { useSettings } from '@/hooks/useSettings';
 import { useCashBox } from '@/hooks/useCashBox';
 import { usePurchases } from '@/hooks/usePurchases';
 import { useExpenses } from '@/hooks/useExpenses';
-import { Sale, Customer, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
+import { useSales } from '@/hooks/useSales';
+import { Customer, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { toast } from 'sonner';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>('sell');
-  const [sales, setSales] = useState<Sale[]>([]);
 
   const cart = useCart();
   const products = useProducts();
@@ -30,40 +30,41 @@ const Index = () => {
   const cashBox = useCashBox();
   const purchases = usePurchases();
   const expensesHook = useExpenses();
-  const handleCheckout = (paymentMethod: 'cash' | 'credit', customer?: Customer) => {
+  const salesHook = useSales();
+
+  const handleCheckout = async (paymentMethod: 'cash' | 'credit', customer?: Customer) => {
     if (cart.items.length === 0) return;
 
     const saleTotal = cart.total;
 
-    const newSale: Sale = {
-      id: Date.now().toString(),
-      items: [...cart.items],
-      subtotal: cart.subtotal,
-      tax: cart.tax,
-      discount: cart.globalDiscount + cart.itemsDiscount,
-      total: saleTotal,
+    // Create sale in database
+    const sale = await salesHook.createSale(
+      cart.items,
+      cart.subtotal,
+      cart.tax,
+      cart.globalDiscount + cart.itemsDiscount,
+      saleTotal,
       paymentMethod,
-      customerId: customer?.id,
-      createdAt: new Date()
-    };
+      customer
+    );
 
-    setSales(prev => [newSale, ...prev]);
+    if (!sale) return;
 
     // Update stock
-    cart.items.forEach(item => {
-      products.updateStock(item.product.id, item.quantity);
-    });
+    for (const item of cart.items) {
+      await products.updateStock(item.product.id, item.quantity);
+    }
 
     // Auto-add to cash box if enabled and payment is cash
     if (paymentMethod === 'cash' && cashBox.settings.autoAddSales) {
-      cashBox.addTransaction('add', saleTotal, `مبيعات - ${cart.itemCount} منتج`, 'sales');
+      await cashBox.addTransaction('add', saleTotal, `مبيعات - ${cart.itemCount} منتج`, 'sales');
     }
 
     // Add points to customer
     if (customer) {
-      const pointsAdded = customers.addPoints(customer.id, saleTotal);
+      const pointsAdded = await customers.addPoints(customer.id, saleTotal);
       if (paymentMethod === 'credit') {
-        customers.updateCreditBalance(customer.id, saleTotal);
+        await customers.updateCreditBalance(customer.id, saleTotal);
       }
       toast.success(`تم إضافة ${pointsAdded} نقطة لـ ${customer.name}`);
     }
@@ -78,35 +79,39 @@ const Index = () => {
   };
 
   // Handle saving purchase and auto-deduct from cash box
-  const handleSavePurchase = (invoiceDate: Date) => {
+  const handleSavePurchase = async (invoiceDate: Date) => {
     const purchaseTotal = purchases.currentTotal;
-    const purchase = purchases.savePurchase(invoiceDate);
+    const purchase = await purchases.savePurchase(invoiceDate);
     
-    if (cashBox.settings.autoDeductPurchases) {
-      cashBox.addTransaction('deduct', purchaseTotal, `فاتورة مشتريات رقم ${purchase.invoiceNumber}`, 'purchases');
+    if (purchase && cashBox.settings.autoDeductPurchases) {
+      await cashBox.addTransaction('deduct', purchaseTotal, `فاتورة مشتريات رقم ${purchase.invoiceNumber}`, 'purchases');
     }
   };
 
   // Handle adding expense with auto-deduct from cash box
-  const handleAddExpense = (amount: number, category: ExpenseCategory, description: string, date?: Date) => {
-    const expense = expensesHook.addExpense(amount, category, description, date);
+  const handleAddExpense = async (amount: number, category: ExpenseCategory, description: string, date?: Date) => {
+    const expense = await expensesHook.addExpense(amount, category, description, date);
+    if (!expense) return;
+
     const catInfo = EXPENSE_CATEGORIES.find(c => c.id === category);
     
     if (cashBox.settings.autoDeductExpenses) {
-      cashBox.addTransaction('deduct', amount, `${catInfo?.label || 'مصروفات'}: ${description || '-'}`, 'expenses');
+      await cashBox.addTransaction('deduct', amount, `${catInfo?.label || 'مصروفات'}: ${description || '-'}`, 'expenses');
     }
     
     toast.success(`تم تسجيل المصروف: ${amount.toFixed(3)} TND`);
   };
 
-  const handleDeleteExpense = (id: string) => {
-    expensesHook.deleteExpense(id);
+  const handleDeleteExpense = async (id: string) => {
+    await expensesHook.deleteExpense(id);
     toast.success('تم حذف المصروف');
   };
 
-  const handleAddCustomer = (customerData: { name: string; phone: string }) => {
-    customers.addCustomer(customerData);
-    toast.success(`تم إضافة العميل ${customerData.name}`);
+  const handleAddCustomer = async (customerData: { name: string; phone: string }) => {
+    const customer = await customers.addCustomer(customerData);
+    if (customer) {
+      toast.success(`تم إضافة العميل ${customerData.name}`);
+    }
   };
 
   return (
@@ -185,7 +190,7 @@ const Index = () => {
 
         {activeTab === 'reports' && (
           <ReportsTab 
-            sales={sales} 
+            sales={salesHook.sales} 
             purchases={purchases.purchases}
             expenses={expensesHook.expenses}
           />

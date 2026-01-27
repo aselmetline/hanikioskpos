@@ -1,48 +1,111 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Expense, ExpenseCategory } from '@/types/pos';
-
-const EXPENSES_KEY = 'hani_expenses';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export const useExpenses = () => {
+  const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load from localStorage
+  // Fetch expenses from Supabase
   useEffect(() => {
-    const saved = localStorage.getItem(EXPENSES_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setExpenses(parsed.map((e: any) => ({
-        ...e,
-        date: new Date(e.date),
-        createdAt: new Date(e.createdAt),
-      })));
+    if (!user) {
+      setExpenses([]);
+      setLoading(false);
+      return;
     }
-  }, []);
 
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
-  }, [expenses]);
+    const fetchExpenses = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('expenses')
+        .select('*')
+        .order('expense_date', { ascending: false });
 
-  const addExpense = useCallback((
+      if (error) {
+        console.error('Error fetching expenses:', error);
+        toast.error('خطأ في تحميل المصروفات');
+      } else {
+        setExpenses(data.map(e => ({
+          id: e.id,
+          amount: Number(e.amount),
+          category: e.category as ExpenseCategory,
+          description: e.description || '',
+          date: new Date(e.expense_date),
+          createdAt: new Date(e.created_at)
+        })));
+      }
+      setLoading(false);
+    };
+
+    fetchExpenses();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel('expenses-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => {
+        fetchExpenses();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  const addExpense = useCallback(async (
     amount: number,
     category: ExpenseCategory,
     description: string,
     date: Date = new Date()
-  ): Expense => {
+  ): Promise<Expense | null> => {
+    if (!user) return null;
+
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert({
+        user_id: user.id,
+        amount,
+        category,
+        description: description || null,
+        expense_date: date.toISOString().split('T')[0]
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding expense:', error);
+      toast.error('خطأ في إضافة المصروف');
+      return null;
+    }
+
     const newExpense: Expense = {
-      id: Date.now().toString(),
-      amount,
-      category,
-      description,
-      date,
-      createdAt: new Date(),
+      id: data.id,
+      amount: Number(data.amount),
+      category: data.category as ExpenseCategory,
+      description: data.description || '',
+      date: new Date(data.expense_date),
+      createdAt: new Date(data.created_at)
     };
+
     setExpenses(prev => [newExpense, ...prev]);
     return newExpense;
-  }, []);
+  }, [user]);
 
-  const deleteExpense = useCallback((id: string) => {
+  const deleteExpense = useCallback(async (id: string) => {
+    const { error } = await supabase
+      .from('expenses')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting expense:', error);
+      toast.error('خطأ في حذف المصروف');
+      return;
+    }
+
     setExpenses(prev => prev.filter(e => e.id !== id));
   }, []);
 
@@ -76,5 +139,6 @@ export const useExpenses = () => {
     getMonthExpenses,
     getTotalByCategory,
     getTotal,
+    loading
   };
 };
