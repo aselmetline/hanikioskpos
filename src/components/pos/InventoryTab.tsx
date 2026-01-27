@@ -2,6 +2,7 @@ import { Package, Plus, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import { Product } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
+import { LoadingState } from './LoadingState';
 import { useState } from 'react';
 
 interface InventoryTabProps {
@@ -11,6 +12,7 @@ interface InventoryTabProps {
   lowStockProducts: Product[];
   onUpdateProduct: (id: string, updates: Partial<Product>) => void;
   onDeleteProduct: (id: string) => void;
+  loading?: boolean;
 }
 
 export function InventoryTab({
@@ -19,7 +21,8 @@ export function InventoryTab({
   onSearchChange,
   lowStockProducts,
   onUpdateProduct,
-  onDeleteProduct
+  onDeleteProduct,
+  loading = false
 }: InventoryTabProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStock, setEditStock] = useState('');
@@ -62,72 +65,86 @@ export function InventoryTab({
 
       {/* Products List */}
       <div className="flex-1 overflow-y-auto px-4 pb-24 space-y-3">
-        {products.map((product) => {
-          const isLowStock = product.stock <= product.lowStockAlert && product.lowStockAlert > 0;
-          const isEditing = editingId === product.id;
+        {loading ? (
+          <LoadingState variant="list" count={5} />
+        ) : (
+          <>
+            {products.map((product) => {
+              const isLowStock = product.stock <= product.lowStockAlert && product.lowStockAlert > 0;
+              const isEditing = editingId === product.id;
 
-          return (
-            <div key={product.id} className="pos-card">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <Package className="w-6 h-6 text-primary" />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-bold truncate">{product.nameAr}</h4>
-                  <p className="text-xs text-muted-foreground">{product.barcode || 'بدون باركود'}</p>
-                </div>
-                
-                <div className="text-left">
-                  <p className="font-bold text-success">{product.price.toFixed(3)} {CURRENCY}</p>
-                  {isEditing ? (
-                    <div className="flex items-center gap-1 mt-1">
-                      <input
-                        type="number"
-                        value={editStock}
-                        onChange={(e) => setEditStock(e.target.value)}
-                        className="w-16 px-2 py-1 text-sm border rounded"
-                        autoFocus
-                      />
+              return (
+                <div key={product.id} className="pos-card">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                      <Package className="w-6 h-6 text-primary" />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold truncate">{product.nameAr}</h4>
+                      <p className="text-xs text-muted-foreground">{product.barcode || 'بدون باركود'}</p>
+                    </div>
+                    
+                    <div className="text-left">
+                      <p className="font-bold text-success">{product.price.toFixed(3)} {CURRENCY}</p>
+                      {isEditing ? (
+                        <div className="flex items-center gap-1 mt-1">
+                          <input
+                            type="number"
+                            value={editStock}
+                            onChange={(e) => setEditStock(e.target.value)}
+                            className="w-16 px-2 py-1 text-sm border rounded"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => handleSaveStock(product.id)}
+                            className="text-xs bg-success text-success-foreground px-2 py-1 rounded"
+                          >
+                            حفظ
+                          </button>
+                        </div>
+                      ) : (
+                        <p className={`text-sm ${isLowStock ? 'text-warning font-bold' : 'text-muted-foreground'}`}>
+                          {product.stock} {product.unit}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="flex gap-1">
                       <button
-                        onClick={() => handleSaveStock(product.id)}
-                        className="text-xs bg-success text-success-foreground px-2 py-1 rounded"
+                        onClick={() => {
+                          setEditingId(product.id);
+                          setEditStock(product.stock.toString());
+                        }}
+                        className="w-9 h-9 bg-secondary rounded-lg flex items-center justify-center"
                       >
-                        حفظ
+                        <Edit2 className="w-4 h-4 text-secondary-foreground" />
+                      </button>
+                      <button
+                        onClick={() => onDeleteProduct(product.id)}
+                        className="w-9 h-9 bg-destructive/10 rounded-lg flex items-center justify-center"
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
                       </button>
                     </div>
-                  ) : (
-                    <p className={`text-sm ${isLowStock ? 'text-warning font-bold' : 'text-muted-foreground'}`}>
-                      {product.stock} {product.unit}
-                    </p>
-                  )}
+                  </div>
                 </div>
-                
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => {
-                      setEditingId(product.id);
-                      setEditStock(product.stock.toString());
-                    }}
-                    className="w-9 h-9 bg-secondary rounded-lg flex items-center justify-center"
-                  >
-                    <Edit2 className="w-4 h-4 text-secondary-foreground" />
-                  </button>
-                  <button
-                    onClick={() => onDeleteProduct(product.id)}
-                    className="w-9 h-9 bg-destructive/10 rounded-lg flex items-center justify-center"
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </button>
-                </div>
+              );
+            })}
+            
+            {products.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p className="text-lg">لا توجد منتجات</p>
+                <p className="text-sm">أضف منتجات جديدة للبدء</p>
               </div>
-            </div>
-          );
-        })}
+            )}
+          </>
+        )}
       </div>
 
       {/* Add Product Button */}
-      <button className="fixed bottom-24 left-4 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-lg flex items-center justify-center z-40">
+      <button className="fixed bottom-24 left-4 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform">
         <Plus className="w-6 h-6" />
       </button>
     </div>

@@ -204,4 +204,19 @@
   .safe-top {
     padding-top: env(safe-area-inset-top, 0);
   }
+
+  @keyframes slide-up {
+    from {
+      transform: translateX(-50%) translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
 }

@@ -5,6 +5,7 @@ import { SearchBar } from './SearchBar';
 import { CategoryFilter } from './CategoryFilter';
 import { ProductCard } from './ProductCard';
 import { CartSheet } from './CartSheet';
+import { LoadingState } from './LoadingState';
 import { useState } from 'react';
 
 interface SellTabProps {
@@ -25,6 +26,7 @@ interface SellTabProps {
   onSetDiscount: (discount: number) => void;
   onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer) => void;
   customers: Customer[];
+  loading?: boolean;
 }
 
 export function SellTab({
@@ -44,7 +46,8 @@ export function SellTab({
   globalDiscount,
   onSetDiscount,
   onCheckout,
-  customers
+  customers,
+  loading = false
 }: SellTabProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -61,21 +64,27 @@ export function SellTab({
 
       {/* Products Grid */}
       <div className="flex-1 overflow-y-auto px-4 pb-32">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAdd={onAddToCart}
-            />
-          ))}
-        </div>
-        
-        {products.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            <p className="text-lg">لا توجد منتجات</p>
-            <p className="text-sm">جرب البحث بكلمة أخرى</p>
-          </div>
+        {loading ? (
+          <LoadingState variant="products" count={6} />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAdd={onAddToCart}
+                />
+              ))}
+            </div>
+            
+            {products.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="text-lg">لا توجد منتجات</p>
+                <p className="text-sm">جرب البحث بكلمة أخرى</p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
