@@ -149,6 +149,7 @@ const Index = () => {
             onSetDiscount={cart.setGlobalDiscount}
             onCheckout={handleCheckout}
             customers={customers.customers}
+            loading={products.loading}
           />
         )}
 
@@ -160,6 +161,7 @@ const Index = () => {
             lowStockProducts={products.lowStockProducts}
             onUpdateProduct={products.updateProduct}
             onDeleteProduct={products.deleteProduct}
+            loading={products.loading}
           />
         )}
 
