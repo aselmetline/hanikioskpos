@@ -161,6 +161,7 @@ const Index = () => {
             lowStockProducts={products.lowStockProducts}
             onUpdateProduct={products.updateProduct}
             onDeleteProduct={products.deleteProduct}
+            onAddProduct={products.addProduct}
             loading={products.loading}
           />
         )}

@@ -3,6 +3,7 @@ import { Product } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
 import { LoadingState } from './LoadingState';
+import { AddProductDialog } from './AddProductDialog';
 import { useState } from 'react';
 
 interface InventoryTabProps {
@@ -12,6 +13,17 @@ interface InventoryTabProps {
   lowStockProducts: Product[];
   onUpdateProduct: (id: string, updates: Partial<Product>) => void;
   onDeleteProduct: (id: string) => void;
+  onAddProduct: (product: {
+    name: string;
+    nameAr: string;
+    price: number;
+    cost?: number;
+    category: string;
+    barcode?: string;
+    stock: number;
+    unit: string;
+    lowStockAlert: number;
+  }) => Promise<Product | void>;
   loading?: boolean;
 }
 
@@ -22,10 +34,12 @@ export function InventoryTab({
   lowStockProducts,
   onUpdateProduct,
   onDeleteProduct,
+  onAddProduct,
   loading = false
 }: InventoryTabProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStock, setEditStock] = useState('');
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   const handleSaveStock = (id: string) => {
     const stock = parseInt(editStock);
@@ -144,9 +158,19 @@ export function InventoryTab({
       </div>
 
       {/* Add Product Button */}
-      <button className="fixed bottom-24 left-4 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform">
+      <button 
+        onClick={() => setShowAddDialog(true)}
+        className="fixed bottom-24 left-4 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
+      >
         <Plus className="w-6 h-6" />
       </button>
+
+      {/* Add Product Dialog */}
+      <AddProductDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onAddProduct={onAddProduct}
+      />
     </div>
   );
 }
