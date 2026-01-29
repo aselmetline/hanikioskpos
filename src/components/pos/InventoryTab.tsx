@@ -4,6 +4,7 @@ import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
 import { LoadingState } from './LoadingState';
 import { AddProductDialog } from './AddProductDialog';
+import { EditProductDialog } from './EditProductDialog';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { useState } from 'react';
 
@@ -38,9 +39,8 @@ export function InventoryTab({
   onAddProduct,
   loading = false
 }: InventoryTabProps) {
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editStock, setEditStock] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
 
   const handleDeleteConfirm = () => {
@@ -50,14 +50,6 @@ export function InventoryTab({
     }
   };
 
-  const handleSaveStock = (id: string) => {
-    const stock = parseInt(editStock);
-    if (!isNaN(stock) && stock >= 0) {
-      onUpdateProduct(id, { stock });
-    }
-    setEditingId(null);
-    setEditStock('');
-  };
 
   return (
     <div className="flex flex-col h-full">
@@ -94,7 +86,6 @@ export function InventoryTab({
           <>
             {products.map((product) => {
               const isLowStock = product.stock <= product.lowStockAlert && product.lowStockAlert > 0;
-              const isEditing = editingId === product.id;
 
               return (
                 <div key={product.id} className="pos-card">
@@ -110,35 +101,14 @@ export function InventoryTab({
                     
                     <div className="text-left">
                       <p className="font-bold text-success">{product.price.toFixed(3)} {CURRENCY}</p>
-                      {isEditing ? (
-                        <div className="flex items-center gap-1 mt-1">
-                          <input
-                            type="number"
-                            value={editStock}
-                            onChange={(e) => setEditStock(e.target.value)}
-                            className="w-16 px-2 py-1 text-sm border rounded"
-                            autoFocus
-                          />
-                          <button
-                            onClick={() => handleSaveStock(product.id)}
-                            className="text-xs bg-success text-success-foreground px-2 py-1 rounded"
-                          >
-                            حفظ
-                          </button>
-                        </div>
-                      ) : (
-                        <p className={`text-sm ${isLowStock ? 'text-warning font-bold' : 'text-muted-foreground'}`}>
-                          {product.stock} {product.unit}
-                        </p>
-                      )}
+                      <p className={`text-sm ${isLowStock ? 'text-warning font-bold' : 'text-muted-foreground'}`}>
+                        {product.stock} {product.unit}
+                      </p>
                     </div>
                     
                     <div className="flex gap-1">
                       <button
-                        onClick={() => {
-                          setEditingId(product.id);
-                          setEditStock(product.stock.toString());
-                        }}
+                        onClick={() => setEditProduct(product)}
                         className="w-9 h-9 bg-secondary rounded-lg flex items-center justify-center"
                       >
                         <Edit2 className="w-4 h-4 text-secondary-foreground" />
@@ -179,6 +149,14 @@ export function InventoryTab({
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onAddProduct={onAddProduct}
+      />
+
+      {/* Edit Product Dialog */}
+      <EditProductDialog
+        open={editProduct !== null}
+        onOpenChange={(open) => !open && setEditProduct(null)}
+        product={editProduct}
+        onUpdateProduct={onUpdateProduct}
       />
 
       {/* Delete Confirmation Dialog */}
