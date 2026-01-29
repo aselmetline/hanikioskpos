@@ -4,6 +4,7 @@ import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
 import { LoadingState } from './LoadingState';
 import { AddProductDialog } from './AddProductDialog';
+import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { useState } from 'react';
 
 interface InventoryTabProps {
@@ -40,6 +41,14 @@ export function InventoryTab({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStock, setEditStock] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
+
+  const handleDeleteConfirm = () => {
+    if (deleteProductId) {
+      onDeleteProduct(deleteProductId);
+      setDeleteProductId(null);
+    }
+  };
 
   const handleSaveStock = (id: string) => {
     const stock = parseInt(editStock);
@@ -135,7 +144,7 @@ export function InventoryTab({
                         <Edit2 className="w-4 h-4 text-secondary-foreground" />
                       </button>
                       <button
-                        onClick={() => onDeleteProduct(product.id)}
+                        onClick={() => setDeleteProductId(product.id)}
                         className="w-9 h-9 bg-destructive/10 rounded-lg flex items-center justify-center"
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
@@ -170,6 +179,15 @@ export function InventoryTab({
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onAddProduct={onAddProduct}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteProductId !== null}
+        onOpenChange={(open) => !open && setDeleteProductId(null)}
+        onConfirm={handleDeleteConfirm}
+        title="حذف المنتج"
+        description="هل أنت متأكد من حذف هذا المنتج؟ سيتم حذفه نهائياً من قاعدة البيانات."
       />
     </div>
   );

@@ -11,6 +11,7 @@ import { Plus, Trash2, Receipt, TrendingDown } from 'lucide-react';
 import { Expense, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 
 interface ExpensesTabProps {
   expenses: Expense[];
@@ -31,6 +32,14 @@ export default function ExpensesTab({
   const [category, setCategory] = useState<ExpenseCategory>('other');
   const [description, setDescription] = useState('');
   const [expenseDate, setExpenseDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [deleteExpenseId, setDeleteExpenseId] = useState<string | null>(null);
+
+  const handleDeleteConfirm = () => {
+    if (deleteExpenseId) {
+      onDeleteExpense(deleteExpenseId);
+      setDeleteExpenseId(null);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,7 +208,7 @@ export default function ExpensesTab({
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => onDeleteExpense(expense.id)}
+                            onClick={() => setDeleteExpenseId(expense.id)}
                             className="h-8 w-8 text-destructive hover:text-destructive"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -214,6 +223,15 @@ export default function ExpensesTab({
           </ScrollArea>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteExpenseId !== null}
+        onOpenChange={(open) => !open && setDeleteExpenseId(null)}
+        onConfirm={handleDeleteConfirm}
+        title="حذف المصروف"
+        description="هل أنت متأكد من حذف هذا المصروف؟ سيتم حذفه نهائياً من السجل."
+      />
     </div>
   );
 }
