@@ -1,13 +1,16 @@
 import { useState } from 'react';
-import { BarChart3, TrendingUp, TrendingDown, Banknote, CreditCard, Download, Share2, ShoppingBag, Receipt, PieChart, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Banknote, CreditCard, Download, Share2, ShoppingBag, Receipt, PieChart, ArrowUpRight, ArrowDownRight, FileSpreadsheet } from 'lucide-react';
 import { Sale, Purchase, Expense, EXPENSE_CATEGORIES } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, subDays, eachDayOfInterval } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, LineChart, Line } from 'recharts';
+import { exportSalesReport, exportExpensesReport } from '@/utils/excelUtils';
+import { toast } from 'sonner';
 
 interface ReportsTabProps {
   sales: Sale[];
@@ -67,8 +70,60 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
     total: filteredExpenses.filter(e => e.category === cat.id).reduce((sum, e) => sum + e.amount, 0)
   })).filter(cat => cat.total > 0);
 
+  // Chart colors
+  const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--warning))', 'hsl(var(--destructive))', 'hsl(var(--accent))'];
+
+  // Daily sales data for chart (last 7 days)
+  const last7Days = eachDayOfInterval({
+    start: subDays(today, 6),
+    end: today
+  });
+
+  const dailySalesData = last7Days.map(day => {
+    const daySales = sales.filter(s => 
+      new Date(s.createdAt).toDateString() === day.toDateString()
+    );
+    return {
+      day: format(day, 'EEE', { locale: ar }),
+      date: format(day, 'dd/MM'),
+      sales: daySales.reduce((sum, s) => sum + s.total, 0),
+      count: daySales.length
+    };
+  });
+
+  // Pie chart data for payment methods
+  const paymentMethodData = [
+    { name: 'نقدي', value: cashSales, color: 'hsl(var(--success))' },
+    { name: 'آجل', value: creditSales, color: 'hsl(var(--warning))' }
+  ].filter(d => d.value > 0);
+
+  // Expense pie data
+  const expensePieData = expensesByCategory.map((cat, idx) => ({
+    name: cat.label,
+    value: cat.total,
+    color: CHART_COLORS[idx % CHART_COLORS.length]
+  }));
+
   const handleExportPDF = () => {
     alert('سيتم تصدير التقرير كـ PDF');
+  };
+
+  const handleExportSalesExcel = () => {
+    if (filteredSales.length === 0) {
+      toast.error('لا توجد مبيعات للتصدير');
+      return;
+    }
+    exportSalesReport(filteredSales);
+    toast.success('تم تصدير تقرير المبيعات');
+  };
+
+  const handleExportExpensesExcel = () => {
+    if (filteredExpenses.length === 0) {
+      toast.error('لا توجد مصروفات للتصدير');
+      return;
+    }
+    exportExpensesReport(filteredExpenses);
+    toast.success('تم تصدير تقرير المصروفات');
   };
 
   const handleShareWhatsApp = () => {
@@ -90,8 +145,16 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={handleExportPDF}
+            onClick={handleExportSalesExcel}
             className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center"
+            title="تصدير المبيعات Excel"
+          >
+            <FileSpreadsheet className="w-5 h-5 text-secondary-foreground" />
+          </button>
+          <button
+            onClick={handleExportExpensesExcel}
+            className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center"
+            title="تصدير المصروفات Excel"
           >
             <Download className="w-5 h-5 text-secondary-foreground" />
           </button>
@@ -170,9 +233,60 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
                   </div>
                 </div>
               </div>
+
+              {/* Payment Methods Pie Chart */}
+              {paymentMethodData.length > 0 && (
+                <div className="h-32 mt-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsPie>
+                      <Pie
+                        data={paymentMethodData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={30}
+                        outerRadius={50}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {paymentMethodData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value: number) => `${value.toFixed(3)} ${CURRENCY}`} />
+                    </RechartsPie>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
               <p className="text-xs text-muted-foreground text-center">
                 {filteredSales.length} عملية بيع
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Sales Trend Chart */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2 text-primary">
+                <BarChart3 className="w-5 h-5" />
+                اتجاه المبيعات (آخر 7 أيام)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={dailySalesData}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="day" fontSize={12} />
+                    <YAxis fontSize={12} tickFormatter={(v) => `${v}`} />
+                    <Tooltip 
+                      formatter={(value: number) => [`${value.toFixed(3)} ${CURRENCY}`, 'المبيعات']}
+                      labelFormatter={(label) => `يوم ${label}`}
+                    />
+                    <Bar dataKey="sales" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
 
@@ -218,6 +332,29 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
                     <PieChart className="w-4 h-4" />
                     تفصيل المصروفات
                   </p>
+                  
+                  {/* Expense Pie Chart */}
+                  <div className="h-40">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPie>
+                        <Pie
+                          data={expensePieData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={25}
+                          outerRadius={50}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {expensePieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value: number) => `${value.toFixed(3)} ${CURRENCY}`} />
+                      </RechartsPie>
+                    </ResponsiveContainer>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-2">
                     {expensesByCategory.map(cat => (
                       <div key={cat.id} className="flex items-center justify-between p-2 bg-card border rounded-lg">

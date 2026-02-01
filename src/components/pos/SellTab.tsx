@@ -1,4 +1,4 @@
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, ScanLine } from 'lucide-react';
 import { Product, CartItem, Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
@@ -6,6 +6,7 @@ import { CategoryFilter } from './CategoryFilter';
 import { ProductCard } from './ProductCard';
 import { CartSheet } from './CartSheet';
 import { LoadingState } from './LoadingState';
+import { BarcodeScanner } from './BarcodeScanner';
 import { useState } from 'react';
 
 interface SellTabProps {
@@ -27,6 +28,9 @@ interface SellTabProps {
   onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer) => void;
   customers: Customer[];
   loading?: boolean;
+  kioskName?: string;
+  kioskNameFr?: string;
+  allProducts?: Product[];
 }
 
 export function SellTab({
@@ -47,15 +51,39 @@ export function SellTab({
   onSetDiscount,
   onCheckout,
   customers,
-  loading = false
+  loading = false,
+  kioskName,
+  kioskNameFr,
+  allProducts = []
 }: SellTabProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+
+  const handleBarcodeScan = (barcode: string) => {
+    const product = allProducts.find(p => p.barcode === barcode);
+    if (product) {
+      onAddToCart(product);
+    } else {
+      // Show toast or alert
+      console.log('Product not found:', barcode);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
       {/* Search */}
       <div className="p-4 space-y-3">
-        <SearchBar value={searchQuery} onChange={onSearchChange} />
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <SearchBar value={searchQuery} onChange={onSearchChange} />
+          </div>
+          <button
+            onClick={() => setIsScannerOpen(true)}
+            className="w-12 h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center"
+          >
+            <ScanLine className="w-5 h-5" />
+          </button>
+        </div>
         <CategoryFilter 
           selectedCategory={selectedCategory} 
           onSelectCategory={onCategoryChange} 
@@ -117,6 +145,15 @@ export function SellTab({
         onSetDiscount={onSetDiscount}
         onCheckout={onCheckout}
         customers={customers}
+        kioskName={kioskName}
+        kioskNameFr={kioskNameFr}
+      />
+
+      {/* Barcode Scanner */}
+      <BarcodeScanner
+        open={isScannerOpen}
+        onOpenChange={setIsScannerOpen}
+        onScan={handleBarcodeScan}
       />
     </div>
   );

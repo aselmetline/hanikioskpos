@@ -1,7 +1,8 @@
-import { ShoppingBag, Minus, Plus, Trash2, X, CreditCard, Banknote, MessageCircle } from 'lucide-react';
+import { ShoppingBag, Minus, Plus, Trash2, X, CreditCard, Banknote, MessageCircle, Printer } from 'lucide-react';
 import { CartItem, Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { useState } from 'react';
+import { ReceiptPrinter } from './ReceiptPrinter';
 
 interface CartSheetProps {
   isOpen: boolean;
@@ -16,6 +17,8 @@ interface CartSheetProps {
   onSetDiscount: (discount: number) => void;
   onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer) => void;
   customers: Customer[];
+  kioskName?: string;
+  kioskNameFr?: string;
 }
 
 export function CartSheet({
@@ -30,16 +33,33 @@ export function CartSheet({
   onRemoveItem,
   onSetDiscount,
   onCheckout,
-  customers
+  customers,
+  kioskName,
+  kioskNameFr
 }: CartSheetProps) {
   const [discountInput, setDiscountInput] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [lastPaymentMethod, setLastPaymentMethod] = useState<'cash' | 'credit'>('cash');
+  const [lastItems, setLastItems] = useState<CartItem[]>([]);
+  const [lastTotals, setLastTotals] = useState({ subtotal: 0, tax: 0, total: 0, discount: 0 });
 
   if (!isOpen) return null;
 
   const handleCheckout = (method: 'cash' | 'credit') => {
     const customer = customers.find(c => c.id === selectedCustomerId);
+    
+    // Save for receipt
+    setLastItems([...items]);
+    setLastTotals({ subtotal, tax, total, discount: globalDiscount });
+    setLastPaymentMethod(method);
+    
     onCheckout(method, customer);
+    setShowReceipt(true);
+  };
+  
+  const handleCloseReceipt = () => {
+    setShowReceipt(false);
     onClose();
   };
 
@@ -201,7 +221,7 @@ export function CartSheet({
               </div>
               <button
                 onClick={handleWhatsAppOrder}
-                className="w-full pos-button bg-[#25D366] text-white py-4 text-lg"
+                className="w-full pos-button bg-success text-success-foreground py-4 text-lg"
               >
                 <MessageCircle className="w-5 h-5" />
                 طلب توصيل واتساب
@@ -210,6 +230,21 @@ export function CartSheet({
           </>
         )}
       </div>
+      
+      {/* Receipt Printer Dialog */}
+      <ReceiptPrinter
+        open={showReceipt}
+        onOpenChange={handleCloseReceipt}
+        items={lastItems}
+        subtotal={lastTotals.subtotal}
+        tax={lastTotals.tax}
+        discount={lastTotals.discount}
+        total={lastTotals.total}
+        paymentMethod={lastPaymentMethod}
+        customer={customers.find(c => c.id === selectedCustomerId)}
+        kioskName={kioskName}
+        kioskNameFr={kioskNameFr}
+      />
     </div>
   );
 }
