@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/pos/Header';
 import { BottomNav, TabType } from '@/components/pos/BottomNav';
 import { SellTab } from '@/components/pos/SellTab';
@@ -9,6 +9,7 @@ import { SettingsTab } from '@/components/pos/SettingsTab';
 import CashBoxTab from '@/components/pos/CashBoxTab';
 import PurchasesTab from '@/components/pos/PurchasesTab';
 import ExpensesTab from '@/components/pos/ExpensesTab';
+import { LowStockNotification } from '@/components/pos/LowStockNotification';
 import { useCart } from '@/hooks/useCart';
 import { useProducts } from '@/hooks/useProducts';
 import { useCustomers } from '@/hooks/useCustomers';
@@ -122,6 +123,9 @@ const Index = () => {
         kioskNameFr={settings.kioskNameFr}
         logo={settings.logo}
       />
+
+      {/* Low Stock Notification */}
+      <LowStockNotification products={products.lowStockProducts} />
       
       <BottomNav
         activeTab={activeTab}
@@ -150,6 +154,9 @@ const Index = () => {
             onCheckout={handleCheckout}
             customers={customers.customers}
             loading={products.loading}
+            kioskName={settings.kioskName}
+            kioskNameFr={settings.kioskNameFr}
+            allProducts={products.products}
           />
         )}
 

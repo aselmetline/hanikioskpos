@@ -1,4 +1,4 @@
-import { Package, Plus, Edit2, Trash2, AlertTriangle } from 'lucide-react';
+import { Package, Plus, Edit2, Trash2, AlertTriangle, Download, Upload } from 'lucide-react';
 import { Product } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
@@ -6,7 +6,10 @@ import { LoadingState } from './LoadingState';
 import { AddProductDialog } from './AddProductDialog';
 import { EditProductDialog } from './EditProductDialog';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import { ExcelImportDialog } from './ExcelImportDialog';
+import { exportProductsToExcel, ExcelProduct } from '@/utils/excelUtils';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface InventoryTabProps {
   products: Product[];
@@ -40,6 +43,7 @@ export function InventoryTab({
   loading = false
 }: InventoryTabProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
 
@@ -48,6 +52,28 @@ export function InventoryTab({
       onDeleteProduct(deleteProductId);
       setDeleteProductId(null);
     }
+  };
+
+  const handleExport = () => {
+    if (products.length === 0) {
+      toast.error('لا توجد منتجات للتصدير');
+      return;
+    }
+    exportProductsToExcel(products);
+    toast.success('تم تصدير المنتجات بنجاح');
+  };
+
+  const handleImport = async (importedProducts: ExcelProduct[]) => {
+    let successCount = 0;
+    for (const p of importedProducts) {
+      try {
+        await onAddProduct(p);
+        successCount++;
+      } catch (err) {
+        console.error('Failed to import product:', p.nameAr, err);
+      }
+    }
+    toast.success(`تم استيراد ${successCount} منتج بنجاح`);
   };
 
 
@@ -137,18 +163,41 @@ export function InventoryTab({
       </div>
 
       {/* Add Product Button */}
-      <button 
-        onClick={() => setShowAddDialog(true)}
-        className="fixed bottom-24 left-4 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-lg flex items-center justify-center z-40 active:scale-95 transition-transform"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
+      <div className="fixed bottom-24 left-4 flex flex-col gap-2 z-40">
+        <button
+          onClick={handleExport}
+          className="w-12 h-12 bg-secondary text-secondary-foreground rounded-xl shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+          title="تصدير Excel"
+        >
+          <Download className="w-5 h-5" />
+        </button>
+        <button
+          onClick={() => setShowImportDialog(true)}
+          className="w-12 h-12 bg-secondary text-secondary-foreground rounded-xl shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+          title="استيراد Excel"
+        >
+          <Upload className="w-5 h-5" />
+        </button>
+        <button 
+          onClick={() => setShowAddDialog(true)}
+          className="w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+      </div>
 
       {/* Add Product Dialog */}
       <AddProductDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onAddProduct={onAddProduct}
+      />
+
+      {/* Excel Import Dialog */}
+      <ExcelImportDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+        onImport={handleImport}
       />
 
       {/* Edit Product Dialog */}
