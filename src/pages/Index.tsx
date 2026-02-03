@@ -9,6 +9,7 @@ import { SettingsTab } from '@/components/pos/SettingsTab';
 import CashBoxTab from '@/components/pos/CashBoxTab';
 import PurchasesTab from '@/components/pos/PurchasesTab';
 import ExpensesTab from '@/components/pos/ExpensesTab';
+import { QueriesTab } from '@/components/pos/QueriesTab';
 import { LowStockNotification } from '@/components/pos/LowStockNotification';
 import { useCart } from '@/hooks/useCart';
 import { useProducts } from '@/hooks/useProducts';
@@ -215,6 +216,10 @@ const Index = () => {
             purchases={purchases.purchases}
             expenses={expensesHook.expenses}
           />
+        )}
+
+        {activeTab === 'queries' && (
+          <QueriesTab />
         )}
 
         {activeTab === 'expenses' && (
