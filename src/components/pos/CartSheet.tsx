@@ -1,7 +1,7 @@
-import { ShoppingBag, Minus, Plus, Trash2, X, CreditCard, Banknote, MessageCircle, Printer } from 'lucide-react';
+import { ShoppingBag, Minus, Plus, Trash2, X, CreditCard, Banknote, MessageCircle, Award } from 'lucide-react';
 import { CartItem, Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ReceiptPrinter } from './ReceiptPrinter';
 
 interface CartSheetProps {
@@ -15,10 +15,11 @@ interface CartSheetProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
   onSetDiscount: (discount: number) => void;
-  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer) => void;
+  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => void;
   customers: Customer[];
   kioskName?: string;
   kioskNameFr?: string;
+  pointsToDiscountRate?: number;
 }
 
 export function CartSheet({
@@ -35,7 +36,8 @@ export function CartSheet({
   onCheckout,
   customers,
   kioskName,
-  kioskNameFr
+  kioskNameFr,
+  pointsToDiscountRate = 100
 }: CartSheetProps) {
   const [discountInput, setDiscountInput] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
@@ -43,6 +45,19 @@ export function CartSheet({
   const [lastPaymentMethod, setLastPaymentMethod] = useState<'cash' | 'credit'>('cash');
   const [lastItems, setLastItems] = useState<CartItem[]>([]);
   const [lastTotals, setLastTotals] = useState({ subtotal: 0, tax: 0, total: 0, discount: 0 });
+  const [usePoints, setUsePoints] = useState(false);
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
+
+  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+  const maxPointsDiscount = selectedCustomer ? selectedCustomer.points / pointsToDiscountRate : 0;
+  const pointsDiscount = usePoints ? Math.min(pointsToRedeem / pointsToDiscountRate, maxPointsDiscount, total) : 0;
+  const finalTotal = total - pointsDiscount;
+
+  // Reset points when customer changes
+  useEffect(() => {
+    setUsePoints(false);
+    setPointsToRedeem(0);
+  }, [selectedCustomerId]);
 
   if (!isOpen) return null;
 
@@ -51,11 +66,13 @@ export function CartSheet({
     
     // Save for receipt
     setLastItems([...items]);
-    setLastTotals({ subtotal, tax, total, discount: globalDiscount });
+    setLastTotals({ subtotal, tax, total: finalTotal, discount: globalDiscount + pointsDiscount });
     setLastPaymentMethod(method);
     
-    onCheckout(method, customer);
+    onCheckout(method, customer, usePoints ? pointsToRedeem : 0);
     setShowReceipt(true);
+    setUsePoints(false);
+    setPointsToRedeem(0);
   };
   
   const handleCloseReceipt = () => {
@@ -165,6 +182,55 @@ export function CartSheet({
               </select>
             </div>
 
+            {/* Points Redemption - Show only if customer selected and has points */}
+            {selectedCustomer && selectedCustomer.points > 0 && (
+              <div className="px-4 py-3 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-t border-border">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-5 h-5 text-amber-500" />
+                    <span className="font-bold text-amber-600">نقاط {selectedCustomer.name}</span>
+                  </div>
+                  <span className="text-lg font-bold text-amber-600">{selectedCustomer.points} نقطة</span>
+                </div>
+                
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="checkbox"
+                    id="usePoints"
+                    checked={usePoints}
+                    onChange={(e) => {
+                      setUsePoints(e.target.checked);
+                      if (e.target.checked) {
+                        setPointsToRedeem(Math.min(selectedCustomer.points, Math.floor(total * pointsToDiscountRate)));
+                      }
+                    }}
+                    className="w-5 h-5 accent-amber-500"
+                  />
+                  <label htmlFor="usePoints" className="text-sm">استخدام النقاط للخصم</label>
+                </div>
+                
+                {usePoints && (
+                  <div className="space-y-2">
+                    <input
+                      type="range"
+                      min={0}
+                      max={Math.min(selectedCustomer.points, Math.floor(total * pointsToDiscountRate))}
+                      value={pointsToRedeem}
+                      onChange={(e) => setPointsToRedeem(Number(e.target.value))}
+                      className="w-full accent-amber-500"
+                    />
+                    <div className="flex justify-between text-sm">
+                      <span>{pointsToRedeem} نقطة</span>
+                      <span className="text-success font-bold">خصم: {pointsDiscount.toFixed(3)} {CURRENCY}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {pointsToDiscountRate} نقطة = 1 {CURRENCY}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Discount */}
             <div className="px-4 py-2 flex gap-2">
               <input
@@ -191,13 +257,19 @@ export function CartSheet({
                   <span>-{globalDiscount.toFixed(3)} {CURRENCY}</span>
                 </div>
               )}
+              {pointsDiscount > 0 && (
+                <div className="flex justify-between text-sm text-amber-600">
+                  <span>خصم النقاط ({pointsToRedeem} نقطة)</span>
+                  <span>-{pointsDiscount.toFixed(3)} {CURRENCY}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span>TVA 19%</span>
                 <span>{tax.toFixed(3)} {CURRENCY}</span>
               </div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
                 <span>الإجمالي</span>
-                <span className="text-success">{total.toFixed(3)} {CURRENCY}</span>
+                <span className="text-success">{finalTotal.toFixed(3)} {CURRENCY}</span>
               </div>
             </div>
 

@@ -33,17 +33,19 @@ const Index = () => {
   const expensesHook = useExpenses();
   const salesHook = useSales();
 
-  const handleCheckout = async (paymentMethod: 'cash' | 'credit', customer?: Customer) => {
+  const handleCheckout = async (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => {
     if (cart.items.length === 0) return;
 
-    const saleTotal = cart.total;
+    // Calculate points discount
+    const pointsDiscount = pointsToRedeem ? pointsToRedeem / customers.POINTS_TO_DINAR_RATE : 0;
+    const saleTotal = cart.total - pointsDiscount;
 
     // Create sale in database
     const sale = await salesHook.createSale(
       cart.items,
       cart.subtotal,
       cart.tax,
-      cart.globalDiscount + cart.itemsDiscount,
+      cart.globalDiscount + cart.itemsDiscount + pointsDiscount,
       saleTotal,
       paymentMethod,
       customer
@@ -56,18 +58,26 @@ const Index = () => {
       await products.updateStock(item.product.id, item.quantity);
     }
 
+    // Redeem points if used
+    if (customer && pointsToRedeem && pointsToRedeem > 0) {
+      await customers.redeemPoints(customer.id, pointsToRedeem);
+      toast.success(`تم استبدال ${pointsToRedeem} نقطة بخصم ${pointsDiscount.toFixed(3)} TND`);
+    }
+
     // Auto-add to cash box if enabled and payment is cash
     if (paymentMethod === 'cash' && cashBox.settings.autoAddSales) {
       await cashBox.addTransaction('add', saleTotal, `مبيعات - ${cart.itemCount} منتج`, 'sales');
     }
 
-    // Add points to customer
+    // Add points to customer (on final total after discount)
     if (customer) {
       const pointsAdded = await customers.addPoints(customer.id, saleTotal);
       if (paymentMethod === 'credit') {
         await customers.updateCreditBalance(customer.id, saleTotal);
       }
-      toast.success(`تم إضافة ${pointsAdded} نقطة لـ ${customer.name}`);
+      if (pointsAdded > 0) {
+        toast.success(`تم إضافة ${pointsAdded} نقطة جديدة لـ ${customer.name}`);
+      }
     }
 
     cart.clearCart();
@@ -157,6 +167,7 @@ const Index = () => {
             kioskName={settings.kioskName}
             kioskNameFr={settings.kioskNameFr}
             allProducts={products.products}
+            pointsToDiscountRate={customers.POINTS_TO_DINAR_RATE}
           />
         )}
 
