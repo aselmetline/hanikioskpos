@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const POINTS_PER_DINAR = 1;
+const POINTS_TO_DINAR_RATE = 100; // 100 points = 1 TND discount
 
 export function useCustomers() {
   const { user } = useAuth();
@@ -169,6 +170,34 @@ export function useCustomers() {
     ));
   }, [customers]);
 
+  const redeemPoints = useCallback(async (id: string, pointsToRedeem: number): Promise<number> => {
+    const customer = customers.find(c => c.id === id);
+    if (!customer || pointsToRedeem <= 0 || pointsToRedeem > customer.points) return 0;
+
+    const newPoints = customer.points - pointsToRedeem;
+    const discountAmount = pointsToRedeem / POINTS_TO_DINAR_RATE;
+
+    const { error } = await supabase
+      .from('customers')
+      .update({ points: newPoints })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error redeeming points:', error);
+      return 0;
+    }
+
+    setCustomers(prev => prev.map(c =>
+      c.id === id ? { ...c, points: newPoints } : c
+    ));
+
+    return discountAmount;
+  }, [customers]);
+
+  const calculatePointsDiscount = useCallback((points: number): number => {
+    return points / POINTS_TO_DINAR_RATE;
+  }, []);
+
   const findByPhone = useCallback((phone: string) => {
     return customers.find(c => c.phone === phone);
   }, [customers]);
@@ -182,7 +211,10 @@ export function useCustomers() {
     updateCustomer,
     addPoints,
     updateCreditBalance,
+    redeemPoints,
+    calculatePointsDiscount,
     findByPhone,
-    loading
+    loading,
+    POINTS_TO_DINAR_RATE
   };
 }

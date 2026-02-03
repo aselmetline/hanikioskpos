@@ -25,12 +25,13 @@ interface SellTabProps {
   itemCount: number;
   globalDiscount: number;
   onSetDiscount: (discount: number) => void;
-  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer) => void;
+  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => void;
   customers: Customer[];
   loading?: boolean;
   kioskName?: string;
   kioskNameFr?: string;
   allProducts?: Product[];
+  pointsToDiscountRate?: number;
 }
 
 export function SellTab({
@@ -54,7 +55,8 @@ export function SellTab({
   loading = false,
   kioskName,
   kioskNameFr,
-  allProducts = []
+  allProducts = [],
+  pointsToDiscountRate = 100
 }: SellTabProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
@@ -147,6 +149,7 @@ export function SellTab({
         customers={customers}
         kioskName={kioskName}
         kioskNameFr={kioskNameFr}
+        pointsToDiscountRate={pointsToDiscountRate}
       />
 
       {/* Barcode Scanner */}
