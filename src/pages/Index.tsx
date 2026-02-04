@@ -219,7 +219,14 @@ const Index = () => {
         )}
 
         {activeTab === 'queries' && (
-          <QueriesTab />
+          <QueriesTab 
+            sales={salesHook.sales}
+            purchases={purchases.purchases}
+            expenses={expensesHook.expenses}
+            transactions={cashBox.transactions}
+            customers={customers.customers}
+            cashBoxBalance={cashBox.balance}
+          />
         )}
 
         {activeTab === 'expenses' && (

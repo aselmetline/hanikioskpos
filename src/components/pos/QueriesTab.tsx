@@ -1,18 +1,26 @@
 import { useState } from 'react';
-import { ChevronLeft, Calendar, FileText, BarChart3, Save } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, BarChart3, Save, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
+import { Sale, Purchase, Expense, CashBoxTransaction, Customer } from '@/types/pos';
+import {
+  SalesReport,
+  ProfitsReport,
+  CustomerDebtsReport,
+  PurchasesReport,
+  ExpensesReport,
+  CashBoxReport,
+  StoreActivityReport
+} from './reports';
 
 interface QueryItem {
   id: string;
   label: string;
-  onClick?: () => void;
 }
 
 interface QuerySection {
@@ -22,16 +30,25 @@ interface QuerySection {
 }
 
 interface QueriesTabProps {
-  onNavigateToReport?: (reportId: string, dateFrom: Date, dateTo: Date) => void;
+  sales?: Sale[];
+  purchases?: Purchase[];
+  expenses?: Expense[];
+  transactions?: CashBoxTransaction[];
+  customers?: Customer[];
+  cashBoxBalance?: number;
 }
 
-export function QueriesTab({ onNavigateToReport }: QueriesTabProps) {
+export function QueriesTab({ 
+  sales = [], 
+  purchases = [], 
+  expenses = [], 
+  transactions = [],
+  customers = [],
+  cashBoxBalance = 0
+}: QueriesTabProps) {
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
-
-  const handleQueryClick = (queryId: string) => {
-    onNavigateToReport?.(queryId, dateFrom, dateTo);
-  };
+  const [activeReport, setActiveReport] = useState<string | null>(null);
 
   const sections: QuerySection[] = [
     {
@@ -48,14 +65,6 @@ export function QueriesTab({ onNavigateToReport }: QueriesTabProps) {
       items: [
         { id: 'sales-report', label: 'تقرير بالمبيعات' },
         { id: 'profits-report', label: 'تقارير الأرباح' },
-        { id: 'sales-invoices', label: 'عرض فواتير المبيعات' },
-        { id: 'discounts-report', label: 'تقرير بالخصومات' },
-        { id: 'credit-invoices', label: 'تقرير بالفواتير الآجل' },
-        { id: 'returns-sales', label: 'تقرير بالفواتير المرتجع-مبيعات' },
-        { id: 'cancelled-sales', label: 'تقرير بفواتير المبيعات التي تم إلغاءها' },
-        { id: 'price-offers', label: 'تقرير بعروض الأسعار' },
-        { id: 'tax-by-item', label: 'إجمالي الضرائب حسب الصنف' },
-        { id: 'tax-by-customer', label: 'إجمالي الضرائب حسب العميل' },
       ],
     },
     {
@@ -63,17 +72,6 @@ export function QueriesTab({ onNavigateToReport }: QueriesTabProps) {
       title: 'العملاء',
       items: [
         { id: 'customer-debts', label: 'ذمم العملاء' },
-        { id: 'customer-account', label: 'كشف حساب عميل' },
-        { id: 'customer-verification', label: 'تقرير مصادقة حساب العميل' },
-        { id: 'customer-opening-balance', label: 'تقرير بحركة الرصيد الافتتاحي والنقد للعميل' },
-        { id: 'customer-invoices', label: 'تقرير بالفواتير لعميل' },
-        { id: 'customer-invoices-total', label: 'تقرير بالفواتير لعميل - إجمالي' },
-        { id: 'customer-returns', label: 'تقرير بالفواتير المرتجع لعميل' },
-        { id: 'customer-receipts', label: 'تقرير بسندات القبض لعميل' },
-        { id: 'customer-payments', label: 'تقرير بسندات الصرف لعميل' },
-        { id: 'customer-payment-tracking', label: 'تقرير بحركة التسديد لعميل' },
-        { id: 'customer-items-total', label: 'تقرير إجمالي حسب الصنف لعميل' },
-        { id: 'customer-payment-method', label: 'تقرير بحركة السداد للعملاء حسب طريقة الدفع' },
       ],
     },
     {
@@ -81,17 +79,6 @@ export function QueriesTab({ onNavigateToReport }: QueriesTabProps) {
       title: 'المشتريات',
       items: [
         { id: 'purchases-report', label: 'تقرير بالمشتريات' },
-        { id: 'purchases-invoices', label: 'عرض فواتير المشتريات' },
-        { id: 'returns-purchases', label: 'تقرير بالفواتير المرتجع-مشتريات' },
-        { id: 'cancelled-purchases', label: 'تقرير بفواتير المشتريات التي تم إلغاءها' },
-        { id: 'purchase-orders', label: 'تقرير بطلبات الشراء' },
-      ],
-    },
-    {
-      id: 'suppliers',
-      title: 'الموردين',
-      items: [
-        { id: 'supplier-balance', label: 'تقرير بالمتبقي للموردين' },
       ],
     },
     {
@@ -99,10 +86,6 @@ export function QueriesTab({ onNavigateToReport }: QueriesTabProps) {
       title: 'الصندوق',
       items: [
         { id: 'cashbox-activity', label: 'تقرير بحركة الصندوق' },
-        { id: 'capital-report', label: 'تقرير رأس المال' },
-        { id: 'zakat-calculation', label: 'حساب الزكاة' },
-        { id: 'tax-declaration', label: 'تقرير بالإقرار الضريبي' },
-        { id: 'tax-with-returns', label: 'تقرير بالإقرار الضريبي مع المرتجع' },
       ],
     },
     {
@@ -110,10 +93,125 @@ export function QueriesTab({ onNavigateToReport }: QueriesTabProps) {
       title: 'المصروفات',
       items: [
         { id: 'expenses-report', label: 'تقرير بالمصروفات' },
-        { id: 'expenses-by-account', label: 'تقرير بالمصروفات حسب الحساب' },
       ],
     },
   ];
+
+  const getReportTitle = (reportId: string): string => {
+    const allItems = sections.flatMap(s => s.items);
+    return allItems.find(i => i.id === reportId)?.label || 'تقرير';
+  };
+
+  const renderReport = () => {
+    switch (activeReport) {
+      case 'store-activity':
+        return (
+          <StoreActivityReport
+            sales={sales}
+            purchases={purchases}
+            expenses={expenses}
+            transactions={transactions}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+          />
+        );
+      case 'store-activity-chart':
+        return (
+          <StoreActivityReport
+            sales={sales}
+            purchases={purchases}
+            expenses={expenses}
+            transactions={transactions}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            showChart
+          />
+        );
+      case 'sales-report':
+        return (
+          <SalesReport
+            sales={sales}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+          />
+        );
+      case 'profits-report':
+        return (
+          <ProfitsReport
+            sales={sales}
+            purchases={purchases}
+            expenses={expenses}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+          />
+        );
+      case 'customer-debts':
+        return (
+          <CustomerDebtsReport
+            customers={customers}
+            sales={sales}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+          />
+        );
+      case 'purchases-report':
+        return (
+          <PurchasesReport
+            purchases={purchases}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+          />
+        );
+      case 'cashbox-activity':
+        return (
+          <CashBoxReport
+            transactions={transactions}
+            balance={cashBoxBalance}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+          />
+        );
+      case 'expenses-report':
+        return (
+          <ExpensesReport
+            expenses={expenses}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  if (activeReport) {
+    return (
+      <div className="flex flex-col h-full p-4 pb-24" dir="rtl">
+        {/* Report Header */}
+        <div className="flex items-center gap-3 mb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setActiveReport(null)}
+            className="shrink-0"
+          >
+            <ArrowRight className="h-5 w-5" />
+          </Button>
+          <div className="flex-1">
+            <h2 className="text-xl font-bold text-primary">{getReportTitle(activeReport)}</h2>
+            <p className="text-sm text-muted-foreground">
+              {format(dateFrom, 'yyyy/MM/dd')} - {format(dateTo, 'yyyy/MM/dd')}
+            </p>
+          </div>
+        </div>
+
+        {/* Report Content */}
+        <ScrollArea className="flex-1">
+          {renderReport()}
+        </ScrollArea>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full p-4 pb-24" dir="rtl">
@@ -203,7 +301,7 @@ export function QueriesTab({ onNavigateToReport }: QueriesTabProps) {
                   {section.items.map((item) => (
                     <button
                       key={item.id}
-                      onClick={() => handleQueryClick(item.id)}
+                      onClick={() => setActiveReport(item.id)}
                       className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors text-right"
                     >
                       <ChevronLeft className="w-5 h-5 text-muted-foreground" />
