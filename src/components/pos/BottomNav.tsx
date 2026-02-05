@@ -23,7 +23,7 @@ export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavPr
   ];
 
   return (
-    <nav className="sticky top-0 left-0 right-0 bg-card border-b border-border z-50 shadow-sm">
+    <nav className="bg-card border-b border-border shadow-sm">
       <ScrollArea className="w-full">
         <div className="flex items-center py-1.5 px-2 min-w-max">
           {tabs.map((tab) => {
