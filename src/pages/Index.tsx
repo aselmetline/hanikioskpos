@@ -128,21 +128,23 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header 
-        lowStockCount={products.lowStockProducts.length}
-        kioskName={settings.kioskName}
-        kioskNameFr={settings.kioskNameFr}
-        logo={settings.logo}
-      />
+      {/* Header + Navigation fixed at top */}
+      <div className="sticky top-0 z-50">
+        <Header 
+          lowStockCount={products.lowStockProducts.length}
+          kioskName={settings.kioskName}
+          kioskNameFr={settings.kioskNameFr}
+          logo={settings.logo}
+        />
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          cartItemCount={cart.itemCount}
+        />
+      </div>
 
       {/* Low Stock Notification */}
       <LowStockNotification products={products.lowStockProducts} />
-      
-      <BottomNav
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        cartItemCount={cart.itemCount}
-      />
       
       <main className="flex-1 overflow-auto">
         {activeTab === 'sell' && (
