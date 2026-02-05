@@ -97,13 +97,13 @@ export function CartSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-sm animate-fade-in flex items-center justify-center p-4" onClick={onClose}>
       <div 
-        className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl max-h-[85vh] animate-slide-up"
+        className="bg-card rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-card rounded-t-3xl border-b border-border p-4">
+        <div className="sticky top-0 bg-card rounded-t-2xl border-b border-border p-4">
           <div className="flex items-center justify-between mb-3">
             <button onClick={onClose} className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
               <X className="w-5 h-5" />
@@ -146,7 +146,7 @@ export function CartSheet({
         </div>
 
         {/* Cart Items */}
-        <div className="overflow-y-auto max-h-[40vh] p-4 space-y-3">
+        <div className="overflow-y-auto max-h-[35vh] p-4 space-y-3">
           {items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <ShoppingBag className="w-12 h-12 mx-auto mb-2 opacity-50" />
