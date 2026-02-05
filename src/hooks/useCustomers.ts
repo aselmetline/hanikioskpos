@@ -171,10 +171,26 @@ export function useCustomers() {
   }, [customers]);
 
   const redeemPoints = useCallback(async (id: string, pointsToRedeem: number): Promise<number> => {
-    const customer = customers.find(c => c.id === id);
-    if (!customer || pointsToRedeem <= 0 || pointsToRedeem > customer.points) return 0;
+    if (pointsToRedeem <= 0) return 0;
 
-    const newPoints = customer.points - pointsToRedeem;
+    // Fetch current points from database to avoid stale data
+    const { data: currentCustomer, error: fetchError } = await supabase
+      .from('customers')
+      .select('points')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (fetchError || !currentCustomer) {
+      console.error('Error fetching customer points:', fetchError);
+      return 0;
+    }
+
+    if (pointsToRedeem > currentCustomer.points) {
+      console.error('Not enough points to redeem');
+      return 0;
+    }
+
+    const newPoints = currentCustomer.points - pointsToRedeem;
     const discountAmount = pointsToRedeem / POINTS_TO_DINAR_RATE;
 
     const { error } = await supabase
@@ -187,12 +203,13 @@ export function useCustomers() {
       return 0;
     }
 
+    // Update local state
     setCustomers(prev => prev.map(c =>
       c.id === id ? { ...c, points: newPoints } : c
     ));
 
     return discountAmount;
-  }, [customers]);
+  }, []);
 
   const calculatePointsDiscount = useCallback((points: number): number => {
     return points / POINTS_TO_DINAR_RATE;
