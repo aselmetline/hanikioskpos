@@ -104,7 +104,7 @@ export function CartSheet({
       >
         {/* Header */}
         <div className="sticky top-0 bg-card rounded-t-3xl border-b border-border p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <button onClick={onClose} className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
               <X className="w-5 h-5" />
             </button>
@@ -114,6 +114,35 @@ export function CartSheet({
             </div>
             <div className="w-10" />
           </div>
+          
+          {/* Payment Buttons in Header */}
+          {items.length > 0 && (
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleCheckout('cash')}
+                  className="pos-button-success text-sm py-2.5"
+                >
+                  <Banknote className="w-4 h-4" />
+                  نقدي
+                </button>
+                <button
+                  onClick={() => handleCheckout('credit')}
+                  className="pos-button-outline text-sm py-2.5"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  آجل
+                </button>
+              </div>
+              <button
+                onClick={handleWhatsAppOrder}
+                className="w-full pos-button bg-success text-success-foreground py-2.5 text-sm"
+              >
+                <MessageCircle className="w-4 h-4" />
+                طلب توصيل واتساب
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Cart Items */}
@@ -273,32 +302,6 @@ export function CartSheet({
               </div>
             </div>
 
-            {/* Payment Buttons */}
-            <div className="p-4 space-y-3 safe-bottom">
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleCheckout('cash')}
-                  className="pos-button-success text-lg py-4"
-                >
-                  <Banknote className="w-5 h-5" />
-                  نقدي
-                </button>
-                <button
-                  onClick={() => handleCheckout('credit')}
-                  className="pos-button-outline text-lg py-4"
-                >
-                  <CreditCard className="w-5 h-5" />
-                  آجل
-                </button>
-              </div>
-              <button
-                onClick={handleWhatsAppOrder}
-                className="w-full pos-button bg-success text-success-foreground py-4 text-lg"
-              >
-                <MessageCircle className="w-5 h-5" />
-                طلب توصيل واتساب
-              </button>
-            </div>
           </>
         )}
       </div>
