@@ -107,6 +107,44 @@ export type Database = {
         }
         Relationships: []
       }
+      points_transactions: {
+        Row: {
+          created_at: string
+          customer_id: string
+          description: string | null
+          id: string
+          points: number
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          id?: string
+          points: number
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          id?: string
+          points?: number
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "points_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           barcode: string | null

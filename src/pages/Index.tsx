@@ -209,6 +209,7 @@ const Index = () => {
             searchQuery={customers.searchQuery}
             onSearchChange={customers.setSearchQuery}
             onAddCustomer={handleAddCustomer}
+            onFetchPointsHistory={customers.getPointsHistory}
           />
         )}
 
