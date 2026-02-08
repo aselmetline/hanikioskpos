@@ -126,11 +126,22 @@ export function useCustomers() {
   }, []);
 
   const addPoints = useCallback(async (id: string, purchaseAmount: number) => {
-    const customer = customers.find(c => c.id === id);
-    if (!customer) return 0;
-
     const pointsToAdd = Math.floor(purchaseAmount * POINTS_PER_DINAR);
-    const newPoints = customer.points + pointsToAdd;
+    if (pointsToAdd <= 0) return 0;
+
+    // Fetch current points from database to avoid stale data
+    const { data: currentCustomer, error: fetchError } = await supabase
+      .from('customers')
+      .select('points')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (fetchError || !currentCustomer) {
+      console.error('Error fetching customer points:', fetchError);
+      return 0;
+    }
+
+    const newPoints = currentCustomer.points + pointsToAdd;
 
     const { error } = await supabase
       .from('customers')
@@ -147,7 +158,7 @@ export function useCustomers() {
     ));
 
     return pointsToAdd;
-  }, [customers]);
+  }, []);
 
   const updateCreditBalance = useCallback(async (id: string, amount: number) => {
     const customer = customers.find(c => c.id === id);
