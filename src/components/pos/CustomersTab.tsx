@@ -1,25 +1,29 @@
-import { Users, Plus, Phone, Award, CreditCard, QrCode } from 'lucide-react';
+import { Users, Plus, Phone, Award, CreditCard, QrCode, History } from 'lucide-react';
 import { Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
 import { useState } from 'react';
+import { PointsHistoryDialog } from './PointsHistoryDialog';
 
 interface CustomersTabProps {
   customers: Customer[];
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onAddCustomer: (customer: { name: string; phone: string }) => void;
+  onFetchPointsHistory?: (customerId: string) => Promise<any[]>;
 }
 
 export function CustomersTab({
   customers,
   searchQuery,
   onSearchChange,
-  onAddCustomer
+  onAddCustomer,
+  onFetchPointsHistory
 }: CustomersTabProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
+  const [historyCustomer, setHistoryCustomer] = useState<Customer | null>(null);
 
   const handleAdd = () => {
     if (newName && newPhone) {
@@ -125,6 +129,16 @@ export function CustomersTab({
                   </div>
                 )}
               </div>
+
+              {onFetchPointsHistory && (
+                <button
+                  onClick={() => setHistoryCustomer(customer)}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                  title="سجل النقاط"
+                >
+                  <History className="w-5 h-5 text-muted-foreground" />
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -149,6 +163,16 @@ export function CustomersTab({
           <QrCode className="w-6 h-6" />
         </button>
       </div>
+
+      {onFetchPointsHistory && historyCustomer && (
+        <PointsHistoryDialog
+          open={!!historyCustomer}
+          onOpenChange={(open) => !open && setHistoryCustomer(null)}
+          customerName={historyCustomer.name}
+          customerId={historyCustomer.id}
+          onFetchHistory={onFetchPointsHistory}
+        />
+      )}
     </div>
   );
 }

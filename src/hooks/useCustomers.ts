@@ -129,7 +129,6 @@ export function useCustomers() {
     const pointsToAdd = Math.floor(purchaseAmount * POINTS_PER_DINAR);
     if (pointsToAdd <= 0) return 0;
 
-    // Fetch current points from database to avoid stale data
     const { data: currentCustomer, error: fetchError } = await supabase
       .from('customers')
       .select('points')
@@ -153,12 +152,23 @@ export function useCustomers() {
       return 0;
     }
 
+    // Log the transaction
+    if (user) {
+      await supabase.from('points_transactions').insert({
+        customer_id: id,
+        user_id: user.id,
+        type: 'earn',
+        points: pointsToAdd,
+        description: `كسب نقاط من عملية شراء بقيمة ${purchaseAmount.toFixed(3)}`
+      });
+    }
+
     setCustomers(prev => prev.map(c =>
       c.id === id ? { ...c, points: newPoints } : c
     ));
 
     return pointsToAdd;
-  }, []);
+  }, [user]);
 
   const updateCreditBalance = useCallback(async (id: string, amount: number) => {
     const customer = customers.find(c => c.id === id);
@@ -214,12 +224,37 @@ export function useCustomers() {
       return 0;
     }
 
-    // Update local state
+    // Log the transaction
+    if (user) {
+      await supabase.from('points_transactions').insert({
+        customer_id: id,
+        user_id: user.id,
+        type: 'redeem',
+        points: pointsToRedeem,
+        description: `استبدال ${pointsToRedeem} نقطة بخصم ${discountAmount.toFixed(3)}`
+      });
+    }
+
     setCustomers(prev => prev.map(c =>
       c.id === id ? { ...c, points: newPoints } : c
     ));
 
     return discountAmount;
+  }, [user]);
+
+  const getPointsHistory = useCallback(async (customerId: string) => {
+    const { data, error } = await supabase
+      .from('points_transactions')
+      .select('*')
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error('Error fetching points history:', error);
+      return [];
+    }
+    return data;
   }, []);
 
   const calculatePointsDiscount = useCallback((points: number): number => {
@@ -242,6 +277,7 @@ export function useCustomers() {
     redeemPoints,
     calculatePointsDiscount,
     findByPhone,
+    getPointsHistory,
     loading,
     POINTS_TO_DINAR_RATE
   };
