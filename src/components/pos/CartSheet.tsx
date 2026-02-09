@@ -15,7 +15,7 @@ interface CartSheetProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
   onSetDiscount: (discount: number) => void;
-  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => void;
+  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<string | null>;
   customers: Customer[];
   kioskName?: string;
   kioskNameFr?: string;
@@ -45,6 +45,7 @@ export function CartSheet({
   const [lastPaymentMethod, setLastPaymentMethod] = useState<'cash' | 'credit'>('cash');
   const [lastItems, setLastItems] = useState<CartItem[]>([]);
   const [lastTotals, setLastTotals] = useState({ subtotal: 0, tax: 0, total: 0, discount: 0 });
+  const [lastSaleId, setLastSaleId] = useState<string | undefined>();
   const [usePoints, setUsePoints] = useState(false);
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
 
@@ -61,7 +62,7 @@ export function CartSheet({
 
   if (!isOpen) return null;
 
-  const handleCheckout = (method: 'cash' | 'credit') => {
+  const handleCheckout = async (method: 'cash' | 'credit') => {
     const customer = customers.find(c => c.id === selectedCustomerId);
     
     // Save for receipt
@@ -69,7 +70,8 @@ export function CartSheet({
     setLastTotals({ subtotal, tax, total: finalTotal, discount: globalDiscount + pointsDiscount });
     setLastPaymentMethod(method);
     
-    onCheckout(method, customer, usePoints ? pointsToRedeem : 0);
+    const saleId = await onCheckout(method, customer, usePoints ? pointsToRedeem : 0);
+    setLastSaleId(saleId || undefined);
     setShowReceipt(true);
     setUsePoints(false);
     setPointsToRedeem(0);
@@ -319,6 +321,7 @@ export function CartSheet({
         customer={customers.find(c => c.id === selectedCustomerId)}
         kioskName={kioskName}
         kioskNameFr={kioskNameFr}
+        saleId={lastSaleId}
       />
     </div>
   );

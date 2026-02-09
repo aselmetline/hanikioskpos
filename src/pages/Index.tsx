@@ -34,8 +34,8 @@ const Index = () => {
   const expensesHook = useExpenses();
   const salesHook = useSales();
 
-  const handleCheckout = async (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => {
-    if (cart.items.length === 0) return;
+  const handleCheckout = async (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number): Promise<string | null> => {
+    if (cart.items.length === 0) return null;
 
     // Calculate points discount
     const pointsDiscount = pointsToRedeem ? pointsToRedeem / customers.POINTS_TO_DINAR_RATE : 0;
@@ -52,7 +52,7 @@ const Index = () => {
       customer
     );
 
-    if (!sale) return;
+    if (!sale) return null;
 
     // Update stock
     for (const item of cart.items) {
@@ -88,6 +88,8 @@ const Index = () => {
         ? `تم البيع بنجاح - ${saleTotal.toFixed(3)} TND` 
         : `تم تسجيل البيع الآجل - ${saleTotal.toFixed(3)} TND`
     );
+
+    return sale.id;
   };
 
   // Handle saving purchase and auto-deduct from cash box
