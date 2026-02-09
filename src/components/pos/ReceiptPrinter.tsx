@@ -171,76 +171,95 @@ ${'─'.repeat(20)}
         {/* Receipt Preview */}
         <div 
           ref={receiptRef}
-          className="bg-white text-black p-4 rounded-lg border-2 border-dashed text-sm font-mono"
-          style={{ direction: 'rtl' }}
+          className="bg-white text-black rounded-xl shadow-lg overflow-hidden text-sm"
+          style={{ direction: 'rtl', fontFamily: "'Cairo', 'Courier New', monospace" }}
         >
-          {/* Header */}
-          <div className="text-center mb-3">
-            <h1 className="text-lg font-bold">{kioskName}</h1>
-            <p className="text-xs text-gray-500">{kioskNameFr}</p>
-            <p className="text-xs font-bold mt-2">فاتورة رقم: {invoiceNumber}</p>
-            <p className="text-xs mt-1">{format(now, 'dd/MM/yyyy HH:mm', { locale: ar })}</p>
+          {/* Header with gradient */}
+          <div className="bg-gradient-to-l from-emerald-600 to-blue-600 text-white px-5 py-4 text-center">
+            <h1 className="text-xl font-bold tracking-wide">{kioskName}</h1>
+            <p className="text-emerald-100 text-xs mt-0.5">{kioskNameFr}</p>
           </div>
 
-          <div className="border-t border-dashed border-gray-400 my-2" />
-
-          {/* Items */}
-          <div className="space-y-1">
-            {items.map((item, idx) => (
-              <div key={idx} className="flex justify-between text-xs">
-                <span className="flex-1 truncate">{item.product.nameAr}</span>
-                <span className="w-8 text-center">x{item.quantity}</span>
-                <span className="w-16 text-left">{(item.product.price * item.quantity).toFixed(3)}</span>
+          <div className="px-5 py-3">
+            {/* Invoice info */}
+            <div className="flex justify-between items-center bg-gray-50 rounded-lg px-3 py-2 mb-3">
+              <div>
+                <p className="text-[10px] text-gray-400">رقم الفاتورة</p>
+                <p className="text-xs font-bold text-gray-800">{invoiceNumber}</p>
               </div>
-            ))}
-          </div>
-
-          <div className="border-t border-dashed border-gray-400 my-2" />
-
-          {/* Totals */}
-          <div className="space-y-1 text-xs">
-            <div className="flex justify-between">
-              <span>المجموع الفرعي</span>
-              <span>{subtotal.toFixed(3)}</span>
-            </div>
-            {discount > 0 && (
-              <div className="flex justify-between text-red-600">
-                <span>الخصم</span>
-                <span>-{discount.toFixed(3)}</span>
+              <div className="text-left">
+                <p className="text-[10px] text-gray-400">التاريخ</p>
+                <p className="text-xs font-bold text-gray-800">{format(now, 'dd/MM/yyyy')}</p>
+                <p className="text-[10px] text-gray-500">{format(now, 'HH:mm', { locale: ar })}</p>
               </div>
-            )}
-            <div className="flex justify-between">
-              <span>الضريبة (19%)</span>
-              <span>{tax.toFixed(3)}</span>
             </div>
-          </div>
 
-          <div className="border-t border-dashed border-gray-400 my-2" />
-
-          {/* Grand Total */}
-          <div className="flex justify-between font-bold">
-            <span>الإجمالي</span>
-            <span>{total.toFixed(3)} {CURRENCY}</span>
-          </div>
-
-          <div className="text-xs mt-2">
-            <div className="flex justify-between">
-              <span>طريقة الدفع</span>
-              <span>{paymentMethod === 'cash' ? 'نقدي 💵' : 'آجل 📝'}</span>
+            {/* Items header */}
+            <div className="flex justify-between text-[10px] text-gray-400 font-bold border-b border-gray-200 pb-1 mb-1">
+              <span className="flex-1">المنتج</span>
+              <span className="w-8 text-center">الكمية</span>
+              <span className="w-16 text-left">السعر</span>
             </div>
-            {customer && (
-              <div className="flex justify-between">
-                <span>العميل</span>
-                <span>{customer.name}</span>
+
+            {/* Items */}
+            <div className="space-y-1.5 mb-3">
+              {items.map((item, idx) => (
+                <div key={idx} className="flex justify-between text-xs items-center">
+                  <span className="flex-1 truncate font-medium text-gray-800">{item.product.nameAr}</span>
+                  <span className="w-8 text-center text-gray-500 bg-gray-100 rounded text-[10px] py-0.5">{item.quantity}</span>
+                  <span className="w-16 text-left font-semibold text-gray-700">{(item.product.price * item.quantity).toFixed(3)}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Divider */}
+            <div className="border-t-2 border-dashed border-gray-200 my-2" />
+
+            {/* Totals */}
+            <div className="space-y-1.5 text-xs">
+              <div className="flex justify-between text-gray-500">
+                <span>المجموع الفرعي</span>
+                <span>{subtotal.toFixed(3)}</span>
               </div>
-            )}
-          </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-red-500">
+                  <span>الخصم</span>
+                  <span>-{discount.toFixed(3)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-gray-500">
+                <span>الضريبة (19%)</span>
+                <span>{tax.toFixed(3)}</span>
+              </div>
+            </div>
 
-          <div className="border-t border-dashed border-gray-400 my-2" />
+            {/* Grand Total */}
+            <div className="bg-gradient-to-l from-emerald-50 to-blue-50 rounded-lg px-3 py-2.5 mt-3 flex justify-between items-center">
+              <span className="font-bold text-gray-700">الإجمالي</span>
+              <span className="font-black text-lg text-emerald-700">{total.toFixed(3)} <span className="text-xs">{CURRENCY}</span></span>
+            </div>
 
-          {/* Footer */}
-          <div className="text-center text-xs text-gray-500">
-            <p>شكراً لتعاملكم معنا! 🙏</p>
+            {/* Payment & Customer info */}
+            <div className="mt-3 space-y-1.5 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">طريقة الدفع</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${paymentMethod === 'cash' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                  {paymentMethod === 'cash' ? '💵 نقدي' : '📝 آجل'}
+                </span>
+              </div>
+              {customer && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">العميل</span>
+                  <span className="font-medium text-gray-700">{customer.name}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-100 mt-3 pt-3 text-center">
+              <p className="text-xs text-gray-400">شكراً لتعاملكم معنا! 🙏</p>
+              <p className="text-[9px] text-gray-300 mt-1">Powered by Hani Kiosk POS</p>
+            </div>
           </div>
         </div>
 
