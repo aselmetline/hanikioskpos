@@ -1,4 +1,4 @@
-import { Printer, X, Check, Share2 } from 'lucide-react';
+import { Printer, X, Check, Share2, Download } from 'lucide-react';
 import { CartItem, Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import {
@@ -9,7 +9,9 @@ import {
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface ReceiptPrinterProps {
   open: boolean;
@@ -23,6 +25,14 @@ interface ReceiptPrinterProps {
   customer?: Customer;
   kioskName?: string;
   kioskNameFr?: string;
+  saleId?: string;
+}
+
+function generateInvoiceNumber(saleId?: string): string {
+  if (!saleId) return '---';
+  const datePart = format(new Date(), 'yyyyMMdd');
+  const shortId = saleId.substring(0, 6).toUpperCase();
+  return `INV-${datePart}-${shortId}`;
 }
 
 export function ReceiptPrinter({
@@ -36,10 +46,12 @@ export function ReceiptPrinter({
   paymentMethod,
   customer,
   kioskName = 'كشك هاني',
-  kioskNameFr = 'Hani Kiosk'
+  kioskNameFr = 'Hani Kiosk',
+  saleId
 }: ReceiptPrinterProps) {
   const receiptRef = useRef<HTMLDivElement>(null);
   const now = new Date();
+  const invoiceNumber = generateInvoiceNumber(saleId);
 
   const handlePrint = () => {
     if (receiptRef.current) {
@@ -50,7 +62,7 @@ export function ReceiptPrinter({
           <html dir="rtl">
           <head>
             <meta charset="UTF-8">
-            <title>إيصال</title>
+            <title>إيصال - ${invoiceNumber}</title>
             <style>
               * { margin: 0; padding: 0; box-sizing: border-box; }
               body { 
@@ -72,6 +84,7 @@ export function ReceiptPrinter({
               .total-row { display: flex; justify-content: space-between; margin: 4px 0; }
               .grand-total { font-size: 14px; font-weight: bold; }
               .footer { text-align: center; margin-top: 15px; font-size: 10px; color: #666; }
+              .invoice-number { font-size: 11px; font-weight: bold; margin-top: 4px; }
             </style>
           </head>
           <body>
@@ -85,10 +98,38 @@ export function ReceiptPrinter({
     }
   };
 
+  const handleExportPDF = useCallback(async () => {
+    if (!receiptRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(receiptRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 80; // 80mm receipt width
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [imgWidth, imgHeight + 10],
+      });
+      
+      pdf.addImage(imgData, 'PNG', 0, 5, imgWidth, imgHeight);
+      pdf.save(`فاتورة-${invoiceNumber}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  }, [invoiceNumber]);
+
   const handleShare = async () => {
     const receiptText = `
 ${kioskName}
 ${kioskNameFr}
+رقم الفاتورة: ${invoiceNumber}
 ${format(now, 'dd/MM/yyyy HH:mm')}
 ${'─'.repeat(20)}
 ${items.map(item => `${item.product.nameAr} x${item.quantity} = ${(item.product.price * item.quantity).toFixed(3)}`).join('\n')}
@@ -106,14 +147,13 @@ ${'─'.repeat(20)}
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'إيصال الشراء',
+          title: `إيصال ${invoiceNumber}`,
           text: receiptText
         });
       } catch (err) {
         console.log('Share cancelled');
       }
     } else {
-      // Fallback to WhatsApp
       window.open(`https://wa.me/?text=${encodeURIComponent(receiptText)}`, '_blank');
     }
   };
@@ -138,7 +178,8 @@ ${'─'.repeat(20)}
           <div className="text-center mb-3">
             <h1 className="text-lg font-bold">{kioskName}</h1>
             <p className="text-xs text-gray-500">{kioskNameFr}</p>
-            <p className="text-xs mt-2">{format(now, 'dd/MM/yyyy HH:mm', { locale: ar })}</p>
+            <p className="text-xs font-bold mt-2">فاتورة رقم: {invoiceNumber}</p>
+            <p className="text-xs mt-1">{format(now, 'dd/MM/yyyy HH:mm', { locale: ar })}</p>
           </div>
 
           <div className="border-t border-dashed border-gray-400 my-2" />
@@ -204,17 +245,24 @@ ${'─'.repeat(20)}
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 mt-4">
+        <div className="grid grid-cols-3 gap-2 mt-4">
           <button
             onClick={handlePrint}
-            className="flex-1 pos-button-primary"
+            className="pos-button-primary text-sm"
           >
             <Printer className="w-4 h-4" />
             طباعة
           </button>
           <button
+            onClick={handleExportPDF}
+            className="pos-button-outline text-sm"
+          >
+            <Download className="w-4 h-4" />
+            PDF
+          </button>
+          <button
             onClick={handleShare}
-            className="flex-1 pos-button-outline"
+            className="pos-button-outline text-sm"
           >
             <Share2 className="w-4 h-4" />
             مشاركة
