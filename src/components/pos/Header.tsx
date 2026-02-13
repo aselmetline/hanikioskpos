@@ -1,6 +1,7 @@
-import { Store, Wifi, WifiOff, Bell, LogOut } from 'lucide-react';
+import { Store, Wifi, WifiOff, Bell, LogOut, Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { toast } from 'sonner';
 
 interface HeaderProps {
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 export function Header({ lowStockCount, kioskName = 'كشك هاني', kioskNameFr = 'Hani Kiosk', logo }: HeaderProps) {
   const { signOut } = useAuth();
+  const { isInstallable, install } = usePWAInstall();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -62,8 +64,21 @@ export function Header({ lowStockCount, kioskName = 'كشك هاني', kioskName
         </div>
 
         <div className="flex items-center gap-3">
+          {isInstallable && (
+            <button
+              onClick={async () => {
+                const accepted = await install();
+                if (accepted) toast.success('تم تثبيت التطبيق بنجاح!');
+              }}
+              className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-success/20 hover:bg-success/30 transition-colors animate-pulse"
+              title="تثبيت التطبيق"
+            >
+              <Download className="w-3 h-3" />
+              <span>تثبيت</span>
+            </button>
+          )}
+
           <span className="text-sm font-medium">{formatTime(currentTime)}</span>
-          
           {lowStockCount > 0 && (
             <div className="relative">
               <Bell className="w-5 h-5" />
