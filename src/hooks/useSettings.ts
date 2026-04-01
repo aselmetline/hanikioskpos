@@ -121,6 +121,7 @@ export function useSettings() {
         kiosk_name_fr: DEFAULT_SETTINGS.kioskNameFr,
         logo_url: null,
         tax_rate: DEFAULT_SETTINGS.taxRate,
+        tax_enabled: DEFAULT_SETTINGS.taxEnabled,
         currency: DEFAULT_SETTINGS.currency,
         printer_width: DEFAULT_SETTINGS.printerWidth,
         printer_enabled: DEFAULT_SETTINGS.printerEnabled,
@@ -128,7 +129,7 @@ export function useSettings() {
         points_per_dinar: DEFAULT_SETTINGS.pointsPerDinar,
         low_stock_threshold: DEFAULT_SETTINGS.lowStockThreshold,
         whatsapp_number: DEFAULT_SETTINGS.whatsappNumber,
-      })
+      } as any)
       .eq('user_id', user.id);
 
     if (error) {
