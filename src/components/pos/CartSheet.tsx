@@ -20,6 +20,8 @@ interface CartSheetProps {
   kioskName?: string;
   kioskNameFr?: string;
   pointsToDiscountRate?: number;
+  taxEnabled?: boolean;
+  taxRate?: number;
 }
 
 export function CartSheet({
