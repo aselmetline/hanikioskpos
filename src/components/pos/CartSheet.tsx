@@ -328,6 +328,8 @@ export function CartSheet({
         kioskName={kioskName}
         kioskNameFr={kioskNameFr}
         saleId={lastSaleId}
+        taxEnabled={taxEnabled}
+        taxRate={taxRate}
       />
     </div>
   );

@@ -151,6 +151,19 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings }: Set
           <CardDescription>تحديد نسبة ضريبة TVA</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>تفعيل الضريبة (TVA)</Label>
+              <p className="text-xs text-muted-foreground">تطبيق الضريبة على المبيعات</p>
+            </div>
+            <Switch
+              checked={localSettings.taxEnabled}
+              onCheckedChange={(checked) => handleChange('taxEnabled', checked)}
+            />
+          </div>
+
+          <Separator />
+
           <div className="space-y-2">
             <Label htmlFor="taxRate">نسبة الضريبة (TVA)</Label>
             <div className="flex items-center gap-2">
@@ -164,12 +177,13 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings }: Set
                 onChange={(e) => handleChange('taxRate', parseFloat(e.target.value) / 100)}
                 className="w-24 text-center"
                 dir="ltr"
+                disabled={!localSettings.taxEnabled}
               />
               <span className="text-muted-foreground">%</span>
             </div>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <Info className="w-3 h-3" />
-              الضريبة الافتراضية في تونس 19%
+              {localSettings.taxEnabled ? 'الضريبة الافتراضية في تونس 19%' : 'الضريبة معطلة - لن يتم احتسابها'}
             </p>
           </div>
 
