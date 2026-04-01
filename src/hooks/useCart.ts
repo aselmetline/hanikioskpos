@@ -1,8 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { CartItem, Product } from '@/types/pos';
-import { TAX_RATE } from '@/data/sampleData';
 
-export function useCart() {
+export function useCart(taxRate: number = 0.19, taxEnabled: boolean = true) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [globalDiscount, setGlobalDiscount] = useState(0);
 
