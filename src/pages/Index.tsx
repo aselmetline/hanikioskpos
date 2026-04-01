@@ -173,7 +173,8 @@ const Index = () => {
             kioskNameFr={settings.kioskNameFr}
             allProducts={products.products}
             pointsToDiscountRate={customers.POINTS_TO_DINAR_RATE}
-          />
+            taxEnabled={settings.taxEnabled}
+            taxRate={settings.taxRate}
         )}
 
         {activeTab === 'inventory' && (

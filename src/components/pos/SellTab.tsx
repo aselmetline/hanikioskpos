@@ -154,6 +154,8 @@ export function SellTab({
         kioskName={kioskName}
         kioskNameFr={kioskNameFr}
         pointsToDiscountRate={pointsToDiscountRate}
+        taxEnabled={taxEnabled}
+        taxRate={taxRate}
       />
 
       {/* Barcode Scanner */}
