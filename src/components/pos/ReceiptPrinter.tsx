@@ -26,6 +26,8 @@ interface ReceiptPrinterProps {
   kioskName?: string;
   kioskNameFr?: string;
   saleId?: string;
+  taxEnabled?: boolean;
+  taxRate?: number;
 }
 
 function generateInvoiceNumber(saleId?: string): string {
