@@ -56,13 +56,13 @@ export function useCart(taxRate: number = 0.19, taxEnabled: boolean = true) {
     
     const afterDiscount = subtotal - itemsDiscount - globalDiscount;
     const taxableAmount = Math.max(0, afterDiscount);
-    const tax = taxableAmount * TAX_RATE;
+    const tax = taxEnabled ? taxableAmount * taxRate : 0;
     const total = taxableAmount + tax;
     
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     return { subtotal, itemsDiscount, taxableAmount, tax, total, itemCount };
-  }, [items, globalDiscount]);
+  }, [items, globalDiscount, taxRate, taxEnabled]);
 
   return {
     items,
