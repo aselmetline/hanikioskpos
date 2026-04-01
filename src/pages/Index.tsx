@@ -25,8 +25,8 @@ import { toast } from 'sonner';
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>('sell');
 
-  const cart = useCart();
-  const products = useProducts();
+  const { settings, updateSettings, resetSettings } = useSettings();
+  const cart = useCart(settings.taxRate, settings.taxEnabled);
   const customers = useCustomers();
   const { settings, updateSettings, resetSettings } = useSettings();
   const cashBox = useCashBox();
