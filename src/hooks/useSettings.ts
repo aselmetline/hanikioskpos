@@ -57,11 +57,12 @@ export function useSettings() {
       if (error) {
         console.error('Error fetching settings:', error);
       } else if (data) {
-        setSettings({
+      setSettings({
           kioskName: data.kiosk_name || DEFAULT_SETTINGS.kioskName,
           kioskNameFr: data.kiosk_name_fr || DEFAULT_SETTINGS.kioskNameFr,
           logo: data.logo_url || null,
           taxRate: data.tax_rate ? Number(data.tax_rate) : DEFAULT_SETTINGS.taxRate,
+          taxEnabled: (data as any).tax_enabled ?? DEFAULT_SETTINGS.taxEnabled,
           currency: data.currency || DEFAULT_SETTINGS.currency,
           printerWidth: (data.printer_width as '58mm' | '80mm') || DEFAULT_SETTINGS.printerWidth,
           printerEnabled: data.printer_enabled ?? DEFAULT_SETTINGS.printerEnabled,
