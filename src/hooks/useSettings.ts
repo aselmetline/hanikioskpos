@@ -23,6 +23,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   kioskNameFr: 'Hani Kiosk',
   logo: null,
   taxRate: 0.19,
+  taxEnabled: true,
   currency: 'TND',
   printerWidth: '58mm',
   printerEnabled: false,
