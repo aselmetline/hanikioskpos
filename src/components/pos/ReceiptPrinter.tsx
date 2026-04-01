@@ -139,7 +139,7 @@ ${'─'.repeat(20)}
 ${items.map(item => `${item.product.nameAr} x${item.quantity} = ${(item.product.price * item.quantity).toFixed(3)}`).join('\n')}
 ${'─'.repeat(20)}
 المجموع الفرعي: ${subtotal.toFixed(3)} ${CURRENCY}
-${discount > 0 ? `الخصم: -${discount.toFixed(3)} ${CURRENCY}\n` : ''}الضريبة (19%): ${tax.toFixed(3)} ${CURRENCY}
+${discount > 0 ? `الخصم: -${discount.toFixed(3)} ${CURRENCY}\n` : ''}${taxEnabled ? `الضريبة (${(taxRate * 100).toFixed(0)}%): ${tax.toFixed(3)} ${CURRENCY}\n` : ''}
 ${'─'.repeat(20)}
 الإجمالي: ${total.toFixed(3)} ${CURRENCY}
 طريقة الدفع: ${paymentMethod === 'cash' ? 'نقدي' : 'آجل'}
