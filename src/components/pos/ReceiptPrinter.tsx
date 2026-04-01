@@ -231,10 +231,12 @@ ${'─'.repeat(20)}
                   <span>-{discount.toFixed(3)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-gray-500">
-                <span>الضريبة (19%)</span>
-                <span>{tax.toFixed(3)}</span>
-              </div>
+              {taxEnabled && (
+                <div className="flex justify-between text-gray-500">
+                  <span>الضريبة ({(taxRate * 100).toFixed(0)}%)</span>
+                  <span>{tax.toFixed(3)}</span>
+                </div>
+              )}
             </div>
 
             {/* Grand Total */}

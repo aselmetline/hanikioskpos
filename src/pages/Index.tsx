@@ -175,6 +175,7 @@ const Index = () => {
             pointsToDiscountRate={customers.POINTS_TO_DINAR_RATE}
             taxEnabled={settings.taxEnabled}
             taxRate={settings.taxRate}
+          />
         )}
 
         {activeTab === 'inventory' && (
