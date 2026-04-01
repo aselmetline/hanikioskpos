@@ -28,7 +28,7 @@ const Index = () => {
   const { settings, updateSettings, resetSettings } = useSettings();
   const cart = useCart(settings.taxRate, settings.taxEnabled);
   const customers = useCustomers();
-  const { settings, updateSettings, resetSettings } = useSettings();
+  const products = useProducts();
   const cashBox = useCashBox();
   const purchases = usePurchases();
   const expensesHook = useExpenses();
