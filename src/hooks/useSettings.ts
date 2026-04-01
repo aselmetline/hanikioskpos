@@ -87,6 +87,7 @@ export function useSettings() {
     if (updates.kioskNameFr !== undefined) dbUpdates.kiosk_name_fr = updates.kioskNameFr;
     if (updates.logo !== undefined) dbUpdates.logo_url = updates.logo;
     if (updates.taxRate !== undefined) dbUpdates.tax_rate = updates.taxRate;
+    if (updates.taxEnabled !== undefined) dbUpdates.tax_enabled = updates.taxEnabled;
     if (updates.currency !== undefined) dbUpdates.currency = updates.currency;
     if (updates.printerWidth !== undefined) dbUpdates.printer_width = updates.printerWidth;
     if (updates.printerEnabled !== undefined) dbUpdates.printer_enabled = updates.printerEnabled;
