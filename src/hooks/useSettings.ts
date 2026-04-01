@@ -8,6 +8,7 @@ export interface AppSettings {
   kioskNameFr: string;
   logo: string | null;
   taxRate: number;
+  taxEnabled: boolean;
   currency: string;
   printerWidth: '58mm' | '80mm';
   printerEnabled: boolean;
