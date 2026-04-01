@@ -32,6 +32,8 @@ interface SellTabProps {
   kioskNameFr?: string;
   allProducts?: Product[];
   pointsToDiscountRate?: number;
+  taxEnabled?: boolean;
+  taxRate?: number;
 }
 
 export function SellTab({
