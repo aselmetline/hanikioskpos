@@ -298,10 +298,12 @@ export function CartSheet({
                   <span>-{pointsDiscount.toFixed(3)} {CURRENCY}</span>
                 </div>
               )}
-              <div className="flex justify-between text-sm">
-                <span>TVA 19%</span>
-                <span>{tax.toFixed(3)} {CURRENCY}</span>
-              </div>
+              {taxEnabled && (
+                <div className="flex justify-between text-sm">
+                  <span>TVA {(taxRate * 100).toFixed(0)}%</span>
+                  <span>{tax.toFixed(3)} {CURRENCY}</span>
+                </div>
+              )}
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
                 <span>الإجمالي</span>
                 <span className="text-success">{finalTotal.toFixed(3)} {CURRENCY}</span>
