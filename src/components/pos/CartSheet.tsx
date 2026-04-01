@@ -39,7 +39,9 @@ export function CartSheet({
   customers,
   kioskName,
   kioskNameFr,
-  pointsToDiscountRate = 100
+  pointsToDiscountRate = 100,
+  taxEnabled = true,
+  taxRate = 0.19
 }: CartSheetProps) {
   const [discountInput, setDiscountInput] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
