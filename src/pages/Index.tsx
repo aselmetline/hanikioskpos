@@ -25,10 +25,10 @@ import { toast } from 'sonner';
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>('sell');
 
-  const cart = useCart();
-  const products = useProducts();
-  const customers = useCustomers();
   const { settings, updateSettings, resetSettings } = useSettings();
+  const cart = useCart(settings.taxRate, settings.taxEnabled);
+  const customers = useCustomers();
+  const products = useProducts();
   const cashBox = useCashBox();
   const purchases = usePurchases();
   const expensesHook = useExpenses();
@@ -173,6 +173,8 @@ const Index = () => {
             kioskNameFr={settings.kioskNameFr}
             allProducts={products.products}
             pointsToDiscountRate={customers.POINTS_TO_DINAR_RATE}
+            taxEnabled={settings.taxEnabled}
+            taxRate={settings.taxRate}
           />
         )}
 

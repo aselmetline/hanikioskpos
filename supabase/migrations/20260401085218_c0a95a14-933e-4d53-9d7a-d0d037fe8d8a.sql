@@ -1,0 +1,1 @@
+ALTER TABLE public.user_settings ADD COLUMN tax_enabled boolean DEFAULT true;

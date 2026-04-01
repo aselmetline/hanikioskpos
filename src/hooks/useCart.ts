@@ -1,8 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { CartItem, Product } from '@/types/pos';
-import { TAX_RATE } from '@/data/sampleData';
 
-export function useCart() {
+export function useCart(taxRate: number = 0.19, taxEnabled: boolean = true) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [globalDiscount, setGlobalDiscount] = useState(0);
 
@@ -57,13 +56,13 @@ export function useCart() {
     
     const afterDiscount = subtotal - itemsDiscount - globalDiscount;
     const taxableAmount = Math.max(0, afterDiscount);
-    const tax = taxableAmount * TAX_RATE;
+    const tax = taxEnabled ? taxableAmount * taxRate : 0;
     const total = taxableAmount + tax;
     
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     return { subtotal, itemsDiscount, taxableAmount, tax, total, itemCount };
-  }, [items, globalDiscount]);
+  }, [items, globalDiscount, taxRate, taxEnabled]);
 
   return {
     items,

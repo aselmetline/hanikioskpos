@@ -32,6 +32,8 @@ interface SellTabProps {
   kioskNameFr?: string;
   allProducts?: Product[];
   pointsToDiscountRate?: number;
+  taxEnabled?: boolean;
+  taxRate?: number;
 }
 
 export function SellTab({
@@ -56,7 +58,9 @@ export function SellTab({
   kioskName,
   kioskNameFr,
   allProducts = [],
-  pointsToDiscountRate = 100
+  pointsToDiscountRate = 100,
+  taxEnabled = true,
+  taxRate = 0.19
 }: SellTabProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
@@ -150,6 +154,8 @@ export function SellTab({
         kioskName={kioskName}
         kioskNameFr={kioskNameFr}
         pointsToDiscountRate={pointsToDiscountRate}
+        taxEnabled={taxEnabled}
+        taxRate={taxRate}
       />
 
       {/* Barcode Scanner */}

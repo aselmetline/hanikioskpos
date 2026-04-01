@@ -8,6 +8,7 @@ export interface AppSettings {
   kioskNameFr: string;
   logo: string | null;
   taxRate: number;
+  taxEnabled: boolean;
   currency: string;
   printerWidth: '58mm' | '80mm';
   printerEnabled: boolean;
@@ -22,6 +23,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   kioskNameFr: 'Hani Kiosk',
   logo: null,
   taxRate: 0.19,
+  taxEnabled: true,
   currency: 'TND',
   printerWidth: '58mm',
   printerEnabled: false,
@@ -55,11 +57,12 @@ export function useSettings() {
       if (error) {
         console.error('Error fetching settings:', error);
       } else if (data) {
-        setSettings({
+      setSettings({
           kioskName: data.kiosk_name || DEFAULT_SETTINGS.kioskName,
           kioskNameFr: data.kiosk_name_fr || DEFAULT_SETTINGS.kioskNameFr,
           logo: data.logo_url || null,
           taxRate: data.tax_rate ? Number(data.tax_rate) : DEFAULT_SETTINGS.taxRate,
+          taxEnabled: (data as any).tax_enabled ?? DEFAULT_SETTINGS.taxEnabled,
           currency: data.currency || DEFAULT_SETTINGS.currency,
           printerWidth: (data.printer_width as '58mm' | '80mm') || DEFAULT_SETTINGS.printerWidth,
           printerEnabled: data.printer_enabled ?? DEFAULT_SETTINGS.printerEnabled,
@@ -84,6 +87,7 @@ export function useSettings() {
     if (updates.kioskNameFr !== undefined) dbUpdates.kiosk_name_fr = updates.kioskNameFr;
     if (updates.logo !== undefined) dbUpdates.logo_url = updates.logo;
     if (updates.taxRate !== undefined) dbUpdates.tax_rate = updates.taxRate;
+    if (updates.taxEnabled !== undefined) dbUpdates.tax_enabled = updates.taxEnabled;
     if (updates.currency !== undefined) dbUpdates.currency = updates.currency;
     if (updates.printerWidth !== undefined) dbUpdates.printer_width = updates.printerWidth;
     if (updates.printerEnabled !== undefined) dbUpdates.printer_enabled = updates.printerEnabled;
@@ -117,6 +121,7 @@ export function useSettings() {
         kiosk_name_fr: DEFAULT_SETTINGS.kioskNameFr,
         logo_url: null,
         tax_rate: DEFAULT_SETTINGS.taxRate,
+        tax_enabled: DEFAULT_SETTINGS.taxEnabled,
         currency: DEFAULT_SETTINGS.currency,
         printer_width: DEFAULT_SETTINGS.printerWidth,
         printer_enabled: DEFAULT_SETTINGS.printerEnabled,
@@ -124,7 +129,7 @@ export function useSettings() {
         points_per_dinar: DEFAULT_SETTINGS.pointsPerDinar,
         low_stock_threshold: DEFAULT_SETTINGS.lowStockThreshold,
         whatsapp_number: DEFAULT_SETTINGS.whatsappNumber,
-      })
+      } as any)
       .eq('user_id', user.id);
 
     if (error) {

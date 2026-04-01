@@ -26,6 +26,8 @@ interface ReceiptPrinterProps {
   kioskName?: string;
   kioskNameFr?: string;
   saleId?: string;
+  taxEnabled?: boolean;
+  taxRate?: number;
 }
 
 function generateInvoiceNumber(saleId?: string): string {
@@ -47,7 +49,9 @@ export function ReceiptPrinter({
   customer,
   kioskName = 'كشك هاني',
   kioskNameFr = 'Hani Kiosk',
-  saleId
+  saleId,
+  taxEnabled = true,
+  taxRate = 0.19
 }: ReceiptPrinterProps) {
   const receiptRef = useRef<HTMLDivElement>(null);
   const now = new Date();
@@ -135,7 +139,7 @@ ${'─'.repeat(20)}
 ${items.map(item => `${item.product.nameAr} x${item.quantity} = ${(item.product.price * item.quantity).toFixed(3)}`).join('\n')}
 ${'─'.repeat(20)}
 المجموع الفرعي: ${subtotal.toFixed(3)} ${CURRENCY}
-${discount > 0 ? `الخصم: -${discount.toFixed(3)} ${CURRENCY}\n` : ''}الضريبة (19%): ${tax.toFixed(3)} ${CURRENCY}
+${discount > 0 ? `الخصم: -${discount.toFixed(3)} ${CURRENCY}\n` : ''}${taxEnabled ? `الضريبة (${(taxRate * 100).toFixed(0)}%): ${tax.toFixed(3)} ${CURRENCY}\n` : ''}
 ${'─'.repeat(20)}
 الإجمالي: ${total.toFixed(3)} ${CURRENCY}
 طريقة الدفع: ${paymentMethod === 'cash' ? 'نقدي' : 'آجل'}
@@ -227,10 +231,12 @@ ${'─'.repeat(20)}
                   <span>-{discount.toFixed(3)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-gray-500">
-                <span>الضريبة (19%)</span>
-                <span>{tax.toFixed(3)}</span>
-              </div>
+              {taxEnabled && (
+                <div className="flex justify-between text-gray-500">
+                  <span>الضريبة ({(taxRate * 100).toFixed(0)}%)</span>
+                  <span>{tax.toFixed(3)}</span>
+                </div>
+              )}
             </div>
 
             {/* Grand Total */}

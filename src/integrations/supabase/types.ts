@@ -403,6 +403,7 @@ export type Database = {
           printer_enabled: boolean | null
           printer_ip: string | null
           printer_width: string | null
+          tax_enabled: boolean | null
           tax_rate: number | null
           updated_at: string
           user_id: string
@@ -423,6 +424,7 @@ export type Database = {
           printer_enabled?: boolean | null
           printer_ip?: string | null
           printer_width?: string | null
+          tax_enabled?: boolean | null
           tax_rate?: number | null
           updated_at?: string
           user_id: string
@@ -443,6 +445,7 @@ export type Database = {
           printer_enabled?: boolean | null
           printer_ip?: string | null
           printer_width?: string | null
+          tax_enabled?: boolean | null
           tax_rate?: number | null
           updated_at?: string
           user_id?: string
