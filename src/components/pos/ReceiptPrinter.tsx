@@ -49,7 +49,9 @@ export function ReceiptPrinter({
   customer,
   kioskName = 'كشك هاني',
   kioskNameFr = 'Hani Kiosk',
-  saleId
+  saleId,
+  taxEnabled = true,
+  taxRate = 0.19
 }: ReceiptPrinterProps) {
   const receiptRef = useRef<HTMLDivElement>(null);
   const now = new Date();
