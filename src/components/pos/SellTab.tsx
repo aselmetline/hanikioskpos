@@ -34,6 +34,9 @@ interface SellTabProps {
   pointsToDiscountRate?: number;
   taxEnabled?: boolean;
   taxRate?: number;
+  storePhone?: string;
+  storeAddress?: string;
+  commercialRegister?: string;
 }
 
 export function SellTab({
@@ -60,7 +63,10 @@ export function SellTab({
   allProducts = [],
   pointsToDiscountRate = 100,
   taxEnabled = true,
-  taxRate = 0.19
+  taxRate = 0.19,
+  storePhone,
+  storeAddress,
+  commercialRegister,
 }: SellTabProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
@@ -156,6 +162,9 @@ export function SellTab({
         pointsToDiscountRate={pointsToDiscountRate}
         taxEnabled={taxEnabled}
         taxRate={taxRate}
+        storePhone={storePhone}
+        storeAddress={storeAddress}
+        commercialRegister={commercialRegister}
       />
 
       {/* Barcode Scanner */}

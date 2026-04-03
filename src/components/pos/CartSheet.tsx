@@ -22,6 +22,9 @@ interface CartSheetProps {
   pointsToDiscountRate?: number;
   taxEnabled?: boolean;
   taxRate?: number;
+  storePhone?: string;
+  storeAddress?: string;
+  commercialRegister?: string;
 }
 
 export function CartSheet({
@@ -41,7 +44,10 @@ export function CartSheet({
   kioskNameFr,
   pointsToDiscountRate = 100,
   taxEnabled = true,
-  taxRate = 0.19
+  taxRate = 0.19,
+  storePhone,
+  storeAddress,
+  commercialRegister,
 }: CartSheetProps) {
   const [discountInput, setDiscountInput] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
@@ -330,6 +336,9 @@ export function CartSheet({
         saleId={lastSaleId}
         taxEnabled={taxEnabled}
         taxRate={taxRate}
+        storePhone={storePhone}
+        storeAddress={storeAddress}
+        commercialRegister={commercialRegister}
       />
     </div>
   );
