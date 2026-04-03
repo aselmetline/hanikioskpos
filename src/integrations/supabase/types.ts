@@ -392,6 +392,8 @@ export type Database = {
           auto_add_sales: boolean | null
           auto_deduct_expenses: boolean | null
           auto_deduct_purchases: boolean | null
+          business_type: string | null
+          commercial_register: string | null
           created_at: string
           currency: string | null
           id: string
@@ -403,6 +405,12 @@ export type Database = {
           printer_enabled: boolean | null
           printer_ip: string | null
           printer_width: string | null
+          store_address_area: string | null
+          store_address_city: string | null
+          store_address_street: string | null
+          store_email: string | null
+          store_notes: string | null
+          store_phone: string | null
           tax_enabled: boolean | null
           tax_rate: number | null
           updated_at: string
@@ -413,6 +421,8 @@ export type Database = {
           auto_add_sales?: boolean | null
           auto_deduct_expenses?: boolean | null
           auto_deduct_purchases?: boolean | null
+          business_type?: string | null
+          commercial_register?: string | null
           created_at?: string
           currency?: string | null
           id?: string
@@ -424,6 +434,12 @@ export type Database = {
           printer_enabled?: boolean | null
           printer_ip?: string | null
           printer_width?: string | null
+          store_address_area?: string | null
+          store_address_city?: string | null
+          store_address_street?: string | null
+          store_email?: string | null
+          store_notes?: string | null
+          store_phone?: string | null
           tax_enabled?: boolean | null
           tax_rate?: number | null
           updated_at?: string
@@ -434,6 +450,8 @@ export type Database = {
           auto_add_sales?: boolean | null
           auto_deduct_expenses?: boolean | null
           auto_deduct_purchases?: boolean | null
+          business_type?: string | null
+          commercial_register?: string | null
           created_at?: string
           currency?: string | null
           id?: string
@@ -445,6 +463,12 @@ export type Database = {
           printer_enabled?: boolean | null
           printer_ip?: string | null
           printer_width?: string | null
+          store_address_area?: string | null
+          store_address_city?: string | null
+          store_address_street?: string | null
+          store_email?: string | null
+          store_notes?: string | null
+          store_phone?: string | null
           tax_enabled?: boolean | null
           tax_rate?: number | null
           updated_at?: string
