@@ -119,6 +119,14 @@ export function useSettings() {
     if (updates.pointsPerDinar !== undefined) dbUpdates.points_per_dinar = updates.pointsPerDinar;
     if (updates.lowStockThreshold !== undefined) dbUpdates.low_stock_threshold = updates.lowStockThreshold;
     if (updates.whatsappNumber !== undefined) dbUpdates.whatsapp_number = updates.whatsappNumber;
+    if (updates.storeAddressCity !== undefined) dbUpdates.store_address_city = updates.storeAddressCity;
+    if (updates.storeAddressStreet !== undefined) dbUpdates.store_address_street = updates.storeAddressStreet;
+    if (updates.storeAddressArea !== undefined) dbUpdates.store_address_area = updates.storeAddressArea;
+    if (updates.commercialRegister !== undefined) dbUpdates.commercial_register = updates.commercialRegister;
+    if (updates.storePhone !== undefined) dbUpdates.store_phone = updates.storePhone;
+    if (updates.storeEmail !== undefined) dbUpdates.store_email = updates.storeEmail;
+    if (updates.businessType !== undefined) dbUpdates.business_type = updates.businessType;
+    if (updates.storeNotes !== undefined) dbUpdates.store_notes = updates.storeNotes;
 
     const { error } = await supabase
       .from('user_settings')
