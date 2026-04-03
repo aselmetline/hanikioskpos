@@ -175,6 +175,9 @@ const Index = () => {
             pointsToDiscountRate={customers.POINTS_TO_DINAR_RATE}
             taxEnabled={settings.taxEnabled}
             taxRate={settings.taxRate}
+            storePhone={settings.storePhone}
+            storeAddress={[settings.storeAddressCity, settings.storeAddressArea, settings.storeAddressStreet].filter(Boolean).join('، ')}
+            commercialRegister={settings.commercialRegister}
           />
         )}
 
