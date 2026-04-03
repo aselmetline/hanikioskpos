@@ -34,6 +34,9 @@ interface SellTabProps {
   pointsToDiscountRate?: number;
   taxEnabled?: boolean;
   taxRate?: number;
+  storePhone?: string;
+  storeAddress?: string;
+  commercialRegister?: string;
 }
 
 export function SellTab({
