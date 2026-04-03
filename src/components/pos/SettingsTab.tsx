@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Store, Printer, Percent, Phone, RotateCcw, Save, Upload, Trash2, Info } from 'lucide-react';
+import { Store, Printer, Percent, Phone, RotateCcw, Save, Upload, Trash2, Info, MapPin, Building2, Mail, Briefcase, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
