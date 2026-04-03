@@ -142,6 +142,132 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings }: Set
         </CardContent>
       </Card>
 
+      {/* Store Details */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Building2 className="w-5 h-5 text-primary" />
+            بيانات المتجر
+          </CardTitle>
+          <CardDescription>معلومات تفصيلية عن المتجر تظهر في الفواتير والتقارير</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="businessType">نوع النشاط</Label>
+            <Select
+              value={localSettings.businessType}
+              onValueChange={(value) => handleChange('businessType', value)}
+            >
+              <SelectTrigger id="businessType">
+                <SelectValue placeholder="اختر نوع النشاط" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="kiosk">🏪 كشك</SelectItem>
+                <SelectItem value="grocery">🛒 بقالة</SelectItem>
+                <SelectItem value="restaurant">🍽️ مطعم</SelectItem>
+                <SelectItem value="cafe">☕ مقهى</SelectItem>
+                <SelectItem value="bakery">🥖 مخبزة</SelectItem>
+                <SelectItem value="pharmacy">💊 صيدلية</SelectItem>
+                <SelectItem value="clinic">🏥 عيادة</SelectItem>
+                <SelectItem value="clothing">👕 ملابس</SelectItem>
+                <SelectItem value="electronics">📱 إلكترونيات</SelectItem>
+                <SelectItem value="ecommerce">🌐 متجر إلكتروني</SelectItem>
+                <SelectItem value="other">📋 أخرى</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5" />
+              العنوان
+            </Label>
+            <div className="grid grid-cols-1 gap-3">
+              <Input
+                value={localSettings.storeAddressCity}
+                onChange={(e) => handleChange('storeAddressCity', e.target.value)}
+                placeholder="المدينة"
+                className="text-right"
+              />
+              <Input
+                value={localSettings.storeAddressArea}
+                onChange={(e) => handleChange('storeAddressArea', e.target.value)}
+                placeholder="المنطقة / الحي"
+                className="text-right"
+              />
+              <Input
+                value={localSettings.storeAddressStreet}
+                onChange={(e) => handleChange('storeAddressStreet', e.target.value)}
+                placeholder="الشارع / العنوان التفصيلي"
+                className="text-right"
+              />
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="storePhone" className="flex items-center gap-1">
+                <Phone className="w-3.5 h-3.5" />
+                هاتف المتجر
+              </Label>
+              <Input
+                id="storePhone"
+                value={localSettings.storePhone}
+                onChange={(e) => handleChange('storePhone', e.target.value)}
+                placeholder="+213 XX XXX XXXX"
+                dir="ltr"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="storeEmail" className="flex items-center gap-1">
+                <Mail className="w-3.5 h-3.5" />
+                البريد الإلكتروني
+              </Label>
+              <Input
+                id="storeEmail"
+                type="email"
+                value={localSettings.storeEmail}
+                onChange={(e) => handleChange('storeEmail', e.target.value)}
+                placeholder="store@example.com"
+                dir="ltr"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="commercialRegister" className="flex items-center gap-1">
+              <FileText className="w-3.5 h-3.5" />
+              رقم التسجيل التجاري
+            </Label>
+            <Input
+              id="commercialRegister"
+              value={localSettings.commercialRegister}
+              onChange={(e) => handleChange('commercialRegister', e.target.value)}
+              placeholder="رقم السجل التجاري"
+              className="text-right"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="storeNotes" className="flex items-center gap-1">
+              <Briefcase className="w-3.5 h-3.5" />
+              ملاحظات إضافية
+            </Label>
+            <Textarea
+              id="storeNotes"
+              value={localSettings.storeNotes}
+              onChange={(e) => handleChange('storeNotes', e.target.value)}
+              placeholder="أي معلومات إضافية عن المتجر..."
+              className="text-right min-h-[80px]"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Tax Settings */}
       <Card>
         <CardHeader className="pb-3">
