@@ -188,6 +188,9 @@ ${'─'.repeat(20)}
           <div className="bg-gradient-to-l from-emerald-600 to-blue-600 text-white px-5 py-4 text-center">
             <h1 className="text-xl font-bold tracking-wide">{kioskName}</h1>
             <p className="text-emerald-100 text-xs mt-0.5">{kioskNameFr}</p>
+            {storeAddress && <p className="text-emerald-100 text-[10px] mt-1">📍 {storeAddress}</p>}
+            {storePhone && <p className="text-emerald-100 text-[10px]">📞 {storePhone}</p>}
+            {commercialRegister && <p className="text-emerald-100 text-[10px]">🏷️ س.ت: {commercialRegister}</p>}
           </div>
 
           <div className="px-5 py-3">
