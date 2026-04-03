@@ -16,6 +16,14 @@ export interface AppSettings {
   pointsPerDinar: number;
   lowStockThreshold: number;
   whatsappNumber: string;
+  storeAddressCity: string;
+  storeAddressStreet: string;
+  storeAddressArea: string;
+  commercialRegister: string;
+  storePhone: string;
+  storeEmail: string;
+  businessType: string;
+  storeNotes: string;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -31,6 +39,14 @@ const DEFAULT_SETTINGS: AppSettings = {
   pointsPerDinar: 1,
   lowStockThreshold: 10,
   whatsappNumber: '+21622123456',
+  storeAddressCity: '',
+  storeAddressStreet: '',
+  storeAddressArea: '',
+  commercialRegister: '',
+  storePhone: '',
+  storeEmail: '',
+  businessType: 'kiosk',
+  storeNotes: '',
 };
 
 export function useSettings() {
@@ -70,6 +86,14 @@ export function useSettings() {
           pointsPerDinar: data.points_per_dinar ?? DEFAULT_SETTINGS.pointsPerDinar,
           lowStockThreshold: data.low_stock_threshold ?? DEFAULT_SETTINGS.lowStockThreshold,
           whatsappNumber: data.whatsapp_number || DEFAULT_SETTINGS.whatsappNumber,
+          storeAddressCity: (data as any).store_address_city || '',
+          storeAddressStreet: (data as any).store_address_street || '',
+          storeAddressArea: (data as any).store_address_area || '',
+          commercialRegister: (data as any).commercial_register || '',
+          storePhone: (data as any).store_phone || '',
+          storeEmail: (data as any).store_email || '',
+          businessType: (data as any).business_type || 'kiosk',
+          storeNotes: (data as any).store_notes || '',
         });
       }
       setLoading(false);
@@ -95,6 +119,14 @@ export function useSettings() {
     if (updates.pointsPerDinar !== undefined) dbUpdates.points_per_dinar = updates.pointsPerDinar;
     if (updates.lowStockThreshold !== undefined) dbUpdates.low_stock_threshold = updates.lowStockThreshold;
     if (updates.whatsappNumber !== undefined) dbUpdates.whatsapp_number = updates.whatsappNumber;
+    if (updates.storeAddressCity !== undefined) dbUpdates.store_address_city = updates.storeAddressCity;
+    if (updates.storeAddressStreet !== undefined) dbUpdates.store_address_street = updates.storeAddressStreet;
+    if (updates.storeAddressArea !== undefined) dbUpdates.store_address_area = updates.storeAddressArea;
+    if (updates.commercialRegister !== undefined) dbUpdates.commercial_register = updates.commercialRegister;
+    if (updates.storePhone !== undefined) dbUpdates.store_phone = updates.storePhone;
+    if (updates.storeEmail !== undefined) dbUpdates.store_email = updates.storeEmail;
+    if (updates.businessType !== undefined) dbUpdates.business_type = updates.businessType;
+    if (updates.storeNotes !== undefined) dbUpdates.store_notes = updates.storeNotes;
 
     const { error } = await supabase
       .from('user_settings')
@@ -129,6 +161,14 @@ export function useSettings() {
         points_per_dinar: DEFAULT_SETTINGS.pointsPerDinar,
         low_stock_threshold: DEFAULT_SETTINGS.lowStockThreshold,
         whatsapp_number: DEFAULT_SETTINGS.whatsappNumber,
+        store_address_city: null,
+        store_address_street: null,
+        store_address_area: null,
+        commercial_register: null,
+        store_phone: null,
+        store_email: null,
+        business_type: 'kiosk',
+        store_notes: null,
       } as any)
       .eq('user_id', user.id);
 
