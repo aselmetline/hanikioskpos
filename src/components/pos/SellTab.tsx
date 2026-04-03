@@ -63,7 +63,10 @@ export function SellTab({
   allProducts = [],
   pointsToDiscountRate = 100,
   taxEnabled = true,
-  taxRate = 0.19
+  taxRate = 0.19,
+  storePhone,
+  storeAddress,
+  commercialRegister,
 }: SellTabProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
