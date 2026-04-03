@@ -86,6 +86,14 @@ export function useSettings() {
           pointsPerDinar: data.points_per_dinar ?? DEFAULT_SETTINGS.pointsPerDinar,
           lowStockThreshold: data.low_stock_threshold ?? DEFAULT_SETTINGS.lowStockThreshold,
           whatsappNumber: data.whatsapp_number || DEFAULT_SETTINGS.whatsappNumber,
+          storeAddressCity: (data as any).store_address_city || '',
+          storeAddressStreet: (data as any).store_address_street || '',
+          storeAddressArea: (data as any).store_address_area || '',
+          commercialRegister: (data as any).commercial_register || '',
+          storePhone: (data as any).store_phone || '',
+          storeEmail: (data as any).store_email || '',
+          businessType: (data as any).business_type || 'kiosk',
+          storeNotes: (data as any).store_notes || '',
         });
       }
       setLoading(false);
