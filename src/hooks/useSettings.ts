@@ -161,6 +161,14 @@ export function useSettings() {
         points_per_dinar: DEFAULT_SETTINGS.pointsPerDinar,
         low_stock_threshold: DEFAULT_SETTINGS.lowStockThreshold,
         whatsapp_number: DEFAULT_SETTINGS.whatsappNumber,
+        store_address_city: null,
+        store_address_street: null,
+        store_address_area: null,
+        commercial_register: null,
+        store_phone: null,
+        store_email: null,
+        business_type: 'kiosk',
+        store_notes: null,
       } as any)
       .eq('user_id', user.id);
 
