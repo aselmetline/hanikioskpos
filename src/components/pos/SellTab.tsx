@@ -159,6 +159,9 @@ export function SellTab({
         pointsToDiscountRate={pointsToDiscountRate}
         taxEnabled={taxEnabled}
         taxRate={taxRate}
+        storePhone={storePhone}
+        storeAddress={storeAddress}
+        commercialRegister={commercialRegister}
       />
 
       {/* Barcode Scanner */}

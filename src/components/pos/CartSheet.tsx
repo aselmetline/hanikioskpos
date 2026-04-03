@@ -336,6 +336,9 @@ export function CartSheet({
         saleId={lastSaleId}
         taxEnabled={taxEnabled}
         taxRate={taxRate}
+        storePhone={storePhone}
+        storeAddress={storeAddress}
+        commercialRegister={commercialRegister}
       />
     </div>
   );
