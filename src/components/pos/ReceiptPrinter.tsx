@@ -28,6 +28,9 @@ interface ReceiptPrinterProps {
   saleId?: string;
   taxEnabled?: boolean;
   taxRate?: number;
+  storePhone?: string;
+  storeAddress?: string;
+  commercialRegister?: string;
 }
 
 function generateInvoiceNumber(saleId?: string): string {
