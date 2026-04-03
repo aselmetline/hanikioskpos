@@ -39,6 +39,14 @@ const DEFAULT_SETTINGS: AppSettings = {
   pointsPerDinar: 1,
   lowStockThreshold: 10,
   whatsappNumber: '+21622123456',
+  storeAddressCity: '',
+  storeAddressStreet: '',
+  storeAddressArea: '',
+  commercialRegister: '',
+  storePhone: '',
+  storeEmail: '',
+  businessType: 'kiosk',
+  storeNotes: '',
 };
 
 export function useSettings() {
