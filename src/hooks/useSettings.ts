@@ -16,6 +16,14 @@ export interface AppSettings {
   pointsPerDinar: number;
   lowStockThreshold: number;
   whatsappNumber: string;
+  storeAddressCity: string;
+  storeAddressStreet: string;
+  storeAddressArea: string;
+  commercialRegister: string;
+  storePhone: string;
+  storeEmail: string;
+  businessType: string;
+  storeNotes: string;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
