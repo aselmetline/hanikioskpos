@@ -26,6 +26,7 @@ interface SettingsTabProps {
   onUpdateSettings: (updates: Partial<AppSettings>) => void;
   onResetSettings: () => void;
   onFactoryReset?: () => Promise<void>;
+  onExportBackup?: () => Promise<void>;
 }
 
 export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset }: SettingsTabProps) {
