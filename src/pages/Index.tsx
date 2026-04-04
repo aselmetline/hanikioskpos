@@ -299,6 +299,15 @@ const Index = () => {
               toast.success('تم إعادة تهيئة التطبيق بنجاح');
               window.location.reload();
             }}
+            onExportBackup={async () => {
+              if (!user) return;
+              try {
+                await exportFullBackup(user.id);
+                toast.success('تم تحميل النسخة الاحتياطية بنجاح');
+              } catch {
+                toast.error('فشل في تصدير النسخة الاحتياطية');
+              }
+            }}
           />
         )}
       </main>
