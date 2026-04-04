@@ -25,6 +25,7 @@ import { Customer, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { toast } from 'sonner';
 
 const Index = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('sell');
 
   const { settings, updateSettings, resetSettings } = useSettings();
