@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/pos/Header';
-import { BottomNav, TabType } from '@/components/pos/BottomNav';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { SellTab } from '@/components/pos/SellTab';
 import { InventoryTab } from '@/components/pos/InventoryTab';
 import { CustomersTab } from '@/components/pos/CustomersTab';
