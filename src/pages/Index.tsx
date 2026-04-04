@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/pos/Header';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { BottomNav, TabType } from '@/components/pos/BottomNav';
 import { SellTab } from '@/components/pos/SellTab';
 import { InventoryTab } from '@/components/pos/InventoryTab';
@@ -23,6 +25,7 @@ import { Customer, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { toast } from 'sonner';
 
 const Index = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('sell');
 
   const { settings, updateSettings, resetSettings } = useSettings();
@@ -264,6 +267,37 @@ const Index = () => {
             settings={settings}
             onUpdateSettings={updateSettings}
             onResetSettings={resetSettings}
+            onFactoryReset={async () => {
+              if (!user) return;
+              const uid = user.id;
+              
+              // Get sale and purchase IDs first
+              const [salesRes, purchasesRes] = await Promise.all([
+                supabase.from('sales').select('id').eq('user_id', uid),
+                supabase.from('purchases').select('id').eq('user_id', uid),
+              ]);
+              const saleIds = salesRes.data?.map(s => s.id) || [];
+              const purchaseIds = purchasesRes.data?.map(p => p.id) || [];
+
+              // Delete child records first
+              if (saleIds.length > 0) await supabase.from('sale_items').delete().in('sale_id', saleIds);
+              if (purchaseIds.length > 0) await supabase.from('purchase_items').delete().in('purchase_id', purchaseIds);
+
+              // Delete parent/independent tables
+              await Promise.all([
+                supabase.from('sales').delete().eq('user_id', uid),
+                supabase.from('purchases').delete().eq('user_id', uid),
+                supabase.from('expenses').delete().eq('user_id', uid),
+                supabase.from('points_transactions').delete().eq('user_id', uid),
+                supabase.from('customers').delete().eq('user_id', uid),
+                supabase.from('products').delete().eq('user_id', uid),
+                supabase.from('cash_box_transactions').delete().eq('user_id', uid),
+              ]);
+
+              await resetSettings();
+              toast.success('تم إعادة تهيئة التطبيق بنجاح');
+              window.location.reload();
+            }}
           />
         )}
       </main>

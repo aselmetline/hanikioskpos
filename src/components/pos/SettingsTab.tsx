@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Store, Printer, Percent, Phone, RotateCcw, Save, Upload, Trash2, Info, MapPin, Building2, Mail, Briefcase, FileText } from 'lucide-react';
+import { Store, Printer, Percent, Phone, RotateCcw, Save, Upload, Trash2, Info, MapPin, Building2, Mail, Briefcase, FileText, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,16 +10,29 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { AppSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SettingsTabProps {
   settings: AppSettings;
   onUpdateSettings: (updates: Partial<AppSettings>) => void;
   onResetSettings: () => void;
+  onFactoryReset?: () => Promise<void>;
 }
 
-export function SettingsTab({ settings, onUpdateSettings, onResetSettings }: SettingsTabProps) {
+export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset }: SettingsTabProps) {
   const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showFactoryReset, setShowFactoryReset] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const handleChange = (key: keyof AppSettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
@@ -451,6 +464,77 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings }: Set
           إعادة تعيين
         </Button>
       </div>
+
+      {/* Factory Reset */}
+      {onFactoryReset && (
+        <>
+          <Separator className="my-4" />
+          <Card className="border-destructive/50 bg-destructive/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2 text-destructive">
+                <AlertTriangle className="w-5 h-5" />
+                إعادة تهيئة التطبيق
+              </CardTitle>
+              <CardDescription>
+                حذف جميع البيانات (المبيعات، المشتريات، المصروفات، المنتجات، العملاء، الصندوق) وإعادة الإعدادات للقيم الافتراضية. لا يمكن التراجع عن هذا الإجراء.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="destructive"
+                className="w-full gap-2"
+                onClick={() => setShowFactoryReset(true)}
+              >
+                <AlertTriangle className="w-4 h-4" />
+                إعادة تهيئة كاملة (نقطة الصفر)
+              </Button>
+            </CardContent>
+          </Card>
+
+          <AlertDialog open={showFactoryReset} onOpenChange={setShowFactoryReset}>
+            <AlertDialogContent className="max-w-[90vw] sm:max-w-md" dir="rtl">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-right flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="w-5 h-5" />
+                  تأكيد إعادة التهيئة الكاملة
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-right">
+                  <strong>تحذير:</strong> سيتم حذف جميع البيانات التالية نهائياً:
+                  <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
+                    <li>جميع المنتجات والمخزون</li>
+                    <li>جميع المبيعات وسجلاتها</li>
+                    <li>جميع المشتريات وفواتيرها</li>
+                    <li>جميع المصروفات</li>
+                    <li>جميع العملاء ونقاطهم</li>
+                    <li>جميع معاملات الصندوق</li>
+                    <li>جميع الإعدادات المخصصة</li>
+                  </ul>
+                  <p className="mt-2 font-bold text-destructive">لا يمكن التراجع عن هذا الإجراء!</p>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-row-reverse gap-2 sm:flex-row-reverse">
+                <AlertDialogCancel className="mt-0" disabled={resetting}>إلغاء</AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={resetting}
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    setResetting(true);
+                    try {
+                      await onFactoryReset();
+                      setShowFactoryReset(false);
+                    } finally {
+                      setResetting(false);
+                    }
+                  }}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {resetting ? 'جاري الحذف...' : 'نعم، احذف كل شيء'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
+      )}
     </div>
   );
 }
