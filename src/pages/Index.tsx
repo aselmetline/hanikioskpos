@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/pos/Header';
 import { BottomNav, TabType } from '@/components/pos/BottomNav';
 import { SellTab } from '@/components/pos/SellTab';
