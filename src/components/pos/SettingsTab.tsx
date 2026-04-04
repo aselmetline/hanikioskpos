@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Store, Printer, Percent, Phone, RotateCcw, Save, Upload, Trash2, Info, MapPin, Building2, Mail, Briefcase, FileText, AlertTriangle } from 'lucide-react';
+import { Store, Printer, Percent, Phone, RotateCcw, Save, Upload, Trash2, Info, MapPin, Building2, Mail, Briefcase, FileText, AlertTriangle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,13 +26,15 @@ interface SettingsTabProps {
   onUpdateSettings: (updates: Partial<AppSettings>) => void;
   onResetSettings: () => void;
   onFactoryReset?: () => Promise<void>;
+  onExportBackup?: () => Promise<void>;
 }
 
-export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset }: SettingsTabProps) {
+export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset, onExportBackup }: SettingsTabProps) {
   const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showFactoryReset, setShowFactoryReset] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const handleChange = (key: keyof AppSettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
@@ -479,7 +481,25 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
                 حذف جميع البيانات (المبيعات، المشتريات، المصروفات، المنتجات، العملاء، الصندوق) وإعادة الإعدادات للقيم الافتراضية. لا يمكن التراجع عن هذا الإجراء.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
+              {onExportBackup && (
+                <Button
+                  variant="outline"
+                  className="w-full gap-2"
+                  disabled={exporting}
+                  onClick={async () => {
+                    setExporting(true);
+                    try {
+                      await onExportBackup();
+                    } finally {
+                      setExporting(false);
+                    }
+                  }}
+                >
+                  <Download className="w-4 h-4" />
+                  {exporting ? 'جاري التصدير...' : 'تحميل نسخة احتياطية أولاً'}
+                </Button>
+              )}
               <Button
                 variant="destructive"
                 className="w-full gap-2"

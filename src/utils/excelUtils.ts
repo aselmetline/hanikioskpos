@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import { Product } from '@/types/pos';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface ExcelProduct {
   name: string;
@@ -140,4 +141,100 @@ export function downloadSampleTemplate() {
   XLSX.utils.book_append_sheet(workbook, worksheet, 'المنتجات');
   
   XLSX.writeFile(workbook, 'products_template.xlsx');
+}
+
+export async function exportFullBackup(userId: string) {
+  const workbook = XLSX.utils.book_new();
+
+  // Products
+  const { data: products } = await supabase.from('products').select('*').eq('user_id', userId);
+  if (products?.length) {
+    const sheet = XLSX.utils.json_to_sheet(products.map(p => ({
+      'الاسم بالعربية': p.name_ar, 'الاسم بالإنجليزية': p.name, 'السعر': p.price,
+      'التكلفة': p.cost || 0, 'التصنيف': p.category, 'الباركود': p.barcode || '',
+      'الكمية': p.stock, 'الوحدة': p.unit, 'تنبيه المخزون': p.low_stock_alert
+    })));
+    XLSX.utils.book_append_sheet(workbook, sheet, 'المنتجات');
+  }
+
+  // Customers
+  const { data: customers } = await supabase.from('customers').select('*').eq('user_id', userId);
+  if (customers?.length) {
+    const sheet = XLSX.utils.json_to_sheet(customers.map(c => ({
+      'الاسم': c.name, 'الهاتف': c.phone || '', 'النقاط': c.points,
+      'رصيد الآجل': c.credit_balance, 'تاريخ الإضافة': c.created_at
+    })));
+    XLSX.utils.book_append_sheet(workbook, sheet, 'العملاء');
+  }
+
+  // Sales with items
+  const { data: sales } = await supabase.from('sales').select('*').eq('user_id', userId);
+  if (sales?.length) {
+    const sheet = XLSX.utils.json_to_sheet(sales.map(s => ({
+      'التاريخ': s.created_at, 'المجموع الفرعي': s.subtotal, 'الضريبة': s.tax,
+      'الخصم': s.discount, 'الإجمالي': s.total,
+      'طريقة الدفع': s.payment_method === 'cash' ? 'نقدي' : 'آجل',
+      'معرف العميل': s.customer_id || ''
+    })));
+    XLSX.utils.book_append_sheet(workbook, sheet, 'المبيعات');
+
+    const saleIds = sales.map(s => s.id);
+    const { data: saleItems } = await supabase.from('sale_items').select('*').in('sale_id', saleIds);
+    if (saleItems?.length) {
+      const itemSheet = XLSX.utils.json_to_sheet(saleItems.map(i => ({
+        'معرف البيع': i.sale_id, 'المنتج': i.product_name, 'السعر': i.price,
+        'الكمية': i.quantity, 'الخصم': i.discount, 'الإجمالي': i.total
+      })));
+      XLSX.utils.book_append_sheet(workbook, itemSheet, 'تفاصيل المبيعات');
+    }
+  }
+
+  // Purchases with items
+  const { data: purchases } = await supabase.from('purchases').select('*').eq('user_id', userId);
+  if (purchases?.length) {
+    const sheet = XLSX.utils.json_to_sheet(purchases.map(p => ({
+      'رقم الفاتورة': p.invoice_number, 'تاريخ الفاتورة': p.invoice_date,
+      'الإجمالي': p.total, 'تاريخ الإنشاء': p.created_at
+    })));
+    XLSX.utils.book_append_sheet(workbook, sheet, 'المشتريات');
+
+    const purchaseIds = purchases.map(p => p.id);
+    const { data: purchaseItems } = await supabase.from('purchase_items').select('*').in('purchase_id', purchaseIds);
+    if (purchaseItems?.length) {
+      const itemSheet = XLSX.utils.json_to_sheet(purchaseItems.map(i => ({
+        'معرف الشراء': i.purchase_id, 'المنتج': i.product_name,
+        'التكلفة': i.cost, 'الكمية': i.quantity, 'الإجمالي': i.total
+      })));
+      XLSX.utils.book_append_sheet(workbook, itemSheet, 'تفاصيل المشتريات');
+    }
+  }
+
+  // Expenses
+  const { data: expenses } = await supabase.from('expenses').select('*').eq('user_id', userId);
+  if (expenses?.length) {
+    const sheet = XLSX.utils.json_to_sheet(expenses.map(e => ({
+      'التاريخ': e.expense_date, 'المبلغ': e.amount,
+      'التصنيف': e.category, 'الوصف': e.description || ''
+    })));
+    XLSX.utils.book_append_sheet(workbook, sheet, 'المصروفات');
+  }
+
+  // Cash box transactions
+  const { data: transactions } = await supabase.from('cash_box_transactions').select('*').eq('user_id', userId);
+  if (transactions?.length) {
+    const sheet = XLSX.utils.json_to_sheet(transactions.map(t => ({
+      'التاريخ': t.created_at, 'النوع': t.type === 'add' ? 'إيداع' : 'سحب',
+      'المبلغ': t.amount, 'الوصف': t.description || '', 'التصنيف': t.category
+    })));
+    XLSX.utils.book_append_sheet(workbook, sheet, 'الصندوق');
+  }
+
+  // If workbook is empty, add a placeholder
+  if (workbook.SheetNames.length === 0) {
+    const sheet = XLSX.utils.json_to_sheet([{ 'ملاحظة': 'لا توجد بيانات للتصدير' }]);
+    XLSX.utils.book_append_sheet(workbook, sheet, 'فارغ');
+  }
+
+  const date = new Date().toISOString().split('T')[0];
+  XLSX.writeFile(workbook, `نسخة_احتياطية_${date}.xlsx`);
 }

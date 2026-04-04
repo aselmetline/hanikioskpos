@@ -23,6 +23,7 @@ import { useExpenses } from '@/hooks/useExpenses';
 import { useSales } from '@/hooks/useSales';
 import { Customer, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { toast } from 'sonner';
+import { exportFullBackup } from '@/utils/excelUtils';
 
 const Index = () => {
   const { user } = useAuth();
@@ -297,6 +298,15 @@ const Index = () => {
               await resetSettings();
               toast.success('تم إعادة تهيئة التطبيق بنجاح');
               window.location.reload();
+            }}
+            onExportBackup={async () => {
+              if (!user) return;
+              try {
+                await exportFullBackup(user.id);
+                toast.success('تم تحميل النسخة الاحتياطية بنجاح');
+              } catch {
+                toast.error('فشل في تصدير النسخة الاحتياطية');
+              }
             }}
           />
         )}
