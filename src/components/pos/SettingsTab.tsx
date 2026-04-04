@@ -28,9 +28,11 @@ interface SettingsTabProps {
   onFactoryReset?: () => Promise<void>;
 }
 
-export function SettingsTab({ settings, onUpdateSettings, onResetSettings }: SettingsTabProps) {
+export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset }: SettingsTabProps) {
   const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showFactoryReset, setShowFactoryReset] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const handleChange = (key: keyof AppSettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
