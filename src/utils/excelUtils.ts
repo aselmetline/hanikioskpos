@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import { Product } from '@/types/pos';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface ExcelProduct {
   name: string;
