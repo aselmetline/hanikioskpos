@@ -270,28 +270,33 @@ const Index = () => {
             onFactoryReset={async () => {
               if (!user) return;
               const uid = user.id;
-              // Delete all user data from all tables
-              const deletes = [
-                supabase.from('sale_items').delete().in('sale_id',
-                  (await supabase.from('sales').select('id').eq('user_id', uid)).data?.map(s => s.id) || []
-                ),
+              
+              // Get sale and purchase IDs first
+              const [salesRes, purchasesRes] = await Promise.all([
+                supabase.from('sales').select('id').eq('user_id', uid),
+                supabase.from('purchases').select('id').eq('user_id', uid),
+              ]);
+              const saleIds = salesRes.data?.map(s => s.id) || [];
+              const purchaseIds = purchasesRes.data?.map(p => p.id) || [];
+
+              // Delete child records first
+              if (saleIds.length > 0) await supabase.from('sale_items').delete().in('sale_id', saleIds);
+              if (purchaseIds.length > 0) await supabase.from('purchase_items').delete().in('purchase_id', purchaseIds);
+
+              // Delete parent/independent tables
+              await Promise.all([
                 supabase.from('sales').delete().eq('user_id', uid),
-                supabase.from('purchase_items').delete().in('purchase_id',
-                  (await supabase.from('purchases').select('id').eq('user_id', uid)).data?.map(p => p.id) || []
-                ),
                 supabase.from('purchases').delete().eq('user_id', uid),
                 supabase.from('expenses').delete().eq('user_id', uid),
                 supabase.from('points_transactions').delete().eq('user_id', uid),
                 supabase.from('customers').delete().eq('user_id', uid),
                 supabase.from('products').delete().eq('user_id', uid),
                 supabase.from('cash_box_transactions').delete().eq('user_id', uid),
-              ];
-              await Promise.all(deletes);
-              // Reset settings to defaults
+              ]);
+
               await resetSettings();
-              // Reload to refresh all hooks
-              window.location.reload();
               toast.success('تم إعادة تهيئة التطبيق بنجاح');
+              window.location.reload();
             }}
           />
         )}
