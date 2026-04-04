@@ -29,11 +29,12 @@ interface SettingsTabProps {
   onExportBackup?: () => Promise<void>;
 }
 
-export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset }: SettingsTabProps) {
+export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset, onExportBackup }: SettingsTabProps) {
   const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showFactoryReset, setShowFactoryReset] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const handleChange = (key: keyof AppSettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
