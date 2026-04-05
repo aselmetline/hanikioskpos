@@ -308,6 +308,20 @@ const Index = () => {
                 toast.error('فشل في تصدير النسخة الاحتياطية');
               }
             }}
+            onImportBackup={async (file: File) => {
+              if (!user) return;
+              try {
+                const result = await importFullBackup(file, user.id);
+                if (result.imported.length > 0) {
+                  toast.success(`تم استيراد: ${result.imported.join('، ')}`);
+                  window.location.reload();
+                } else {
+                  toast.warning('لم يتم العثور على بيانات للاستيراد في الملف');
+                }
+              } catch {
+                toast.error('فشل في استيراد النسخة الاحتياطية');
+              }
+            }}
           />
         )}
       </main>
