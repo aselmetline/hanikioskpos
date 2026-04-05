@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx';
 import { Product } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 
 export interface ExcelProduct {
   name: string;
@@ -31,7 +32,6 @@ export function exportProductsToExcel(products: Product[], filename: string = 'p
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'المنتجات');
 
-  // Auto-size columns
   const maxWidth = 20;
   const colWidths = Object.keys(data[0] || {}).map(key => ({
     wch: Math.min(maxWidth, Math.max(key.length, ...data.map(row => String(row[key as keyof typeof row]).length)))
@@ -54,16 +54,16 @@ export function parseExcelProducts(file: File): Promise<ExcelProduct[]> {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        const products: ExcelProduct[] = jsonData.map((row: any) => ({
-          name: row['الاسم بالإنجليزية'] || row['name'] || row['Name'] || '',
-          nameAr: row['الاسم بالعربية'] || row['nameAr'] || row['NameAr'] || '',
-          price: parseFloat(row['السعر'] || row['price'] || row['Price'] || 0),
-          cost: parseFloat(row['التكلفة'] || row['cost'] || row['Cost'] || 0),
-          category: row['التصنيف'] || row['category'] || row['Category'] || 'daily',
-          barcode: row['الباركود'] || row['barcode'] || row['Barcode'] || '',
-          stock: parseInt(row['الكمية'] || row['stock'] || row['Stock'] || 0),
-          unit: row['الوحدة'] || row['unit'] || row['Unit'] || 'قطعة',
-          lowStockAlert: parseInt(row['تنبيه المخزون'] || row['lowStockAlert'] || row['LowStockAlert'] || 10)
+        const products: ExcelProduct[] = jsonData.map((row: Record<string, unknown>) => ({
+          name: String(row['الاسم بالإنجليزية'] || row['name'] || row['Name'] || ''),
+          nameAr: String(row['الاسم بالعربية'] || row['nameAr'] || row['NameAr'] || ''),
+          price: parseFloat(String(row['السعر'] || row['price'] || row['Price'] || 0)),
+          cost: parseFloat(String(row['التكلفة'] || row['cost'] || row['Cost'] || 0)),
+          category: String(row['التصنيف'] || row['category'] || row['Category'] || 'daily'),
+          barcode: String(row['الباركود'] || row['barcode'] || row['Barcode'] || ''),
+          stock: parseInt(String(row['الكمية'] || row['stock'] || row['Stock'] || 0)),
+          unit: String(row['الوحدة'] || row['unit'] || row['Unit'] || 'قطعة'),
+          lowStockAlert: parseInt(String(row['تنبيه المخزون'] || row['lowStockAlert'] || row['LowStockAlert'] || 10))
         }));
 
         resolve(products.filter(p => p.nameAr || p.name));
@@ -77,7 +77,7 @@ export function parseExcelProducts(file: File): Promise<ExcelProduct[]> {
   });
 }
 
-export function exportSalesReport(sales: any[], filename: string = 'sales_report') {
+export function exportSalesReport(sales: { createdAt: Date; items: unknown[]; subtotal: number; tax: number; discount: number; total: number; paymentMethod: string }[], filename: string = 'sales_report') {
   const data = sales.map(s => ({
     'التاريخ': new Date(s.createdAt).toLocaleDateString('ar-TN'),
     'الوقت': new Date(s.createdAt).toLocaleTimeString('ar-TN'),
@@ -96,7 +96,7 @@ export function exportSalesReport(sales: any[], filename: string = 'sales_report
   XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
-export function exportExpensesReport(expenses: any[], filename: string = 'expenses_report') {
+export function exportExpensesReport(expenses: { date: Date; amount: number; category: string; description: string }[], filename: string = 'expenses_report') {
   const categoryLabels: Record<string, string> = {
     electricity: 'كهرباء',
     rent: 'إيجار',
@@ -154,19 +154,19 @@ export async function importFullBackup(file: File, userId: string): Promise<{ im
 
         // Products
         if (workbook.SheetNames.includes('المنتجات')) {
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets['المنتجات']);
+          const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets['المنتجات']);
           if (rows.length) {
-            const products = (rows as any[]).map(r => ({
+            const products = rows.map(r => ({
               user_id: userId,
-              name: r['الاسم بالإنجليزية'] || '',
-              name_ar: r['الاسم بالعربية'] || '',
-              price: parseFloat(r['السعر'] || 0),
-              cost: parseFloat(r['التكلفة'] || 0),
-              category: r['التصنيف'] || 'daily',
-              barcode: r['الباركود'] || null,
-              stock: parseInt(r['الكمية'] || 0),
-              unit: r['الوحدة'] || 'قطعة',
-              low_stock_alert: parseInt(r['تنبيه المخزون'] || 10),
+              name: String(r['الاسم بالإنجليزية'] || ''),
+              name_ar: String(r['الاسم بالعربية'] || ''),
+              price: parseFloat(String(r['السعر'] || 0)),
+              cost: parseFloat(String(r['التكلفة'] || 0)),
+              category: String(r['التصنيف'] || 'daily'),
+              barcode: r['الباركود'] ? String(r['الباركود']) : null,
+              stock: parseInt(String(r['الكمية'] || 0)),
+              unit: String(r['الوحدة'] || 'قطعة'),
+              low_stock_alert: parseInt(String(r['تنبيه المخزون'] || 10)),
             }));
             const { error } = await supabase.from('products').insert(products);
             if (!error) imported.push(`المنتجات (${products.length})`);
@@ -175,30 +175,107 @@ export async function importFullBackup(file: File, userId: string): Promise<{ im
 
         // Customers
         if (workbook.SheetNames.includes('العملاء')) {
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets['العملاء']);
+          const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets['العملاء']);
           if (rows.length) {
-            const customers = (rows as any[]).map(r => ({
+            const customers = rows.map(r => ({
               user_id: userId,
-              name: r['الاسم'] || '',
-              phone: r['الهاتف'] || null,
-              points: parseInt(r['النقاط'] || 0),
-              credit_balance: parseFloat(r['رصيد الآجل'] || 0),
+              name: String(r['الاسم'] || ''),
+              phone: r['الهاتف'] ? String(r['الهاتف']) : null,
+              points: parseInt(String(r['النقاط'] || 0)),
+              credit_balance: parseFloat(String(r['رصيد الآجل'] || 0)),
             }));
             const { error } = await supabase.from('customers').insert(customers);
             if (!error) imported.push(`العملاء (${customers.length})`);
           }
         }
 
+        // Sales + Sale Items
+        if (workbook.SheetNames.includes('المبيعات')) {
+          const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets['المبيعات']);
+          if (rows.length) {
+            for (const r of rows) {
+              const { data: saleData, error: saleError } = await supabase.from('sales').insert({
+                user_id: userId,
+                subtotal: parseFloat(String(r['المجموع الفرعي'] || 0)),
+                tax: parseFloat(String(r['الضريبة'] || 0)),
+                discount: parseFloat(String(r['الخصم'] || 0)),
+                total: parseFloat(String(r['الإجمالي'] || 0)),
+                payment_method: r['طريقة الدفع'] === 'نقدي' ? 'cash' : 'credit',
+                customer_id: r['معرف العميل'] ? String(r['معرف العميل']) : null,
+                created_at: r['التاريخ'] ? String(r['التاريخ']) : new Date().toISOString(),
+              }).select('id').single();
+
+              if (!saleError && saleData && workbook.SheetNames.includes('تفاصيل المبيعات')) {
+                const itemRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets['تفاصيل المبيعات']);
+                // We can't perfectly match items to sales from different exports, 
+                // but the sale_id in the export refers to the original ID
+                // For full restore we import all items linked to this sale
+                const originalSaleId = r['معرف البيع'] ? String(r['معرف البيع']) : null;
+                if (originalSaleId) {
+                  const matchingItems = itemRows.filter(i => String(i['معرف البيع']) === originalSaleId);
+                  if (matchingItems.length) {
+                    const items = matchingItems.map(i => ({
+                      sale_id: saleData.id,
+                      product_name: String(i['المنتج'] || ''),
+                      price: parseFloat(String(i['السعر'] || 0)),
+                      quantity: parseInt(String(i['الكمية'] || 1)),
+                      discount: parseFloat(String(i['الخصم'] || 0)),
+                      total: parseFloat(String(i['الإجمالي'] || 0)),
+                    }));
+                    await supabase.from('sale_items').insert(items);
+                  }
+                }
+              }
+            }
+            imported.push(`المبيعات (${rows.length})`);
+          }
+        }
+
+        // Purchases + Purchase Items
+        if (workbook.SheetNames.includes('المشتريات')) {
+          const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets['المشتريات']);
+          if (rows.length) {
+            for (const r of rows) {
+              const { data: purchaseData, error: purchaseError } = await supabase.from('purchases').insert({
+                user_id: userId,
+                invoice_number: String(r['رقم الفاتورة'] || ''),
+                invoice_date: r['تاريخ الفاتورة'] ? String(r['تاريخ الفاتورة']) : new Date().toISOString().split('T')[0],
+                total: parseFloat(String(r['الإجمالي'] || 0)),
+                created_at: r['تاريخ الإنشاء'] ? String(r['تاريخ الإنشاء']) : new Date().toISOString(),
+              }).select('id').single();
+
+              if (!purchaseError && purchaseData && workbook.SheetNames.includes('تفاصيل المشتريات')) {
+                const itemRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets['تفاصيل المشتريات']);
+                const originalPurchaseId = r['معرف الشراء'] ? String(r['معرف الشراء']) : null;
+                if (originalPurchaseId) {
+                  const matchingItems = itemRows.filter(i => String(i['معرف الشراء']) === originalPurchaseId);
+                  if (matchingItems.length) {
+                    const items = matchingItems.map(i => ({
+                      purchase_id: purchaseData.id,
+                      product_name: String(i['المنتج'] || ''),
+                      cost: parseFloat(String(i['التكلفة'] || 0)),
+                      quantity: parseInt(String(i['الكمية'] || 1)),
+                      total: parseFloat(String(i['الإجمالي'] || 0)),
+                    }));
+                    await supabase.from('purchase_items').insert(items);
+                  }
+                }
+              }
+            }
+            imported.push(`المشتريات (${rows.length})`);
+          }
+        }
+
         // Expenses
         if (workbook.SheetNames.includes('المصروفات')) {
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets['المصروفات']);
+          const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets['المصروفات']);
           if (rows.length) {
-            const expenses = (rows as any[]).map(r => ({
+            const expenses = rows.map(r => ({
               user_id: userId,
-              expense_date: r['التاريخ'] || new Date().toISOString().split('T')[0],
-              amount: parseFloat(r['المبلغ'] || 0),
-              category: r['التصنيف'] || 'other',
-              description: r['الوصف'] || null,
+              expense_date: r['التاريخ'] ? String(r['التاريخ']) : new Date().toISOString().split('T')[0],
+              amount: parseFloat(String(r['المبلغ'] || 0)),
+              category: String(r['التصنيف'] || 'other'),
+              description: r['الوصف'] ? String(r['الوصف']) : null,
             }));
             const { error } = await supabase.from('expenses').insert(expenses);
             if (!error) imported.push(`المصروفات (${expenses.length})`);
@@ -207,14 +284,14 @@ export async function importFullBackup(file: File, userId: string): Promise<{ im
 
         // Cash box transactions
         if (workbook.SheetNames.includes('الصندوق')) {
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets['الصندوق']);
+          const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets['الصندوق']);
           if (rows.length) {
-            const transactions = (rows as any[]).map(r => ({
+            const transactions = rows.map(r => ({
               user_id: userId,
               type: r['النوع'] === 'إيداع' ? 'add' : 'deduct',
-              amount: parseFloat(r['المبلغ'] || 0),
-              description: r['الوصف'] || null,
-              category: r['التصنيف'] || 'manual',
+              amount: parseFloat(String(r['المبلغ'] || 0)),
+              description: r['الوصف'] ? String(r['الوصف']) : null,
+              category: String(r['التصنيف'] || 'manual'),
             }));
             const { error } = await supabase.from('cash_box_transactions').insert(transactions);
             if (!error) imported.push(`الصندوق (${transactions.length})`);
@@ -235,7 +312,9 @@ export async function exportFullBackup(userId: string) {
   const workbook = XLSX.utils.book_new();
 
   // Products
-  const { data: products } = await supabase.from('products').select('*').eq('user_id', userId);
+  const { data: products } = await fetchAllPaginated<Record<string, unknown>>(
+    (from, to) => supabase.from('products').select('*').eq('user_id', userId).range(from, to)
+  );
   if (products?.length) {
     const sheet = XLSX.utils.json_to_sheet(products.map(p => ({
       'الاسم بالعربية': p.name_ar, 'الاسم بالإنجليزية': p.name, 'السعر': p.price,
@@ -246,7 +325,9 @@ export async function exportFullBackup(userId: string) {
   }
 
   // Customers
-  const { data: customers } = await supabase.from('customers').select('*').eq('user_id', userId);
+  const { data: customers } = await fetchAllPaginated<Record<string, unknown>>(
+    (from, to) => supabase.from('customers').select('*').eq('user_id', userId).range(from, to)
+  );
   if (customers?.length) {
     const sheet = XLSX.utils.json_to_sheet(customers.map(c => ({
       'الاسم': c.name, 'الهاتف': c.phone || '', 'النقاط': c.points,
@@ -256,9 +337,12 @@ export async function exportFullBackup(userId: string) {
   }
 
   // Sales with items
-  const { data: sales } = await supabase.from('sales').select('*').eq('user_id', userId);
+  const { data: sales } = await fetchAllPaginated<Record<string, unknown>>(
+    (from, to) => supabase.from('sales').select('*').eq('user_id', userId).range(from, to)
+  );
   if (sales?.length) {
     const sheet = XLSX.utils.json_to_sheet(sales.map(s => ({
+      'معرف البيع': s.id,
       'التاريخ': s.created_at, 'المجموع الفرعي': s.subtotal, 'الضريبة': s.tax,
       'الخصم': s.discount, 'الإجمالي': s.total,
       'طريقة الدفع': s.payment_method === 'cash' ? 'نقدي' : 'آجل',
@@ -266,8 +350,10 @@ export async function exportFullBackup(userId: string) {
     })));
     XLSX.utils.book_append_sheet(workbook, sheet, 'المبيعات');
 
-    const saleIds = sales.map(s => s.id);
-    const { data: saleItems } = await supabase.from('sale_items').select('*').in('sale_id', saleIds);
+    const saleIds = sales.map(s => String(s.id));
+    const { data: saleItems } = await fetchAllPaginated<Record<string, unknown>>(
+      (from, to) => supabase.from('sale_items').select('*').in('sale_id', saleIds).range(from, to)
+    );
     if (saleItems?.length) {
       const itemSheet = XLSX.utils.json_to_sheet(saleItems.map(i => ({
         'معرف البيع': i.sale_id, 'المنتج': i.product_name, 'السعر': i.price,
@@ -278,16 +364,21 @@ export async function exportFullBackup(userId: string) {
   }
 
   // Purchases with items
-  const { data: purchases } = await supabase.from('purchases').select('*').eq('user_id', userId);
+  const { data: purchases } = await fetchAllPaginated<Record<string, unknown>>(
+    (from, to) => supabase.from('purchases').select('*').eq('user_id', userId).range(from, to)
+  );
   if (purchases?.length) {
     const sheet = XLSX.utils.json_to_sheet(purchases.map(p => ({
+      'معرف الشراء': p.id,
       'رقم الفاتورة': p.invoice_number, 'تاريخ الفاتورة': p.invoice_date,
       'الإجمالي': p.total, 'تاريخ الإنشاء': p.created_at
     })));
     XLSX.utils.book_append_sheet(workbook, sheet, 'المشتريات');
 
-    const purchaseIds = purchases.map(p => p.id);
-    const { data: purchaseItems } = await supabase.from('purchase_items').select('*').in('purchase_id', purchaseIds);
+    const purchaseIds = purchases.map(p => String(p.id));
+    const { data: purchaseItems } = await fetchAllPaginated<Record<string, unknown>>(
+      (from, to) => supabase.from('purchase_items').select('*').in('purchase_id', purchaseIds).range(from, to)
+    );
     if (purchaseItems?.length) {
       const itemSheet = XLSX.utils.json_to_sheet(purchaseItems.map(i => ({
         'معرف الشراء': i.purchase_id, 'المنتج': i.product_name,
@@ -298,7 +389,9 @@ export async function exportFullBackup(userId: string) {
   }
 
   // Expenses
-  const { data: expenses } = await supabase.from('expenses').select('*').eq('user_id', userId);
+  const { data: expenses } = await fetchAllPaginated<Record<string, unknown>>(
+    (from, to) => supabase.from('expenses').select('*').eq('user_id', userId).range(from, to)
+  );
   if (expenses?.length) {
     const sheet = XLSX.utils.json_to_sheet(expenses.map(e => ({
       'التاريخ': e.expense_date, 'المبلغ': e.amount,
@@ -308,7 +401,9 @@ export async function exportFullBackup(userId: string) {
   }
 
   // Cash box transactions
-  const { data: transactions } = await supabase.from('cash_box_transactions').select('*').eq('user_id', userId);
+  const { data: transactions } = await fetchAllPaginated<Record<string, unknown>>(
+    (from, to) => supabase.from('cash_box_transactions').select('*').eq('user_id', userId).range(from, to)
+  );
   if (transactions?.length) {
     const sheet = XLSX.utils.json_to_sheet(transactions.map(t => ({
       'التاريخ': t.created_at, 'النوع': t.type === 'add' ? 'إيداع' : 'سحب',
@@ -317,7 +412,6 @@ export async function exportFullBackup(userId: string) {
     XLSX.utils.book_append_sheet(workbook, sheet, 'الصندوق');
   }
 
-  // If workbook is empty, add a placeholder
   if (workbook.SheetNames.length === 0) {
     const sheet = XLSX.utils.json_to_sheet([{ 'ملاحظة': 'لا توجد بيانات للتصدير' }]);
     XLSX.utils.book_append_sheet(workbook, sheet, 'فارغ');
