@@ -458,6 +458,63 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
         </CardContent>
       </Card>
 
+      {/* Backup Import/Export */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Download className="w-5 h-5 text-primary" />
+            النسخ الاحتياطي
+          </CardTitle>
+          <CardDescription>تصدير أو استيراد بيانات التطبيق</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {onExportBackup && (
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              disabled={exporting}
+              onClick={async () => {
+                setExporting(true);
+                try { await onExportBackup(); } finally { setExporting(false); }
+              }}
+            >
+              <Download className="w-4 h-4" />
+              {exporting ? 'جاري التصدير...' : 'تصدير نسخة احتياطية'}
+            </Button>
+          )}
+          {onImportBackup && (
+            <>
+              <input
+                ref={backupFileRef}
+                type="file"
+                accept=".xlsx,.xls"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setImporting(true);
+                  try {
+                    await onImportBackup(file);
+                  } finally {
+                    setImporting(false);
+                    if (backupFileRef.current) backupFileRef.current.value = '';
+                  }
+                }}
+              />
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                disabled={importing}
+                onClick={() => backupFileRef.current?.click()}
+              >
+                <Upload className="w-4 h-4" />
+                {importing ? 'جاري الاستيراد...' : 'استيراد نسخة احتياطية'}
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Action Buttons */}
       <div className="flex gap-3 pt-2">
         <Button onClick={handleSave} className="flex-1 gap-2">
