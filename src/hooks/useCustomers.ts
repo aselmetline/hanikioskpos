@@ -3,6 +3,7 @@ import { Customer } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 
 const POINTS_PER_DINAR = 1;
 const POINTS_TO_DINAR_RATE = 100; // 100 points = 1 TND discount
@@ -23,10 +24,9 @@ export function useCustomers() {
 
     const fetchCustomers = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await fetchAllPaginated<any>(
+        (from, to) => supabase.from('customers').select('*').order('created_at', { ascending: false }).range(from, to)
+      );
 
       if (error) {
         console.error('Error fetching customers:', error);

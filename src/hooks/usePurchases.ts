@@ -3,6 +3,7 @@ import { Purchase, PurchaseItem, Product } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 
 export const usePurchases = () => {
   const { user } = useAuth();
@@ -21,13 +22,9 @@ export const usePurchases = () => {
 
     const fetchPurchases = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('purchases')
-        .select(`
-          *,
-          purchase_items (*)
-        `)
-        .order('created_at', { ascending: false });
+      const { data, error } = await fetchAllPaginated<any>(
+        (from, to) => supabase.from('purchases').select('*, purchase_items (*)').order('created_at', { ascending: false }).range(from, to)
+      );
 
       if (error) {
         console.error('Error fetching purchases:', error);

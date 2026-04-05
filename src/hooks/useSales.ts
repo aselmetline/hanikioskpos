@@ -3,6 +3,7 @@ import { Sale, CartItem, Customer } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 
 export const useSales = () => {
   const { user } = useAuth();
@@ -19,13 +20,9 @@ export const useSales = () => {
 
     const fetchSales = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('sales')
-        .select(`
-          *,
-          sale_items (*)
-        `)
-        .order('created_at', { ascending: false });
+      const { data, error } = await fetchAllPaginated<any>(
+        (from, to) => supabase.from('sales').select('*, sale_items (*)').order('created_at', { ascending: false }).range(from, to)
+      );
 
       if (error) {
         console.error('Error fetching sales:', error);

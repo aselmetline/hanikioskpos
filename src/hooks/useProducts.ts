@@ -3,6 +3,7 @@ import { Product } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 
 export function useProducts() {
   const { user } = useAuth();
@@ -21,10 +22,9 @@ export function useProducts() {
 
     const fetchProducts = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await fetchAllPaginated<any>(
+        (from, to) => supabase.from('products').select('*').order('created_at', { ascending: false }).range(from, to)
+      );
 
       if (error) {
         console.error('Error fetching products:', error);

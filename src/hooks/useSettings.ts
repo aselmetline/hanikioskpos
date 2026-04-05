@@ -54,7 +54,6 @@ export function useSettings() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
 
-  // Fetch settings from Supabase
   useEffect(() => {
     if (!user) {
       setSettings(DEFAULT_SETTINGS);
@@ -73,12 +72,12 @@ export function useSettings() {
       if (error) {
         console.error('Error fetching settings:', error);
       } else if (data) {
-      setSettings({
+        setSettings({
           kioskName: data.kiosk_name || DEFAULT_SETTINGS.kioskName,
           kioskNameFr: data.kiosk_name_fr || DEFAULT_SETTINGS.kioskNameFr,
           logo: data.logo_url || null,
           taxRate: data.tax_rate ? Number(data.tax_rate) : DEFAULT_SETTINGS.taxRate,
-          taxEnabled: (data as any).tax_enabled ?? DEFAULT_SETTINGS.taxEnabled,
+          taxEnabled: data.tax_enabled ?? DEFAULT_SETTINGS.taxEnabled,
           currency: data.currency || DEFAULT_SETTINGS.currency,
           printerWidth: (data.printer_width as '58mm' | '80mm') || DEFAULT_SETTINGS.printerWidth,
           printerEnabled: data.printer_enabled ?? DEFAULT_SETTINGS.printerEnabled,
@@ -86,14 +85,14 @@ export function useSettings() {
           pointsPerDinar: data.points_per_dinar ?? DEFAULT_SETTINGS.pointsPerDinar,
           lowStockThreshold: data.low_stock_threshold ?? DEFAULT_SETTINGS.lowStockThreshold,
           whatsappNumber: data.whatsapp_number || DEFAULT_SETTINGS.whatsappNumber,
-          storeAddressCity: (data as any).store_address_city || '',
-          storeAddressStreet: (data as any).store_address_street || '',
-          storeAddressArea: (data as any).store_address_area || '',
-          commercialRegister: (data as any).commercial_register || '',
-          storePhone: (data as any).store_phone || '',
-          storeEmail: (data as any).store_email || '',
-          businessType: (data as any).business_type || 'kiosk',
-          storeNotes: (data as any).store_notes || '',
+          storeAddressCity: data.store_address_city || '',
+          storeAddressStreet: data.store_address_street || '',
+          storeAddressArea: data.store_address_area || '',
+          commercialRegister: data.commercial_register || '',
+          storePhone: data.store_phone || '',
+          storeEmail: data.store_email || '',
+          businessType: data.business_type || 'kiosk',
+          storeNotes: data.store_notes || '',
         });
       }
       setLoading(false);
@@ -169,7 +168,7 @@ export function useSettings() {
         store_email: null,
         business_type: 'kiosk',
         store_notes: null,
-      } as any)
+      })
       .eq('user_id', user.id);
 
     if (error) {
