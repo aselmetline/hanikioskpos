@@ -143,6 +143,94 @@ export function downloadSampleTemplate() {
   XLSX.writeFile(workbook, 'products_template.xlsx');
 }
 
+export async function importFullBackup(file: File, userId: string): Promise<{ imported: string[] }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const imported: string[] = [];
+
+        // Products
+        if (workbook.SheetNames.includes('المنتجات')) {
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets['المنتجات']);
+          if (rows.length) {
+            const products = (rows as any[]).map(r => ({
+              user_id: userId,
+              name: r['الاسم بالإنجليزية'] || '',
+              name_ar: r['الاسم بالعربية'] || '',
+              price: parseFloat(r['السعر'] || 0),
+              cost: parseFloat(r['التكلفة'] || 0),
+              category: r['التصنيف'] || 'daily',
+              barcode: r['الباركود'] || null,
+              stock: parseInt(r['الكمية'] || 0),
+              unit: r['الوحدة'] || 'قطعة',
+              low_stock_alert: parseInt(r['تنبيه المخزون'] || 10),
+            }));
+            const { error } = await supabase.from('products').insert(products);
+            if (!error) imported.push(`المنتجات (${products.length})`);
+          }
+        }
+
+        // Customers
+        if (workbook.SheetNames.includes('العملاء')) {
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets['العملاء']);
+          if (rows.length) {
+            const customers = (rows as any[]).map(r => ({
+              user_id: userId,
+              name: r['الاسم'] || '',
+              phone: r['الهاتف'] || null,
+              points: parseInt(r['النقاط'] || 0),
+              credit_balance: parseFloat(r['رصيد الآجل'] || 0),
+            }));
+            const { error } = await supabase.from('customers').insert(customers);
+            if (!error) imported.push(`العملاء (${customers.length})`);
+          }
+        }
+
+        // Expenses
+        if (workbook.SheetNames.includes('المصروفات')) {
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets['المصروفات']);
+          if (rows.length) {
+            const expenses = (rows as any[]).map(r => ({
+              user_id: userId,
+              expense_date: r['التاريخ'] || new Date().toISOString().split('T')[0],
+              amount: parseFloat(r['المبلغ'] || 0),
+              category: r['التصنيف'] || 'other',
+              description: r['الوصف'] || null,
+            }));
+            const { error } = await supabase.from('expenses').insert(expenses);
+            if (!error) imported.push(`المصروفات (${expenses.length})`);
+          }
+        }
+
+        // Cash box transactions
+        if (workbook.SheetNames.includes('الصندوق')) {
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets['الصندوق']);
+          if (rows.length) {
+            const transactions = (rows as any[]).map(r => ({
+              user_id: userId,
+              type: r['النوع'] === 'إيداع' ? 'add' : 'deduct',
+              amount: parseFloat(r['المبلغ'] || 0),
+              description: r['الوصف'] || null,
+              category: r['التصنيف'] || 'manual',
+            }));
+            const { error } = await supabase.from('cash_box_transactions').insert(transactions);
+            if (!error) imported.push(`الصندوق (${transactions.length})`);
+          }
+        }
+
+        resolve({ imported });
+      } catch (error) {
+        reject(new Error('فشل في قراءة ملف النسخة الاحتياطية'));
+      }
+    };
+    reader.onerror = () => reject(new Error('فشل في قراءة الملف'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 export async function exportFullBackup(userId: string) {
   const workbook = XLSX.utils.book_new();
 

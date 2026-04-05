@@ -27,14 +27,17 @@ interface SettingsTabProps {
   onResetSettings: () => void;
   onFactoryReset?: () => Promise<void>;
   onExportBackup?: () => Promise<void>;
+  onImportBackup?: (file: File) => Promise<void>;
 }
 
-export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset, onExportBackup }: SettingsTabProps) {
+export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset, onExportBackup, onImportBackup }: SettingsTabProps) {
   const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const backupFileRef = useRef<HTMLInputElement>(null);
   const [showFactoryReset, setShowFactoryReset] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const handleChange = (key: keyof AppSettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
