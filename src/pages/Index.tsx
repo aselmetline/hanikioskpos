@@ -23,7 +23,7 @@ import { useExpenses } from '@/hooks/useExpenses';
 import { useSales } from '@/hooks/useSales';
 import { Customer, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { toast } from 'sonner';
-import { exportFullBackup } from '@/utils/excelUtils';
+import { exportFullBackup, importFullBackup } from '@/utils/excelUtils';
 
 const Index = () => {
   const { user } = useAuth();
@@ -306,6 +306,20 @@ const Index = () => {
                 toast.success('تم تحميل النسخة الاحتياطية بنجاح');
               } catch {
                 toast.error('فشل في تصدير النسخة الاحتياطية');
+              }
+            }}
+            onImportBackup={async (file: File) => {
+              if (!user) return;
+              try {
+                const result = await importFullBackup(file, user.id);
+                if (result.imported.length > 0) {
+                  toast.success(`تم استيراد: ${result.imported.join('، ')}`);
+                  window.location.reload();
+                } else {
+                  toast.warning('لم يتم العثور على بيانات للاستيراد في الملف');
+                }
+              } catch {
+                toast.error('فشل في استيراد النسخة الاحتياطية');
               }
             }}
           />

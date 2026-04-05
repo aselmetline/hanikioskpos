@@ -27,14 +27,17 @@ interface SettingsTabProps {
   onResetSettings: () => void;
   onFactoryReset?: () => Promise<void>;
   onExportBackup?: () => Promise<void>;
+  onImportBackup?: (file: File) => Promise<void>;
 }
 
-export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset, onExportBackup }: SettingsTabProps) {
+export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset, onExportBackup, onImportBackup }: SettingsTabProps) {
   const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const backupFileRef = useRef<HTMLInputElement>(null);
   const [showFactoryReset, setShowFactoryReset] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const handleChange = (key: keyof AppSettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
@@ -455,6 +458,63 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
         </CardContent>
       </Card>
 
+      {/* Backup Import/Export */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Download className="w-5 h-5 text-primary" />
+            النسخ الاحتياطي
+          </CardTitle>
+          <CardDescription>تصدير أو استيراد بيانات التطبيق</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {onExportBackup && (
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              disabled={exporting}
+              onClick={async () => {
+                setExporting(true);
+                try { await onExportBackup(); } finally { setExporting(false); }
+              }}
+            >
+              <Download className="w-4 h-4" />
+              {exporting ? 'جاري التصدير...' : 'تصدير نسخة احتياطية'}
+            </Button>
+          )}
+          {onImportBackup && (
+            <>
+              <input
+                ref={backupFileRef}
+                type="file"
+                accept=".xlsx,.xls"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setImporting(true);
+                  try {
+                    await onImportBackup(file);
+                  } finally {
+                    setImporting(false);
+                    if (backupFileRef.current) backupFileRef.current.value = '';
+                  }
+                }}
+              />
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                disabled={importing}
+                onClick={() => backupFileRef.current?.click()}
+              >
+                <Upload className="w-4 h-4" />
+                {importing ? 'جاري الاستيراد...' : 'استيراد نسخة احتياطية'}
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Action Buttons */}
       <div className="flex gap-3 pt-2">
         <Button onClick={handleSave} className="flex-1 gap-2">
@@ -482,24 +542,6 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {onExportBackup && (
-                <Button
-                  variant="outline"
-                  className="w-full gap-2"
-                  disabled={exporting}
-                  onClick={async () => {
-                    setExporting(true);
-                    try {
-                      await onExportBackup();
-                    } finally {
-                      setExporting(false);
-                    }
-                  }}
-                >
-                  <Download className="w-4 h-4" />
-                  {exporting ? 'جاري التصدير...' : 'تحميل نسخة احتياطية أولاً'}
-                </Button>
-              )}
               <Button
                 variant="destructive"
                 className="w-full gap-2"
