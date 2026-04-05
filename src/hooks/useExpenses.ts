@@ -3,6 +3,7 @@ import { Expense, ExpenseCategory } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 
 export const useExpenses = () => {
   const { user } = useAuth();
@@ -19,10 +20,9 @@ export const useExpenses = () => {
 
     const fetchExpenses = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('expenses')
-        .select('*')
-        .order('expense_date', { ascending: false });
+      const { data, error } = await fetchAllPaginated<any>(
+        (from, to) => supabase.from('expenses').select('*').order('expense_date', { ascending: false }).range(from, to)
+      );
 
       if (error) {
         console.error('Error fetching expenses:', error);

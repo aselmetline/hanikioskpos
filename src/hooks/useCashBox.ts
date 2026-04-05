@@ -3,6 +3,7 @@ import { CashBoxTransaction, CashBoxSettings } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 
 export const useCashBox = () => {
   const { user } = useAuth();
@@ -26,10 +27,9 @@ export const useCashBox = () => {
       setLoading(true);
 
       // Fetch transactions
-      const { data: txData, error: txError } = await supabase
-        .from('cash_box_transactions')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data: txData, error: txError } = await fetchAllPaginated<any>(
+        (from, to) => supabase.from('cash_box_transactions').select('*').order('created_at', { ascending: false }).range(from, to)
+      );
 
       if (txError) {
         console.error('Error fetching transactions:', txError);
