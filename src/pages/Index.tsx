@@ -23,7 +23,7 @@ import { useExpenses } from '@/hooks/useExpenses';
 import { useSales } from '@/hooks/useSales';
 import { Customer, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { toast } from 'sonner';
-import { exportFullBackup } from '@/utils/excelUtils';
+import { exportFullBackup, importFullBackup } from '@/utils/excelUtils';
 
 const Index = () => {
   const { user } = useAuth();
