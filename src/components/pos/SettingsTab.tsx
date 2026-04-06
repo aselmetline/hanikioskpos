@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Store, Printer, Percent, Phone, RotateCcw, Save, Upload, Trash2, Info, MapPin, Building2, Mail, Briefcase, FileText, AlertTriangle, Download } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,8 +27,8 @@ interface SettingsTabProps {
   onUpdateSettings: (updates: Partial<AppSettings>) => void;
   onResetSettings: () => void;
   onFactoryReset?: () => Promise<void>;
-  onExportBackup?: () => Promise<void>;
-  onImportBackup?: (file: File) => Promise<void>;
+  onExportBackup?: (onProgress?: (progress: number, message: string) => void) => Promise<void>;
+  onImportBackup?: (file: File, onProgress?: (progress: number, message: string) => void) => Promise<void>;
 }
 
 export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset, onExportBackup, onImportBackup }: SettingsTabProps) {
@@ -38,6 +39,8 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
   const [resetting, setResetting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [backupProgress, setBackupProgress] = useState(0);
+  const [backupMessage, setBackupMessage] = useState('');
 
   const handleChange = (key: keyof AppSettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
