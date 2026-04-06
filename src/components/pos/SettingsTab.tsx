@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Store, Printer, Percent, Phone, RotateCcw, Save, Upload, Trash2, Info, MapPin, Building2, Mail, Briefcase, FileText, AlertTriangle, Download } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,8 +27,8 @@ interface SettingsTabProps {
   onUpdateSettings: (updates: Partial<AppSettings>) => void;
   onResetSettings: () => void;
   onFactoryReset?: () => Promise<void>;
-  onExportBackup?: () => Promise<void>;
-  onImportBackup?: (file: File) => Promise<void>;
+  onExportBackup?: (onProgress?: (progress: number, message: string) => void) => Promise<void>;
+  onImportBackup?: (file: File, onProgress?: (progress: number, message: string) => void) => Promise<void>;
 }
 
 export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFactoryReset, onExportBackup, onImportBackup }: SettingsTabProps) {
@@ -38,6 +39,8 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
   const [resetting, setResetting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [backupProgress, setBackupProgress] = useState(0);
+  const [backupMessage, setBackupMessage] = useState('');
 
   const handleChange = (key: keyof AppSettings, value: any) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
@@ -468,14 +471,27 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
           <CardDescription>تصدير أو استيراد بيانات التطبيق</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          {(exporting || importing) && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{backupMessage}</span>
+                <span className="font-medium">{backupProgress}%</span>
+              </div>
+              <Progress value={backupProgress} className="h-2" />
+            </div>
+          )}
           {onExportBackup && (
             <Button
               variant="outline"
               className="w-full gap-2"
-              disabled={exporting}
+              disabled={exporting || importing}
               onClick={async () => {
                 setExporting(true);
-                try { await onExportBackup(); } finally { setExporting(false); }
+                setBackupProgress(0);
+                setBackupMessage('');
+                try {
+                  await onExportBackup((p, m) => { setBackupProgress(p); setBackupMessage(m); });
+                } finally { setExporting(false); setBackupProgress(0); setBackupMessage(''); }
               }}
             >
               <Download className="w-4 h-4" />
@@ -493,10 +509,14 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
                   const file = e.target.files?.[0];
                   if (!file) return;
                   setImporting(true);
+                  setBackupProgress(0);
+                  setBackupMessage('');
                   try {
-                    await onImportBackup(file);
+                    await onImportBackup(file, (p, m) => { setBackupProgress(p); setBackupMessage(m); });
                   } finally {
                     setImporting(false);
+                    setBackupProgress(0);
+                    setBackupMessage('');
                     if (backupFileRef.current) backupFileRef.current.value = '';
                   }
                 }}
@@ -504,7 +524,7 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
               <Button
                 variant="outline"
                 className="w-full gap-2"
-                disabled={importing}
+                disabled={importing || exporting}
                 onClick={() => backupFileRef.current?.click()}
               >
                 <Upload className="w-4 h-4" />
