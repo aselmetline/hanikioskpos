@@ -299,19 +299,19 @@ const Index = () => {
               toast.success('تم إعادة تهيئة التطبيق بنجاح');
               window.location.reload();
             }}
-            onExportBackup={async () => {
+            onExportBackup={async (onProgress) => {
               if (!user) return;
               try {
-                await exportFullBackup(user.id);
+                await exportFullBackup(user.id, onProgress);
                 toast.success('تم تحميل النسخة الاحتياطية بنجاح');
               } catch {
                 toast.error('فشل في تصدير النسخة الاحتياطية');
               }
             }}
-            onImportBackup={async (file: File) => {
+            onImportBackup={async (file: File, onProgress) => {
               if (!user) return;
               try {
-                const result = await importFullBackup(file, user.id);
+                const result = await importFullBackup(file, user.id, onProgress);
                 if (result.imported.length > 0) {
                   toast.success(`تم استيراد: ${result.imported.join('، ')}`);
                   window.location.reload();
