@@ -12,6 +12,7 @@ import CashBoxTab from '@/components/pos/CashBoxTab';
 import PurchasesTab from '@/components/pos/PurchasesTab';
 import ExpensesTab from '@/components/pos/ExpensesTab';
 import { QueriesTab } from '@/components/pos/QueriesTab';
+import { SuppliersTab } from '@/components/pos/SuppliersTab';
 import { LowStockNotification } from '@/components/pos/LowStockNotification';
 import { useCart } from '@/hooks/useCart';
 import { useProducts } from '@/hooks/useProducts';
@@ -21,6 +22,7 @@ import { useCashBox } from '@/hooks/useCashBox';
 import { usePurchases } from '@/hooks/usePurchases';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useSales } from '@/hooks/useSales';
+import { useSuppliers } from '@/hooks/useSuppliers';
 import { Customer, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { toast } from 'sonner';
 import { exportFullBackup, importFullBackup } from '@/utils/excelUtils';
@@ -37,6 +39,7 @@ const Index = () => {
   const purchases = usePurchases();
   const expensesHook = useExpenses();
   const salesHook = useSales();
+  const suppliersHook = useSuppliers();
 
   const handleCheckout = async (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number): Promise<string | null> => {
     if (cart.items.length === 0) return null;
@@ -97,9 +100,9 @@ const Index = () => {
   };
 
   // Handle saving purchase and auto-deduct from cash box
-  const handleSavePurchase = async (invoiceDate: Date) => {
+  const handleSavePurchase = async (invoiceDate: Date, supplierId?: string) => {
     const purchaseTotal = purchases.currentTotal;
-    const purchase = await purchases.savePurchase(invoiceDate);
+    const purchase = await purchases.savePurchase(invoiceDate, supplierId);
     
     if (purchase && cashBox.settings.autoDeductPurchases) {
       await cashBox.addTransaction('deduct', purchaseTotal, `فاتورة مشتريات رقم ${purchase.invoiceNumber}`, 'purchases');
@@ -211,6 +214,21 @@ const Index = () => {
             onRemoveItem={purchases.removeItem}
             onSavePurchase={handleSavePurchase}
             onUpdateStock={products.updateStock}
+            suppliers={suppliersHook.suppliers}
+            onUpdateSupplierDebt={suppliersHook.updateDebt}
+          />
+        )}
+
+        {activeTab === 'suppliers' && (
+          <SuppliersTab
+            suppliers={suppliersHook.filteredSuppliers}
+            searchQuery={suppliersHook.searchQuery}
+            onSearchChange={suppliersHook.setSearchQuery}
+            onAddSupplier={suppliersHook.addSupplier}
+            onUpdateSupplier={suppliersHook.updateSupplier}
+            onDeleteSupplier={suppliersHook.deleteSupplier}
+            onUpdateDebt={suppliersHook.updateDebt}
+            loading={suppliersHook.loading}
           />
         )}
 
