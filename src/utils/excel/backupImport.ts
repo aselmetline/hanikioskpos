@@ -171,6 +171,24 @@ export async function importFullBackup(
           }
         }
 
+        // Suppliers
+        if (workbook.SheetNames.includes('الموردين')) {
+          report('جاري استيراد الموردين...');
+          const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets['الموردين']);
+          if (rows.length) {
+            const suppliersData = rows.map(r => ({
+              user_id: userId,
+              name: String(r['الاسم'] || ''),
+              phone: r['الهاتف'] ? String(r['الهاتف']) : null,
+              address: r['العنوان'] ? String(r['العنوان']) : null,
+              notes: r['ملاحظات'] ? String(r['ملاحظات']) : null,
+              debt_balance: parseFloat(String(r['رصيد الدين'] || 0)),
+            }));
+            const { error } = await supabase.from('suppliers').insert(suppliersData);
+            if (!error) imported.push(`الموردين (${suppliersData.length})`);
+          }
+        }
+
         resolve({ imported });
       } catch {
         reject(new Error('فشل في قراءة ملف النسخة الاحتياطية'));
