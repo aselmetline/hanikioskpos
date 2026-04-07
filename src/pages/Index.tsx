@@ -100,9 +100,9 @@ const Index = () => {
   };
 
   // Handle saving purchase and auto-deduct from cash box
-  const handleSavePurchase = async (invoiceDate: Date) => {
+  const handleSavePurchase = async (invoiceDate: Date, supplierId?: string) => {
     const purchaseTotal = purchases.currentTotal;
-    const purchase = await purchases.savePurchase(invoiceDate);
+    const purchase = await purchases.savePurchase(invoiceDate, supplierId);
     
     if (purchase && cashBox.settings.autoDeductPurchases) {
       await cashBox.addTransaction('deduct', purchaseTotal, `فاتورة مشتريات رقم ${purchase.invoiceNumber}`, 'purchases');
