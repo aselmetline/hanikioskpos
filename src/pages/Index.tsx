@@ -314,6 +314,7 @@ const Index = () => {
                 supabase.from('customers').delete().eq('user_id', uid),
                 supabase.from('products').delete().eq('user_id', uid),
                 supabase.from('cash_box_transactions').delete().eq('user_id', uid),
+                supabase.from('suppliers').delete().eq('user_id', uid),
               ]);
 
               await resetSettings();
