@@ -1,8 +1,8 @@
-import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch } from 'lucide-react';
+import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
-export type TabType = 'sell' | 'inventory' | 'purchases' | 'expenses' | 'customers' | 'reports' | 'queries' | 'cashbox' | 'settings';
+export type TabType = 'sell' | 'inventory' | 'purchases' | 'expenses' | 'customers' | 'suppliers' | 'reports' | 'queries' | 'cashbox' | 'settings';
 interface BottomNavProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
@@ -17,6 +17,7 @@ export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavPr
     { id: 'expenses' as TabType, icon: Receipt, label: 'مصروفات' },
     { id: 'cashbox' as TabType, icon: Wallet, label: 'صندوق' },
     { id: 'customers' as TabType, icon: Users, label: 'عملاء' },
+    { id: 'suppliers' as TabType, icon: Truck, label: 'موردين' },
     { id: 'reports' as TabType, icon: BarChart3, label: 'تقارير' },
     { id: 'queries' as TabType, icon: FileSearch, label: 'استعلامات' },
     { id: 'settings' as TabType, icon: Settings, label: 'إعدادات' },
