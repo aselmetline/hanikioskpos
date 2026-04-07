@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { Sale, Purchase, Expense, CashBoxTransaction, Customer } from '@/types/pos';
+import { Supplier } from '@/hooks/useSuppliers';
 import {
   SalesReport,
   ProfitsReport,
@@ -15,7 +16,8 @@ import {
   PurchasesReport,
   ExpensesReport,
   CashBoxReport,
-  StoreActivityReport
+  StoreActivityReport,
+  SuppliersReport
 } from './reports';
 
 interface QueryItem {
@@ -36,6 +38,7 @@ interface QueriesTabProps {
   transactions?: CashBoxTransaction[];
   customers?: Customer[];
   cashBoxBalance?: number;
+  suppliers?: Supplier[];
 }
 
 export function QueriesTab({ 
@@ -44,7 +47,8 @@ export function QueriesTab({
   expenses = [], 
   transactions = [],
   customers = [],
-  cashBoxBalance = 0
+  cashBoxBalance = 0,
+  suppliers = []
 }: QueriesTabProps) {
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
