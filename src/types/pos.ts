@@ -84,6 +84,8 @@ export interface Purchase {
   invoiceDate: Date;
   items: PurchaseItem[];
   total: number;
+  supplierId?: string;
+  supplierName?: string;
   createdAt: Date;
 }
 

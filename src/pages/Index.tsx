@@ -216,6 +216,8 @@ const Index = () => {
             onUpdateStock={products.updateStock}
             suppliers={suppliersHook.suppliers}
             onUpdateSupplierDebt={suppliersHook.updateDebt}
+            purchases={purchases.purchases}
+            onDeletePurchase={purchases.deletePurchase}
           />
         )}
 
@@ -258,6 +260,7 @@ const Index = () => {
             transactions={cashBox.transactions}
             customers={customers.customers}
             cashBoxBalance={cashBox.balance}
+            suppliers={suppliersHook.suppliers}
           />
         )}
 
@@ -311,6 +314,7 @@ const Index = () => {
                 supabase.from('customers').delete().eq('user_id', uid),
                 supabase.from('products').delete().eq('user_id', uid),
                 supabase.from('cash_box_transactions').delete().eq('user_id', uid),
+                supabase.from('suppliers').delete().eq('user_id', uid),
               ]);
 
               await resetSettings();

@@ -112,6 +112,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
                 <TableRow>
                   <TableHead className="text-right">رقم الفاتورة</TableHead>
                   <TableHead className="text-right">التاريخ</TableHead>
+                  <TableHead className="text-right">المورد</TableHead>
                   <TableHead className="text-right">عدد الأصناف</TableHead>
                   <TableHead className="text-right">الإجمالي</TableHead>
                 </TableRow>
@@ -119,7 +120,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
               <TableBody>
                 {filteredPurchases.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                       لا توجد مشتريات في هذه الفترة
                     </TableCell>
                   </TableRow>
@@ -130,6 +131,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
                         <Badge variant="outline">#{purchase.invoiceNumber}</Badge>
                       </TableCell>
                       <TableCell>{format(new Date(purchase.invoiceDate), 'yyyy/MM/dd')}</TableCell>
+                      <TableCell>{purchase.supplierName || '-'}</TableCell>
                       <TableCell>{purchase.items.reduce((sum, i) => sum + i.quantity, 0)}</TableCell>
                       <TableCell className="font-medium">{purchase.total.toFixed(3)} TND</TableCell>
                     </TableRow>

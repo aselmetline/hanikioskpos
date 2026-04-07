@@ -5,7 +5,7 @@ import { ProgressCallback } from './types';
 
 export async function exportFullBackup(userId: string, onProgress?: ProgressCallback) {
   const workbook = XLSX.utils.book_new();
-  const steps = 6;
+  const steps = 7;
   let step = 0;
 
   const report = (msg: string) => {
@@ -75,7 +75,8 @@ export async function exportFullBackup(userId: string, onProgress?: ProgressCall
   if (purchases?.length) {
     const sheet = XLSX.utils.json_to_sheet(purchases.map(p => ({
       'معرف الشراء': p.id, 'رقم الفاتورة': p.invoice_number,
-      'تاريخ الفاتورة': p.invoice_date, 'الإجمالي': p.total, 'تاريخ الإنشاء': p.created_at
+      'تاريخ الفاتورة': p.invoice_date, 'الإجمالي': p.total,
+      'معرف المورد': p.supplier_id || '', 'تاريخ الإنشاء': p.created_at
     })));
     XLSX.utils.book_append_sheet(workbook, sheet, 'المشتريات');
 
@@ -90,6 +91,19 @@ export async function exportFullBackup(userId: string, onProgress?: ProgressCall
       })));
       XLSX.utils.book_append_sheet(workbook, itemSheet, 'تفاصيل المشتريات');
     }
+  }
+
+  // Suppliers
+  report('جاري تصدير الموردين...');
+  const { data: suppliers } = await fetchAllPaginated<Record<string, unknown>>(
+    (from, to) => supabase.from('suppliers').select('*').eq('user_id', userId).range(from, to)
+  );
+  if (suppliers?.length) {
+    const sheet = XLSX.utils.json_to_sheet(suppliers.map(s => ({
+      'الاسم': s.name, 'الهاتف': s.phone || '', 'العنوان': s.address || '',
+      'ملاحظات': s.notes || '', 'رصيد الدين': s.debt_balance, 'تاريخ الإضافة': s.created_at
+    })));
+    XLSX.utils.book_append_sheet(workbook, sheet, 'الموردين');
   }
 
   // Expenses

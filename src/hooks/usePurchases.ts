@@ -12,7 +12,6 @@ export const usePurchases = () => {
   const [invoiceNumber, setInvoiceNumber] = useState('1');
   const [loading, setLoading] = useState(true);
 
-  // Fetch purchases from Supabase
   useEffect(() => {
     if (!user) {
       setPurchases([]);
@@ -22,42 +21,47 @@ export const usePurchases = () => {
 
     const fetchPurchases = async () => {
       setLoading(true);
-      const { data, error } = await fetchAllPaginated<any>(
-        (from, to) => supabase.from('purchases').select('*, purchase_items (*)').order('created_at', { ascending: false }).range(from, to)
+      const { data, error } = await fetchAllPaginated<Record<string, unknown>>(
+        (from, to) => supabase.from('purchases').select('*, purchase_items (*), suppliers (name)').eq('user_id', user.id).order('created_at', { ascending: false }).range(from, to)
       );
 
       if (error) {
         console.error('Error fetching purchases:', error);
         toast.error('خطأ في تحميل المشتريات');
       } else {
-        const mappedPurchases: Purchase[] = data.map(p => ({
-          id: p.id,
-          invoiceNumber: p.invoice_number,
-          invoiceDate: new Date(p.invoice_date),
-          items: (p.purchase_items || []).map((item: { product_id: string | null; product_name: string; cost: number; quantity: number; total: number }) => ({
-            product: {
-              id: item.product_id || '',
-              name: item.product_name,
-              nameAr: item.product_name,
-              price: 0,
-              category: '',
-              stock: 0,
-              unit: '',
-              lowStockAlert: 0
-            },
-            cost: Number(item.cost),
-            quantity: item.quantity,
-            total: Number(item.total)
-          })),
-          total: Number(p.total),
-          createdAt: new Date(p.created_at)
-        }));
+        const mappedPurchases: Purchase[] = data.map(p => {
+          const items = p.purchase_items as Array<Record<string, unknown>> | null;
+          const supplier = p.suppliers as Record<string, unknown> | null;
+          return {
+            id: String(p.id),
+            invoiceNumber: String(p.invoice_number),
+            invoiceDate: new Date(String(p.invoice_date)),
+            items: (items || []).map((item) => ({
+              product: {
+                id: item.product_id ? String(item.product_id) : '',
+                name: String(item.product_name),
+                nameAr: String(item.product_name),
+                price: 0,
+                category: '',
+                stock: 0,
+                unit: '',
+                lowStockAlert: 0
+              },
+              cost: Number(item.cost),
+              quantity: Number(item.quantity),
+              total: Number(item.total)
+            })),
+            total: Number(p.total),
+            supplierId: p.supplier_id ? String(p.supplier_id) : undefined,
+            supplierName: supplier ? String(supplier.name) : undefined,
+            createdAt: new Date(String(p.created_at))
+          };
+        });
 
         setPurchases(mappedPurchases);
 
-        // Set next invoice number
         if (data.length > 0) {
-          const maxNumber = Math.max(...data.map(p => parseInt(p.invoice_number) || 0));
+          const maxNumber = Math.max(...data.map(p => parseInt(String(p.invoice_number)) || 0));
           setInvoiceNumber((maxNumber + 1).toString());
         }
       }
@@ -66,7 +70,6 @@ export const usePurchases = () => {
 
     fetchPurchases();
 
-    // Subscribe to realtime changes
     const channel = supabase
       .channel('purchases-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases' }, () => {
@@ -89,33 +92,24 @@ export const usePurchases = () => {
           : item
       ));
     } else {
-      const newItem: PurchaseItem = {
-        product,
-        cost,
-        quantity,
-        total: cost * quantity
-      };
+      const newItem: PurchaseItem = { product, cost, quantity, total: cost * quantity };
       setCurrentItems(prev => [...prev, newItem]);
     }
   }, [currentItems]);
 
   const updateItemQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(productId);
+      setCurrentItems(prev => prev.filter(item => item.product.id !== productId));
       return;
     }
     setCurrentItems(prev => prev.map(item =>
-      item.product.id === productId
-        ? { ...item, quantity, total: item.cost * quantity }
-        : item
+      item.product.id === productId ? { ...item, quantity, total: item.cost * quantity } : item
     ));
   }, []);
 
   const updateItemCost = useCallback((productId: string, cost: number) => {
     setCurrentItems(prev => prev.map(item =>
-      item.product.id === productId
-        ? { ...item, cost, total: cost * item.quantity }
-        : item
+      item.product.id === productId ? { ...item, cost, total: cost * item.quantity } : item
     ));
   }, []);
 
@@ -140,10 +134,9 @@ export const usePurchases = () => {
     };
     if (supplierId) insertData.supplier_id = supplierId;
 
-    // Insert purchase
     const { data: purchaseData, error: purchaseError } = await supabase
       .from('purchases')
-      .insert(insertData as any)
+      .insert(insertData as { user_id: string; invoice_number: string; invoice_date: string; total: number; supplier_id?: string })
       .select()
       .single();
 
@@ -153,7 +146,6 @@ export const usePurchases = () => {
       return null;
     }
 
-    // Insert purchase items
     const purchaseItems = currentItems.map(item => ({
       purchase_id: purchaseData.id,
       product_id: item.product.id,
@@ -163,13 +155,8 @@ export const usePurchases = () => {
       total: item.total
     }));
 
-    const { error: itemsError } = await supabase
-      .from('purchase_items')
-      .insert(purchaseItems);
-
-    if (itemsError) {
-      console.error('Error saving purchase items:', itemsError);
-    }
+    const { error: itemsError } = await supabase.from('purchase_items').insert(purchaseItems);
+    if (itemsError) console.error('Error saving purchase items:', itemsError);
 
     const newPurchase: Purchase = {
       id: purchaseData.id,
@@ -177,6 +164,7 @@ export const usePurchases = () => {
       invoiceDate: new Date(purchaseData.invoice_date),
       items: [...currentItems],
       total,
+      supplierId: supplierId,
       createdAt: new Date(purchaseData.created_at)
     };
 
@@ -187,6 +175,19 @@ export const usePurchases = () => {
     toast.success('تم حفظ فاتورة المشتريات');
     return newPurchase;
   }, [user, currentItems, invoiceNumber, clearCurrentItems]);
+
+  const deletePurchase = useCallback(async (id: string) => {
+    if (!user) return;
+    // Delete items first, then purchase
+    await supabase.from('purchase_items').delete().eq('purchase_id', id);
+    const { error } = await supabase.from('purchases').delete().eq('id', id);
+    if (error) {
+      toast.error('خطأ في حذف الفاتورة');
+      return;
+    }
+    setPurchases(prev => prev.filter(p => p.id !== id));
+    toast.success('تم حذف فاتورة المشتريات');
+  }, [user]);
 
   const currentTotal = useMemo(() => {
     return currentItems.reduce((sum, item) => sum + item.total, 0);
@@ -204,6 +205,7 @@ export const usePurchases = () => {
     removeItem,
     clearCurrentItems,
     savePurchase,
+    deletePurchase,
     loading
   };
 };
