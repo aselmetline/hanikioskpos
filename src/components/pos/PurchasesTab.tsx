@@ -4,8 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Barcode, Save, Trash2, Plus, Minus } from 'lucide-react';
 import { Product, PurchaseItem } from '@/types/pos';
+import { Supplier } from '@/hooks/useSuppliers';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -19,8 +21,10 @@ interface PurchasesTabProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onUpdateCost: (productId: string, cost: number) => void;
   onRemoveItem: (productId: string) => void;
-  onSavePurchase: (invoiceDate: Date) => void;
+  onSavePurchase: (invoiceDate: Date, supplierId?: string) => void;
   onUpdateStock: (productId: string, quantity: number, isAddition: boolean) => void;
+  suppliers?: Supplier[];
+  onUpdateSupplierDebt?: (id: string, amount: number) => Promise<void>;
 }
 
 const PurchasesTab: React.FC<PurchasesTabProps> = ({
@@ -35,10 +39,13 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   onRemoveItem,
   onSavePurchase,
   onUpdateStock,
+  suppliers = [],
+  onUpdateSupplierDebt,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [showProductSearch, setShowProductSearch] = useState(false);
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string>('');
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
