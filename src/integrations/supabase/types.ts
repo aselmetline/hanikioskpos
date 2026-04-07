@@ -274,6 +274,7 @@ export type Database = {
           id: string
           invoice_date: string
           invoice_number: string
+          supplier_id: string | null
           total: number
           user_id: string
         }
@@ -282,6 +283,7 @@ export type Database = {
           id?: string
           invoice_date?: string
           invoice_number: string
+          supplier_id?: string | null
           total?: number
           user_id: string
         }
@@ -290,10 +292,19 @@ export type Database = {
           id?: string
           invoice_date?: string
           invoice_number?: string
+          supplier_id?: string | null
           total?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "purchases_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sale_items: {
         Row: {
@@ -386,6 +397,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      suppliers: {
+        Row: {
+          address: string | null
+          created_at: string
+          debt_balance: number
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          debt_balance?: number
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          debt_balance?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_settings: {
         Row: {
