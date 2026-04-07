@@ -127,20 +127,23 @@ export const usePurchases = () => {
     setCurrentItems([]);
   }, []);
 
-  const savePurchase = useCallback(async (invoiceDate: Date): Promise<Purchase | null> => {
+  const savePurchase = useCallback(async (invoiceDate: Date, supplierId?: string): Promise<Purchase | null> => {
     if (!user || currentItems.length === 0) return null;
 
     const total = currentItems.reduce((sum, item) => sum + item.total, 0);
 
+    const insertData: Record<string, unknown> = {
+      user_id: user.id,
+      invoice_number: invoiceNumber,
+      invoice_date: invoiceDate.toISOString().split('T')[0],
+      total,
+    };
+    if (supplierId) insertData.supplier_id = supplierId;
+
     // Insert purchase
     const { data: purchaseData, error: purchaseError } = await supabase
       .from('purchases')
-      .insert({
-        user_id: user.id,
-        invoice_number: invoiceNumber,
-        invoice_date: invoiceDate.toISOString().split('T')[0],
-        total
-      })
+      .insert(insertData as any)
       .select()
       .single();
 
