@@ -86,6 +86,13 @@ export function QueriesTab({
       ],
     },
     {
+      id: 'suppliers',
+      title: 'الموردين',
+      items: [
+        { id: 'suppliers-report', label: 'تقرير الموردين والديون' },
+      ],
+    },
+    {
       id: 'cashbox',
       title: 'الصندوق',
       items: [
@@ -164,6 +171,13 @@ export function QueriesTab({
             purchases={purchases}
             dateFrom={dateFrom}
             dateTo={dateTo}
+          />
+        );
+      case 'suppliers-report':
+        return (
+          <SuppliersReport
+            suppliers={suppliers}
+            purchases={purchases}
           />
         );
       case 'cashbox-activity':
