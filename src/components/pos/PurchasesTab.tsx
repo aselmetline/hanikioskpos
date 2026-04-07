@@ -58,18 +58,23 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
     setShowProductSearch(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (currentItems.length === 0) {
       toast.error('أضف منتجات للفاتورة أولاً');
       return;
     }
 
-    // Update stock for each item (add to stock)
     currentItems.forEach(item => {
       onUpdateStock(item.product.id, item.quantity, true);
     });
 
-    onSavePurchase(new Date(invoiceDate));
+    // Add debt to supplier if selected
+    if (selectedSupplierId && onUpdateSupplierDebt) {
+      await onUpdateSupplierDebt(selectedSupplierId, currentTotal);
+    }
+
+    onSavePurchase(new Date(invoiceDate), selectedSupplierId || undefined);
+    setSelectedSupplierId('');
     toast.success(`تم حفظ فاتورة المشتريات رقم ${invoiceNumber}`);
   };
 
@@ -83,27 +88,45 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
 
         {/* Invoice Info */}
         <Card className="mb-4">
-          <CardContent className="p-3 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Input
-                type="date"
-                value={invoiceDate}
-                onChange={(e) => setInvoiceDate(e.target.value)}
-                className="w-36 text-center text-sm"
-                dir="ltr"
-              />
-              <span className="text-sm text-muted-foreground whitespace-nowrap">تاريخ الفاتورة</span>
+          <CardContent className="p-3 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Input
+                  type="date"
+                  value={invoiceDate}
+                  onChange={(e) => setInvoiceDate(e.target.value)}
+                  className="w-36 text-center text-sm"
+                  dir="ltr"
+                />
+                <span className="text-sm text-muted-foreground whitespace-nowrap">تاريخ الفاتورة</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={invoiceNumber}
+                  onChange={(e) => onSetInvoiceNumber(e.target.value)}
+                  className="w-16 text-center"
+                  dir="ltr"
+                />
+                <span className="text-sm text-muted-foreground whitespace-nowrap">رقم الفاتورة</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Input
-                type="text"
-                value={invoiceNumber}
-                onChange={(e) => onSetInvoiceNumber(e.target.value)}
-                className="w-16 text-center"
-                dir="ltr"
-              />
-              <span className="text-sm text-muted-foreground whitespace-nowrap">رقم الفاتورة</span>
-            </div>
+            {suppliers.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Select value={selectedSupplierId} onValueChange={setSelectedSupplierId}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="اختر المورد (اختياري)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">بدون مورد</SelectItem>
+                    {suppliers.map(s => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-muted-foreground whitespace-nowrap">المورد</span>
+              </div>
+            )}
           </CardContent>
         </Card>
 
