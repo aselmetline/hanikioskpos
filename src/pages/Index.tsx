@@ -214,6 +214,21 @@ const Index = () => {
             onRemoveItem={purchases.removeItem}
             onSavePurchase={handleSavePurchase}
             onUpdateStock={products.updateStock}
+            suppliers={suppliersHook.suppliers}
+            onUpdateSupplierDebt={suppliersHook.updateDebt}
+          />
+        )}
+
+        {activeTab === 'suppliers' && (
+          <SuppliersTab
+            suppliers={suppliersHook.filteredSuppliers}
+            searchQuery={suppliersHook.searchQuery}
+            onSearchChange={suppliersHook.setSearchQuery}
+            onAddSupplier={suppliersHook.addSupplier}
+            onUpdateSupplier={suppliersHook.updateSupplier}
+            onDeleteSupplier={suppliersHook.deleteSupplier}
+            onUpdateDebt={suppliersHook.updateDebt}
+            loading={suppliersHook.loading}
           />
         )}
 
