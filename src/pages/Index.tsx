@@ -218,6 +218,11 @@ const Index = () => {
             onUpdateSupplierDebt={suppliersHook.updateDebt}
             purchases={purchases.purchases}
             onDeletePurchase={purchases.deletePurchase}
+            kioskName={settings.kioskName}
+            kioskNameFr={settings.kioskNameFr}
+            storePhone={settings.storePhone}
+            storeAddress={[settings.storeAddressCity, settings.storeAddressArea, settings.storeAddressStreet].filter(Boolean).join('، ')}
+            commercialRegister={settings.commercialRegister}
           />
         )}
 

@@ -13,6 +13,7 @@ import { Supplier } from '@/hooks/useSuppliers';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import { PurchaseReceiptPrinter } from './PurchaseReceiptPrinter';
 
 interface PurchasesTabProps {
   products: Product[];
@@ -30,6 +31,11 @@ interface PurchasesTabProps {
   onUpdateSupplierDebt?: (id: string, amount: number) => Promise<void>;
   purchases?: Purchase[];
   onDeletePurchase?: (id: string) => Promise<void>;
+  kioskName?: string;
+  kioskNameFr?: string;
+  storePhone?: string;
+  storeAddress?: string;
+  commercialRegister?: string;
 }
 
 const PurchasesTab: React.FC<PurchasesTabProps> = ({
@@ -48,6 +54,11 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   onUpdateSupplierDebt,
   purchases = [],
   onDeletePurchase,
+  kioskName,
+  kioskNameFr,
+  storePhone,
+  storeAddress,
+  commercialRegister,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -56,6 +67,8 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   const [expandedPurchase, setExpandedPurchase] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'new' | 'history'>('new');
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [savedPurchaseData, setSavedPurchaseData] = useState<{ items: PurchaseItem[]; total: number; invoiceNumber: string; invoiceDate: Date; supplier?: Supplier } | null>(null);
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -74,6 +87,13 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
       return;
     }
 
+    // Capture data before save clears it
+    const savedItems = [...currentItems];
+    const savedTotal = currentTotal;
+    const savedInvNum = invoiceNumber;
+    const savedDate = new Date(invoiceDate);
+    const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId);
+
     currentItems.forEach(item => {
       onUpdateStock(item.product.id, item.quantity, true);
     });
@@ -84,6 +104,16 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
 
     onSavePurchase(new Date(invoiceDate), selectedSupplierId && selectedSupplierId !== 'none' ? selectedSupplierId : undefined);
     setSelectedSupplierId('');
+
+    // Show receipt with auto PDF export
+    setSavedPurchaseData({
+      items: savedItems,
+      total: savedTotal,
+      invoiceNumber: savedInvNum,
+      invoiceDate: savedDate,
+      supplier: selectedSupplier,
+    });
+    setReceiptOpen(true);
   };
 
   // Stats
@@ -221,7 +251,14 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}>
                                 <Minus className="w-3 h-3" />
                               </Button>
-                              <span className="w-8 text-center">{item.quantity}</span>
+                              <Input
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) => onUpdateQuantity(item.product.id, parseInt(e.target.value) || 1)}
+                                className="w-14 text-center h-7 text-sm"
+                                dir="ltr"
+                                min="1"
+                              />
                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}>
                                 <Plus className="w-3 h-3" />
                               </Button>
@@ -341,6 +378,24 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
         title="حذف فاتورة المشتريات"
         description="هل أنت متأكد من حذف هذه الفاتورة؟ سيتم حذف جميع بنودها."
       />
+
+      {savedPurchaseData && (
+        <PurchaseReceiptPrinter
+          open={receiptOpen}
+          onOpenChange={(open) => { setReceiptOpen(open); if (!open) setSavedPurchaseData(null); }}
+          items={savedPurchaseData.items}
+          total={savedPurchaseData.total}
+          invoiceNumber={savedPurchaseData.invoiceNumber}
+          invoiceDate={savedPurchaseData.invoiceDate}
+          supplier={savedPurchaseData.supplier}
+          kioskName={kioskName}
+          kioskNameFr={kioskNameFr}
+          storePhone={storePhone}
+          storeAddress={storeAddress}
+          commercialRegister={commercialRegister}
+          autoExport
+        />
+      )}
     </div>
   );
 };
