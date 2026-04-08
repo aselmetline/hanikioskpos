@@ -378,6 +378,24 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
         title="حذف فاتورة المشتريات"
         description="هل أنت متأكد من حذف هذه الفاتورة؟ سيتم حذف جميع بنودها."
       />
+
+      {savedPurchaseData && (
+        <PurchaseReceiptPrinter
+          open={receiptOpen}
+          onOpenChange={(open) => { setReceiptOpen(open); if (!open) setSavedPurchaseData(null); }}
+          items={savedPurchaseData.items}
+          total={savedPurchaseData.total}
+          invoiceNumber={savedPurchaseData.invoiceNumber}
+          invoiceDate={savedPurchaseData.invoiceDate}
+          supplier={savedPurchaseData.supplier}
+          kioskName={kioskName}
+          kioskNameFr={kioskNameFr}
+          storePhone={storePhone}
+          storeAddress={storeAddress}
+          commercialRegister={commercialRegister}
+          autoExport
+        />
+      )}
     </div>
   );
 };
