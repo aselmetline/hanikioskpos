@@ -13,6 +13,7 @@ import { Supplier } from '@/hooks/useSuppliers';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import { PurchaseReceiptPrinter } from './PurchaseReceiptPrinter';
 
 interface PurchasesTabProps {
   products: Product[];
