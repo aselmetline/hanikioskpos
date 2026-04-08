@@ -31,6 +31,11 @@ interface PurchasesTabProps {
   onUpdateSupplierDebt?: (id: string, amount: number) => Promise<void>;
   purchases?: Purchase[];
   onDeletePurchase?: (id: string) => Promise<void>;
+  kioskName?: string;
+  kioskNameFr?: string;
+  storePhone?: string;
+  storeAddress?: string;
+  commercialRegister?: string;
 }
 
 const PurchasesTab: React.FC<PurchasesTabProps> = ({
