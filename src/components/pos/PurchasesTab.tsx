@@ -54,6 +54,11 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   onUpdateSupplierDebt,
   purchases = [],
   onDeletePurchase,
+  kioskName,
+  kioskNameFr,
+  storePhone,
+  storeAddress,
+  commercialRegister,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -62,6 +67,8 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   const [expandedPurchase, setExpandedPurchase] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'new' | 'history'>('new');
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [savedPurchaseData, setSavedPurchaseData] = useState<{ items: PurchaseItem[]; total: number; invoiceNumber: string; invoiceDate: Date; supplier?: Supplier } | null>(null);
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
