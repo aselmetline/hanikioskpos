@@ -87,6 +87,13 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
       return;
     }
 
+    // Capture data before save clears it
+    const savedItems = [...currentItems];
+    const savedTotal = currentTotal;
+    const savedInvNum = invoiceNumber;
+    const savedDate = new Date(invoiceDate);
+    const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId);
+
     currentItems.forEach(item => {
       onUpdateStock(item.product.id, item.quantity, true);
     });
@@ -97,6 +104,16 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
 
     onSavePurchase(new Date(invoiceDate), selectedSupplierId && selectedSupplierId !== 'none' ? selectedSupplierId : undefined);
     setSelectedSupplierId('');
+
+    // Show receipt with auto PDF export
+    setSavedPurchaseData({
+      items: savedItems,
+      total: savedTotal,
+      invoiceNumber: savedInvNum,
+      invoiceDate: savedDate,
+      supplier: selectedSupplier,
+    });
+    setReceiptOpen(true);
   };
 
   // Stats
