@@ -251,7 +251,14 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}>
                                 <Minus className="w-3 h-3" />
                               </Button>
-                              <span className="w-8 text-center">{item.quantity}</span>
+                              <Input
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) => onUpdateQuantity(item.product.id, parseInt(e.target.value) || 1)}
+                                className="w-14 text-center h-7 text-sm"
+                                dir="ltr"
+                                min="1"
+                              />
                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}>
                                 <Plus className="w-3 h-3" />
                               </Button>
