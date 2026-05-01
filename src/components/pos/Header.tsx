@@ -14,6 +14,7 @@ interface HeaderProps {
 
 export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderProps) {
   const { t, language } = useLanguage();
+  const { signOut } = useAuth();
   const { isInstallable, install } = usePWAInstall();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentTime, setCurrentTime] = useState(new Date());
