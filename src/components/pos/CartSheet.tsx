@@ -1,6 +1,7 @@
 import { ShoppingBag, Minus, Plus, Trash2, X, CreditCard, Banknote, MessageCircle, Award } from 'lucide-react';
 import { CartItem, Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
+import { useT } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
 import { ReceiptPrinter } from './ReceiptPrinter';
 
@@ -49,6 +50,7 @@ export function CartSheet({
   storeAddress,
   commercialRegister,
 }: CartSheetProps) {
+  const t = useT();
   const [discountInput, setDiscountInput] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [showReceipt, setShowReceipt] = useState(false);
@@ -93,11 +95,11 @@ export function CartSheet({
   };
 
   const handleWhatsAppOrder = () => {
-    const itemsList = items.map(item => 
+    const itemsList = items.map(item =>
       `• ${item.product.nameAr} × ${item.quantity} = ${(item.product.price * item.quantity).toFixed(3)} ${CURRENCY}`
     ).join('\n');
-    
-    const message = `🛒 طلب جديد من كشك هاني\n\n${itemsList}\n\n💰 المجموع: ${total.toFixed(3)} ${CURRENCY}\n\n📍 العنوان: `;
+
+    const message = `🛒 ${t('purchases.newInvoice')}\n\n${itemsList}\n\n💰 ${t('common.total')}: ${total.toFixed(3)} ${CURRENCY}\n\n📍 ${t('common.address')}: `;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -122,7 +124,7 @@ export function CartSheet({
             </button>
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-primary" />
-              <span className="font-bold text-lg">السلة ({items.length})</span>
+              <span className="font-bold text-lg">{t('sell.cart')} ({items.length})</span>
             </div>
             <div className="w-10" />
           </div>
@@ -136,14 +138,14 @@ export function CartSheet({
                   className="pos-button-success text-sm py-2.5"
                 >
                   <Banknote className="w-4 h-4" />
-                  نقدي
+                  {t('common.cash')}
                 </button>
                 <button
                   onClick={() => handleCheckout('credit')}
                   className="pos-button-outline text-sm py-2.5"
                 >
                   <CreditCard className="w-4 h-4" />
-                  آجل
+                  {t('common.credit')}
                 </button>
               </div>
               <button
@@ -151,7 +153,7 @@ export function CartSheet({
                 className="w-full pos-button bg-success text-success-foreground py-2.5 text-sm"
               >
                 <MessageCircle className="w-4 h-4" />
-                طلب توصيل واتساب
+                WhatsApp
               </button>
             </div>
           )}
@@ -162,7 +164,7 @@ export function CartSheet({
           {items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <ShoppingBag className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>السلة فارغة</p>
+              <p>{t('sell.emptyCart')}</p>
             </div>
           ) : (
             items.map((item) => (
@@ -216,7 +218,7 @@ export function CartSheet({
                 onChange={(e) => setSelectedCustomerId(e.target.value)}
                 className="pos-input text-sm"
               >
-                <option value="">زبون عابر</option>
+                <option value="">{t('sell.noCustomer')}</option>
                 {customers.map(c => (
                   <option key={c.id} value={c.id}>{c.name} - {c.phone}</option>
                 ))}
@@ -229,9 +231,9 @@ export function CartSheet({
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Award className="w-5 h-5 text-amber-500" />
-                    <span className="font-bold text-amber-600">نقاط {selectedCustomer.name}</span>
+                    <span className="font-bold text-amber-600">{t('sell.points')} : {selectedCustomer.name}</span>
                   </div>
-                  <span className="text-lg font-bold text-amber-600">{selectedCustomer.points} نقطة</span>
+                  <span className="text-lg font-bold text-amber-600">{selectedCustomer.points} {t('sell.points')}</span>
                 </div>
                 
                 <div className="flex items-center gap-2 mb-2">
@@ -247,7 +249,7 @@ export function CartSheet({
                     }}
                     className="w-5 h-5 accent-amber-500"
                   />
-                  <label htmlFor="usePoints" className="text-sm">استخدام النقاط للخصم</label>
+                  <label htmlFor="usePoints" className="text-sm">{t('sell.redeemPoints')}</label>
                 </div>
                 
                 {usePoints && (
@@ -261,11 +263,11 @@ export function CartSheet({
                       className="w-full accent-amber-500"
                     />
                     <div className="flex justify-between text-sm">
-                      <span>{pointsToRedeem} نقطة</span>
-                      <span className="text-success font-bold">خصم: {pointsDiscount.toFixed(3)} {CURRENCY}</span>
+                      <span>{pointsToRedeem} {t('sell.points')}</span>
+                      <span className="text-success font-bold">{t('common.discount')}: {pointsDiscount.toFixed(3)} {CURRENCY}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {pointsToDiscountRate} نقطة = 1 {CURRENCY}
+                      {pointsToDiscountRate} {t('sell.points')} = 1 {CURRENCY}
                     </p>
                   </div>
                 )}
@@ -278,29 +280,29 @@ export function CartSheet({
                 type="number"
                 value={discountInput}
                 onChange={(e) => setDiscountInput(e.target.value)}
-                placeholder="خصم (TND)"
+                placeholder={`${t('common.discount')} (TND)`}
                 className="pos-input flex-1 text-sm"
               />
               <button onClick={applyDiscount} className="pos-button-outline text-sm px-4">
-                تطبيق
+                {t('common.confirm')}
               </button>
             </div>
 
             {/* Totals */}
             <div className="px-4 py-3 bg-muted space-y-2">
               <div className="flex justify-between text-sm">
-                <span>المجموع الفرعي</span>
+                <span>{t('common.subtotal')}</span>
                 <span>{subtotal.toFixed(3)} {CURRENCY}</span>
               </div>
               {globalDiscount > 0 && (
                 <div className="flex justify-between text-sm text-destructive">
-                  <span>الخصم</span>
+                  <span>{t('common.discount')}</span>
                   <span>-{globalDiscount.toFixed(3)} {CURRENCY}</span>
                 </div>
               )}
               {pointsDiscount > 0 && (
                 <div className="flex justify-between text-sm text-amber-600">
-                  <span>خصم النقاط ({pointsToRedeem} نقطة)</span>
+                  <span>{t('sell.points')} ({pointsToRedeem})</span>
                   <span>-{pointsDiscount.toFixed(3)} {CURRENCY}</span>
                 </div>
               )}
@@ -311,7 +313,7 @@ export function CartSheet({
                 </div>
               )}
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
-                <span>الإجمالي</span>
+                <span>{t('common.total')}</span>
                 <span className="text-success">{finalTotal.toFixed(3)} {CURRENCY}</span>
               </div>
             </div>
