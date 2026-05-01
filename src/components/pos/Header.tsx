@@ -2,6 +2,7 @@ import { Store, Wifi, WifiOff, Bell, LogOut, Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { useT } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
 interface HeaderProps {
@@ -11,11 +12,20 @@ interface HeaderProps {
   logo?: string | null;
 }
 
-export function Header({ lowStockCount, kioskName = 'كشك هاني', kioskNameFr = 'Hani Kiosk', logo }: HeaderProps) {
+export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderProps) {
+  const t = useT();
   const { signOut } = useAuth();
   const { isInstallable, install } = usePWAInstall();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  const displayName = kioskName || t('header.appName');
+  const displayNameSecondary = kioskNameFr || t('header.appNameSecondary');
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success(t('auth.logoutSuccess'));
+  };
 
   const handleSignOut = async () => {
     await signOut();
