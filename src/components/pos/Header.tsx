@@ -45,10 +45,10 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
   }, []);
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('ar-TN', { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString(t('settings.arabic') === 'العربية' ? 'ar-TN' : 'fr-TN', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
     });
   };
 
@@ -57,15 +57,15 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {logo ? (
-            <img src={logo} alt={kioskName} className="w-10 h-10 rounded-xl object-cover" />
+            <img src={logo} alt={displayName} className="w-10 h-10 rounded-xl object-cover" />
           ) : (
             <div className="w-10 h-10 bg-primary-foreground/20 rounded-xl flex items-center justify-center">
               <Store className="w-6 h-6" />
             </div>
           )}
           <div>
-            <h1 className="text-lg font-bold">{kioskName}</h1>
-            <p className="text-xs text-primary-foreground/80">{kioskNameFr}</p>
+            <h1 className="text-lg font-bold">{displayName}</h1>
+            <p className="text-xs text-primary-foreground/80">{displayNameSecondary}</p>
           </div>
         </div>
 
@@ -74,13 +74,13 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
             <button
               onClick={async () => {
                 const accepted = await install();
-                if (accepted) toast.success('تم تثبيت التطبيق بنجاح!');
+                if (accepted) toast.success(t('common.success'));
               }}
               className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-success/20 hover:bg-success/30 transition-colors animate-pulse"
-              title="تثبيت التطبيق"
+              title={t('common.install')}
             >
               <Download className="w-3 h-3" />
-              <span>تثبيت</span>
+              <span>{t('common.install')}</span>
             </button>
           )}
 
@@ -100,12 +100,12 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
             {isOnline ? (
               <>
                 <Wifi className="w-3 h-3" />
-                <span>متصل</span>
+                <span>{t('common.online')}</span>
               </>
             ) : (
               <>
                 <WifiOff className="w-3 h-3" />
-                <span>غير متصل</span>
+                <span>{t('common.offline')}</span>
               </>
             )}
           </div>
@@ -113,10 +113,10 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
           <button
             onClick={handleSignOut}
             className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors"
-            title="تسجيل الخروج"
+            title={t('auth.signOut')}
           >
             <LogOut className="w-3 h-3" />
-            <span>خروج</span>
+            <span>{t('common.logout')}</span>
           </button>
         </div>
       </div>
