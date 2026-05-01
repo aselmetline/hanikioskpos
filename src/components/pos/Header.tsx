@@ -27,10 +27,6 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
     toast.success(t('auth.logoutSuccess'));
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    toast.success('تم تسجيل الخروج بنجاح');
-  };
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
