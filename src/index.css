@@ -134,8 +134,11 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Cairo', sans-serif;
-    direction: rtl;
   }
+
+  /* Direction is controlled dynamically via LanguageContext on <html dir="..."> */
+  html[dir="rtl"] body { direction: rtl; text-align: right; }
+  html[dir="ltr"] body { direction: ltr; text-align: left; }
 }
 
 @layer components {
