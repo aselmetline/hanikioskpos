@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Html5Qrcode } from 'html5-qrcode';
+import { useT } from '@/contexts/LanguageContext';
 
 interface BarcodeScannerProps {
   open: boolean;
@@ -15,6 +16,7 @@ interface BarcodeScannerProps {
 }
 
 export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerProps) {
+  const t = useT();
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -90,7 +92,7 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
         <DialogHeader className="p-4 pb-2">
           <DialogTitle className="flex items-center gap-2">
             <Camera className="w-5 h-5 text-primary" />
-            مسح الباركود
+            {t('sell.scanBarcode')}
           </DialogTitle>
         </DialogHeader>
         
@@ -121,13 +123,13 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
           {error && (
             <div className="absolute inset-0 bg-background/90 flex flex-col items-center justify-center p-4 text-center">
               <Camera className="w-12 h-12 text-muted-foreground mb-4" />
-              <p className="text-destructive font-medium mb-2">تعذر الوصول للكاميرا</p>
+              <p className="text-destructive font-medium mb-2">{t('common.error')}</p>
               <p className="text-sm text-muted-foreground">{error}</p>
               <button
                 onClick={startScanner}
                 className="mt-4 pos-button-primary"
               >
-                إعادة المحاولة
+                {t('common.previous')}
               </button>
             </div>
           )}
@@ -135,7 +137,7 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
 
         <div className="p-4 bg-muted/50 text-center">
           <p className="text-sm text-muted-foreground">
-            وجّه الكاميرا نحو الباركود
+            {t('sell.scanBarcode')}
           </p>
         </div>
       </DialogContent>

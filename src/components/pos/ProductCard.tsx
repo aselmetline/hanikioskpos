@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
 import { Product } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
+import { useT } from '@/contexts/LanguageContext';
 
 interface ProductCardProps {
   product: Product;
@@ -8,6 +9,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAdd }: ProductCardProps) {
+  const t = useT();
   const isLowStock = product.stock <= product.lowStockAlert && product.lowStockAlert > 0;
   const isOutOfStock = product.stock === 0;
 
@@ -36,7 +38,7 @@ export function ProductCard({ product, onAdd }: ProductCardProps) {
                   ? 'bg-warning/10 text-warning' 
                   : 'bg-success/10 text-success'
             }`}>
-              {isOutOfStock ? 'نفذ' : `${product.stock} ${product.unit}`}
+              {isOutOfStock ? t('sell.outOfStock') : `${product.stock} ${product.unit}`}
             </div>
           </div>
         </div>

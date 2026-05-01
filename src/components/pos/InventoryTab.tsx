@@ -8,6 +8,7 @@ import { EditProductDialog } from './EditProductDialog';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { ExcelImportDialog } from './ExcelImportDialog';
 import { exportProductsToExcel, ExcelProduct } from '@/utils/excelUtils';
+import { useT } from '@/contexts/LanguageContext';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -42,6 +43,7 @@ export function InventoryTab({
   onAddProduct,
   loading = false
 }: InventoryTabProps) {
+  const t = useT();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
@@ -56,11 +58,11 @@ export function InventoryTab({
 
   const handleExport = () => {
     if (products.length === 0) {
-      toast.error('لا توجد منتجات للتصدير');
+      toast.error(t('common.noData'));
       return;
     }
     exportProductsToExcel(products);
-    toast.success('تم تصدير المنتجات بنجاح');
+    toast.success(t('common.success'));
   };
 
   const handleImport = async (importedProducts: ExcelProduct[]) => {
@@ -73,17 +75,17 @@ export function InventoryTab({
         console.error('Failed to import product:', p.nameAr, err);
       }
     }
-    toast.success(`تم استيراد ${successCount} منتج بنجاح`);
+    toast.success(`${successCount} ✓`);
   };
 
 
   return (
     <div className="flex flex-col h-full">
       <div className="p-4">
-        <SearchBar 
-          value={searchQuery} 
-          onChange={onSearchChange} 
-          placeholder="بحث في المخزون..."
+        <SearchBar
+          value={searchQuery}
+          onChange={onSearchChange}
+          placeholder={`${t('common.search')}...`}
         />
       </div>
 
@@ -92,7 +94,7 @@ export function InventoryTab({
         <div className="mx-4 mb-4 p-4 bg-warning/10 border border-warning/30 rounded-xl">
           <div className="flex items-center gap-2 text-warning font-bold mb-2">
             <AlertTriangle className="w-5 h-5" />
-            <span>تنبيه مخزون منخفض ({lowStockProducts.length})</span>
+            <span>{t('inventory.lowStock')} ({lowStockProducts.length})</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {lowStockProducts.slice(0, 5).map(p => (
@@ -122,7 +124,7 @@ export function InventoryTab({
                     
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold truncate">{product.nameAr}</h4>
-                      <p className="text-xs text-muted-foreground">{product.barcode || 'بدون باركود'}</p>
+                      <p className="text-xs text-muted-foreground">{product.barcode || t('common.noData')}</p>
                     </div>
                     
                     <div className="text-left">
@@ -154,8 +156,8 @@ export function InventoryTab({
             {products.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
                 <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-lg">لا توجد منتجات</p>
-                <p className="text-sm">أضف منتجات جديدة للبدء</p>
+                <p className="text-lg">{t('common.noData')}</p>
+                <p className="text-sm">{t('inventory.addProduct')}</p>
               </div>
             )}
           </>
@@ -167,14 +169,14 @@ export function InventoryTab({
         <button
           onClick={handleExport}
           className="w-12 h-12 bg-secondary text-secondary-foreground rounded-xl shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-          title="تصدير Excel"
+          title={t('inventory.exportExcel')}
         >
           <Download className="w-5 h-5" />
         </button>
         <button
           onClick={() => setShowImportDialog(true)}
           className="w-12 h-12 bg-secondary text-secondary-foreground rounded-xl shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-          title="استيراد Excel"
+          title={t('inventory.importExcel')}
         >
           <Upload className="w-5 h-5" />
         </button>
@@ -213,8 +215,8 @@ export function InventoryTab({
         open={deleteProductId !== null}
         onOpenChange={(open) => !open && setDeleteProductId(null)}
         onConfirm={handleDeleteConfirm}
-        title="حذف المنتج"
-        description="هل أنت متأكد من حذف هذا المنتج؟ سيتم حذفه نهائياً من قاعدة البيانات."
+        title={t('inventory.deleteProduct')}
+        description={t('inventory.confirmDelete')}
       />
     </div>
   );

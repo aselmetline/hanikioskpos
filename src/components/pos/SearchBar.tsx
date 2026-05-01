@@ -1,4 +1,5 @@
 import { Search, X, ScanBarcode } from 'lucide-react';
+import { useT } from '@/contexts/LanguageContext';
 
 interface SearchBarProps {
   value: string;
@@ -6,7 +7,9 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-export function SearchBar({ value, onChange, placeholder = "بحث بالاسم أو الباركود..." }: SearchBarProps) {
+export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
+  const t = useT();
+  const ph = placeholder ?? `${t('common.search')}...`;
   return (
     <div className="relative">
       <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -14,7 +17,7 @@ export function SearchBar({ value, onChange, placeholder = "بحث بالاسم 
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={ph}
         className="pos-input pr-12 pl-12"
       />
       {value ? (

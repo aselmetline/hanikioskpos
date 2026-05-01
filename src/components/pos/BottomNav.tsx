@@ -1,6 +1,7 @@
 import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { useT } from '@/contexts/LanguageContext';
 
 export type TabType = 'sell' | 'inventory' | 'purchases' | 'expenses' | 'customers' | 'suppliers' | 'reports' | 'queries' | 'cashbox' | 'settings';
 interface BottomNavProps {
@@ -10,17 +11,18 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavProps) {
+  const t = useT();
   const tabs = [
-    { id: 'sell' as TabType, icon: ShoppingCart, label: 'بيع' },
-    { id: 'inventory' as TabType, icon: Package, label: 'مخزون' },
-    { id: 'purchases' as TabType, icon: ShoppingBag, label: 'مشتريات' },
-    { id: 'expenses' as TabType, icon: Receipt, label: 'مصروفات' },
-    { id: 'cashbox' as TabType, icon: Wallet, label: 'صندوق' },
-    { id: 'customers' as TabType, icon: Users, label: 'عملاء' },
-    { id: 'suppliers' as TabType, icon: Truck, label: 'موردين' },
-    { id: 'reports' as TabType, icon: BarChart3, label: 'تقارير' },
-    { id: 'queries' as TabType, icon: FileSearch, label: 'استعلامات' },
-    { id: 'settings' as TabType, icon: Settings, label: 'إعدادات' },
+    { id: 'sell' as TabType, icon: ShoppingCart, label: t('nav.sell') },
+    { id: 'inventory' as TabType, icon: Package, label: t('nav.inventory') },
+    { id: 'purchases' as TabType, icon: ShoppingBag, label: t('nav.purchases') },
+    { id: 'expenses' as TabType, icon: Receipt, label: t('nav.expenses') },
+    { id: 'cashbox' as TabType, icon: Wallet, label: t('nav.cashbox') },
+    { id: 'customers' as TabType, icon: Users, label: t('nav.customers') },
+    { id: 'suppliers' as TabType, icon: Truck, label: t('nav.suppliers') },
+    { id: 'reports' as TabType, icon: BarChart3, label: t('nav.reports') },
+    { id: 'queries' as TabType, icon: FileSearch, label: t('nav.queries') },
+    { id: 'settings' as TabType, icon: Settings, label: t('nav.settings') },
   ];
 
   return (
