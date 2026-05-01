@@ -1,6 +1,7 @@
 import { AlertTriangle, X, Package, Bell } from 'lucide-react';
 import { Product } from '@/types/pos';
 import { useState, useEffect } from 'react';
+import { useT } from '@/contexts/LanguageContext';
 
 interface LowStockNotificationProps {
   products: Product[];
@@ -8,6 +9,7 @@ interface LowStockNotificationProps {
 }
 
 export function LowStockNotification({ products, onDismiss }: LowStockNotificationProps) {
+  const t = useT();
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -37,7 +39,7 @@ export function LowStockNotification({ products, onDismiss }: LowStockNotificati
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-bold text-warning flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" />
-                تنبيه مخزون منخفض
+                {t('inventory.lowStock')}
               </h4>
               <button
                 onClick={handleDismiss}
@@ -48,7 +50,7 @@ export function LowStockNotification({ products, onDismiss }: LowStockNotificati
             </div>
             
             <p className="text-sm text-muted-foreground mb-3">
-              {products.length} منتج يحتاج إلى إعادة تموين
+              {products.length} {t('common.items')}
             </p>
             
             <div className="flex flex-wrap gap-2">
@@ -64,7 +66,7 @@ export function LowStockNotification({ products, onDismiss }: LowStockNotificati
               ))}
               {products.length > 4 && (
                 <span className="text-xs text-muted-foreground px-2 py-1">
-                  +{products.length - 4} آخرين
+                  +{products.length - 4}
                 </span>
               )}
             </div>

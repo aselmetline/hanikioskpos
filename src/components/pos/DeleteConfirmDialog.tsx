@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -21,25 +22,28 @@ export function DeleteConfirmDialog({
   open,
   onOpenChange,
   onConfirm,
-  title = "تأكيد الحذف",
-  description = "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء."
+  title,
+  description,
 }: DeleteConfirmDialogProps) {
+  const { t, isRTL } = useLanguage();
+  const finalTitle = title ?? t('common.delete');
+  const finalDesc = description ?? t('inventory.confirmDelete');
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-[90vw] sm:max-w-md" dir="rtl">
+      <AlertDialogContent className="max-w-[90vw] sm:max-w-md" dir={isRTL ? 'rtl' : 'ltr'}>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-right">{title}</AlertDialogTitle>
-          <AlertDialogDescription className="text-right">
-            {description}
+          <AlertDialogTitle className={isRTL ? 'text-right' : 'text-left'}>{finalTitle}</AlertDialogTitle>
+          <AlertDialogDescription className={isRTL ? 'text-right' : 'text-left'}>
+            {finalDesc}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex-row-reverse gap-2 sm:flex-row-reverse">
-          <AlertDialogCancel className="mt-0">إلغاء</AlertDialogCancel>
+        <AlertDialogFooter className="gap-2">
+          <AlertDialogCancel className="mt-0">{t('common.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            حذف
+            {t('common.delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

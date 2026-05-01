@@ -1,4 +1,5 @@
 import { categories } from '@/data/sampleData';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CategoryFilterProps {
   selectedCategory: string | null;
@@ -6,6 +7,7 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryFilterProps) {
+  const { t, language } = useLanguage();
   return (
     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       <button
@@ -16,7 +18,7 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryF
             : 'bg-secondary text-secondary-foreground'
         }`}
       >
-        الكل
+        {t('common.all')}
       </button>
       
       {categories.map((category) => (
@@ -30,7 +32,7 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryF
           }`}
         >
           <span>{category.icon}</span>
-          <span>{category.nameAr}</span>
+          <span>{language === 'fr' ? category.name : category.nameAr}</span>
         </button>
       ))}
     </div>

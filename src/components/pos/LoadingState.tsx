@@ -1,5 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
+import { useT } from '@/contexts/LanguageContext';
 
 interface LoadingStateProps {
   variant?: 'products' | 'list' | 'full' | 'spinner';
@@ -7,6 +8,7 @@ interface LoadingStateProps {
 }
 
 export function LoadingState({ variant = 'products', count = 6 }: LoadingStateProps) {
+  const t = useT();
   if (variant === 'spinner') {
     return (
       <div className="flex items-center justify-center py-12">
@@ -19,7 +21,7 @@ export function LoadingState({ variant = 'products', count = 6 }: LoadingStatePr
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-4">
         <Loader2 className="w-12 h-12 animate-spin text-primary" />
-        <p className="text-muted-foreground">جاري التحميل...</p>
+        <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
     );
   }
