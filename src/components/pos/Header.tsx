@@ -44,7 +44,7 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
   }, []);
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString(t('settings.arabic') === 'العربية' ? 'ar-TN' : 'fr-TN', {
+    return date.toLocaleTimeString(language === 'ar' ? 'ar-TN' : 'fr-TN', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
