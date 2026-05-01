@@ -7,6 +7,7 @@ import { ProductCard } from './ProductCard';
 import { CartSheet } from './CartSheet';
 import { LoadingState } from './LoadingState';
 import { BarcodeScanner } from './BarcodeScanner';
+import { useT } from '@/contexts/LanguageContext';
 import { useState } from 'react';
 
 interface SellTabProps {
@@ -68,6 +69,7 @@ export function SellTab({
   storeAddress,
   commercialRegister,
 }: SellTabProps) {
+  const t = useT();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
 
@@ -120,8 +122,8 @@ export function SellTab({
             
             {products.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
-                <p className="text-lg">لا توجد منتجات</p>
-                <p className="text-sm">جرب البحث بكلمة أخرى</p>
+                <p className="text-lg">{t('sell.noProducts')}</p>
+                <p className="text-sm">{t('sell.searchProduct')}</p>
               </div>
             )}
           </>
@@ -136,7 +138,7 @@ export function SellTab({
         >
           <div className="flex items-center gap-2">
             <ShoppingBag className="w-5 h-5" />
-            <span className="font-bold">{itemCount} منتج</span>
+            <span className="font-bold">{itemCount} {t('common.items')}</span>
           </div>
           <div className="w-px h-6 bg-primary-foreground/30" />
           <span className="font-bold text-lg">{total.toFixed(3)} {CURRENCY}</span>
