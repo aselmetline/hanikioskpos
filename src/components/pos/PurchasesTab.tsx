@@ -360,14 +360,14 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
         <div className="fixed bottom-16 left-0 right-0 bg-background border-t p-3">
           <div className="flex items-center justify-between gap-2 max-w-lg mx-auto">
             <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground">{currentItems.length} صنف</span>
+              <span className="text-xs text-muted-foreground">{currentItems.length} {t('common.items')}</span>
             </div>
             <div className="bg-destructive text-destructive-foreground rounded px-4 py-2">
               <span className="font-bold">{currentTotal.toFixed(3)}</span>
             </div>
-            <span className="font-medium">الإجمالي</span>
+            <span className="font-medium">{t('common.total')}</span>
             <Button onClick={handleSave} disabled={currentItems.length === 0} size="sm" className="gap-1">
-              <Save className="w-4 h-4" /> حفظ
+              <Save className="w-4 h-4" /> {t('common.save')}
             </Button>
           </div>
         </div>
@@ -377,8 +377,8 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
         open={!!deleteId}
         onOpenChange={(open) => { if (!open) setDeleteId(null); }}
         onConfirm={async () => { if (deleteId && onDeletePurchase) { await onDeletePurchase(deleteId); setDeleteId(null); } }}
-        title="حذف فاتورة المشتريات"
-        description="هل أنت متأكد من حذف هذه الفاتورة؟ سيتم حذف جميع بنودها."
+        title={t('purchases.invoiceDeleted')}
+        description={t('purchases.confirmDelete')}
       />
 
       {savedPurchaseData && (
