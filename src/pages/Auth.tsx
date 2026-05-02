@@ -8,8 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Loader2, Store, Mail, Lock, User, Phone } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Auth() {
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -31,13 +33,13 @@ export default function Auth() {
     const { error } = await signIn(loginEmail, loginPassword);
     
     if (error) {
-      toast.error('فشل تسجيل الدخول', {
+      toast.error(t('auth.signIn') + ' - ' + t('common.error'), {
         description: error.message === 'Invalid login credentials' 
-          ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+          ? t('auth.email') + ' / ' + t('auth.password')
           : error.message
       });
     } else {
-      toast.success('تم تسجيل الدخول بنجاح!');
+      toast.success(t('auth.loginSuccess'));
       navigate('/');
     }
     
@@ -48,12 +50,12 @@ export default function Auth() {
     e.preventDefault();
     
     if (!signupName.trim()) {
-      toast.error('يرجى إدخال اسم العرض');
+      toast.error(t('auth.displayName'));
       return;
     }
     
     if (signupPassword.length < 6) {
-      toast.error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      toast.error(t('auth.password') + ' (min 6)');
       return;
     }
 
@@ -62,12 +64,12 @@ export default function Auth() {
     const { error } = await signUp(signupEmail, signupPassword, signupName, signupPhone);
     
     if (error) {
-      toast.error('فشل إنشاء الحساب', {
+      toast.error(t('auth.signUp') + ' - ' + t('common.error'), {
         description: error.message
       });
     } else {
-      toast.success('تم إنشاء الحساب بنجاح!', {
-        description: 'يمكنك الآن تسجيل الدخول'
+      toast.success(t('auth.signupSuccess'), {
+        description: t('auth.signIn')
       });
       navigate('/');
     }
@@ -83,23 +85,23 @@ export default function Auth() {
             <Store className="w-8 h-8 text-primary-foreground" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold">كشك هاني</CardTitle>
-            <CardDescription>Hani Kiosk POS</CardDescription>
+            <CardTitle className="text-2xl font-bold">{t('header.appName')}</CardTitle>
+            <CardDescription>{t('header.appNameSecondary')}</CardDescription>
           </div>
         </CardHeader>
         
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">تسجيل الدخول</TabsTrigger>
-              <TabsTrigger value="signup">حساب جديد</TabsTrigger>
+              <TabsTrigger value="login">{t('auth.signIn')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('auth.signUp')}</TabsTrigger>
             </TabsList>
             
             {/* Login Tab */}
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="login-email">البريد الإلكتروني</Label>
+                  <Label htmlFor="login-email">{t('auth.email')}</Label>
                   <div className="relative">
                     <Mail className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -116,7 +118,7 @@ export default function Auth() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="login-password">كلمة المرور</Label>
+                  <Label htmlFor="login-password">{t('auth.password')}</Label>
                   <div className="relative">
                     <Lock className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -136,10 +138,10 @@ export default function Auth() {
                   {isLoading ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      جاري التحميل...
+                      {t('auth.loggingIn')}
                     </>
                   ) : (
-                    'دخول'
+                    t('auth.signIn')
                   )}
                 </Button>
               </form>
@@ -149,7 +151,7 @@ export default function Auth() {
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">اسم العرض *</Label>
+                  <Label htmlFor="signup-name">{t('auth.displayName')} *</Label>
                   <div className="relative">
                     <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -166,7 +168,7 @@ export default function Auth() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-phone">رقم الهاتف</Label>
+                  <Label htmlFor="signup-phone">{t('common.phone')}</Label>
                   <div className="relative">
                     <Phone className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -182,7 +184,7 @@ export default function Auth() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">البريد الإلكتروني *</Label>
+                  <Label htmlFor="signup-email">{t('auth.email')} *</Label>
                   <div className="relative">
                     <Mail className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -199,7 +201,7 @@ export default function Auth() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">كلمة المرور *</Label>
+                  <Label htmlFor="signup-password">{t('auth.password')} *</Label>
                   <div className="relative">
                     <Lock className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -220,10 +222,10 @@ export default function Auth() {
                   {isLoading ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      جاري الإنشاء...
+                      {t('auth.creatingAccount')}
                     </>
                   ) : (
-                    'إنشاء حساب'
+                    t('auth.signUp')
                   )}
                 </Button>
               </form>
