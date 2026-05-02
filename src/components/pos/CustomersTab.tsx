@@ -4,6 +4,7 @@ import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
 import { useState } from 'react';
 import { PointsHistoryDialog } from './PointsHistoryDialog';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CustomersTabProps {
   customers: Customer[];
@@ -20,6 +21,7 @@ export function CustomersTab({
   onAddCustomer,
   onFetchPointsHistory
 }: CustomersTabProps) {
+  const { t } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');

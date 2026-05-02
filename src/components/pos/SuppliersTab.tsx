@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Plus, Search, Phone, MapPin, FileText, Trash2, Edit, Truck, Banknote } from 'lucide-react';
 import { Supplier } from '@/hooks/useSuppliers';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SuppliersTabProps {
   suppliers: Supplier[];
@@ -24,6 +25,7 @@ interface SuppliersTabProps {
 export function SuppliersTab({
   suppliers, searchQuery, onSearchChange, onAddSupplier, onUpdateSupplier, onDeleteSupplier, onUpdateDebt, loading
 }: SuppliersTabProps) {
+  const { t } = useLanguage();
   const [showAdd, setShowAdd] = useState(false);
   const [editSupplier, setEditSupplier] = useState<Supplier | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -60,9 +62,9 @@ export function SuppliersTab({
     <div className="flex flex-col h-full">
       <ScrollArea className="flex-1 px-4 pb-32">
         <div className="flex items-center justify-between py-4">
-          <h2 className="text-xl font-bold">الموردين</h2>
+          <h2 className="text-xl font-bold">{t('suppliers.title')}</h2>
           <Button size="sm" onClick={() => { resetForm(); setShowAdd(true); }} className="gap-1">
-            <Plus className="w-4 h-4" /> إضافة مورد
+            <Plus className="w-4 h-4" /> {t('suppliers.addSupplier')}
           </Button>
         </div>
 
@@ -72,14 +74,14 @@ export function SuppliersTab({
             <CardContent className="p-3 text-center">
               <Truck className="w-5 h-5 mx-auto mb-1 text-primary" />
               <p className="text-2xl font-bold">{suppliers.length}</p>
-              <p className="text-xs text-muted-foreground">إجمالي الموردين</p>
+              <p className="text-xs text-muted-foreground">{t('suppliers.title')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 text-center">
               <Banknote className="w-5 h-5 mx-auto mb-1 text-destructive" />
               <p className="text-2xl font-bold">{totalDebt.toFixed(3)}</p>
-              <p className="text-xs text-muted-foreground">إجمالي الديون</p>
+              <p className="text-xs text-muted-foreground">{t('suppliers.totalDebt')}</p>
             </CardContent>
           </Card>
         </div>
@@ -88,7 +90,7 @@ export function SuppliersTab({
         <div className="relative mb-4">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="بحث بالاسم أو الهاتف..."
+            placeholder={t('common.search') + '...'}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pr-10"
@@ -97,9 +99,9 @@ export function SuppliersTab({
 
         {/* Suppliers List */}
         {loading ? (
-          <div className="text-center py-8 text-muted-foreground">جاري التحميل...</div>
+          <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>
         ) : suppliers.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">لا يوجد موردين بعد</div>
+          <div className="text-center py-8 text-muted-foreground">{t('suppliers.noSuppliers')}</div>
         ) : (
           <div className="space-y-3">
             {suppliers.map(supplier => (
@@ -128,15 +130,15 @@ export function SuppliersTab({
                       <p className={`text-lg font-bold ${supplier.debtBalance > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                         {supplier.debtBalance.toFixed(3)}
                       </p>
-                      <p className="text-[10px] text-muted-foreground">رصيد الدين</p>
+                      <p className="text-[10px] text-muted-foreground">{t('suppliers.debtBalance')}</p>
                     </div>
                   </div>
                   <div className="flex gap-2 mt-2">
                     <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs" onClick={() => { setDebtSupplier(supplier); setDebtType('add'); }}>
-                      <Banknote className="w-3 h-3" /> دين جديد
+                      <Banknote className="w-3 h-3" /> {t('suppliers.addDebt')}
                     </Button>
                     <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs" onClick={() => { setDebtSupplier(supplier); setDebtType('pay'); }}>
-                      <Banknote className="w-3 h-3" /> تسديد
+                      <Banknote className="w-3 h-3" /> {t('suppliers.payment')}
                     </Button>
                     <Button size="sm" variant="ghost" className="px-2" onClick={() => { setForm({ name: supplier.name, phone: supplier.phone, address: supplier.address, notes: supplier.notes }); setEditSupplier(supplier); }}>
                       <Edit className="w-4 h-4" />
@@ -154,29 +156,29 @@ export function SuppliersTab({
 
       {/* Add/Edit Dialog */}
       <Dialog open={showAdd || !!editSupplier} onOpenChange={(open) => { if (!open) { setShowAdd(false); setEditSupplier(null); resetForm(); } }}>
-        <DialogContent className="sm:max-w-md" dir="rtl">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editSupplier ? 'تعديل المورد' : 'إضافة مورد جديد'}</DialogTitle>
+            <DialogTitle>{editSupplier ? t('suppliers.editSupplier') : t('suppliers.addSupplier')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label>اسم المورد *</Label>
-              <Input value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="اسم المورد" />
+              <Label>{t('common.name')} *</Label>
+              <Input value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder={t('common.name')} />
             </div>
             <div>
-              <Label>الهاتف</Label>
-              <Input value={form.phone} onChange={(e) => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="رقم الهاتف" dir="ltr" />
+              <Label>{t('common.phone')}</Label>
+              <Input value={form.phone} onChange={(e) => setForm(f => ({ ...f, phone: e.target.value }))} placeholder={t('common.phone')} dir="ltr" />
             </div>
             <div>
-              <Label>العنوان</Label>
-              <Input value={form.address} onChange={(e) => setForm(f => ({ ...f, address: e.target.value }))} placeholder="العنوان" />
+              <Label>{t('common.address')}</Label>
+              <Input value={form.address} onChange={(e) => setForm(f => ({ ...f, address: e.target.value }))} placeholder={t('common.address')} />
             </div>
             <div>
-              <Label>ملاحظات</Label>
-              <Textarea value={form.notes} onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="ملاحظات" rows={2} />
+              <Label>{t('common.notes')}</Label>
+              <Textarea value={form.notes} onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))} placeholder={t('common.notes')} rows={2} />
             </div>
             <Button className="w-full" onClick={editSupplier ? handleEdit : handleAdd}>
-              {editSupplier ? 'حفظ التعديلات' : 'إضافة المورد'}
+              {editSupplier ? t('common.save') : t('suppliers.addSupplier')}
             </Button>
           </div>
         </DialogContent>
@@ -184,18 +186,18 @@ export function SuppliersTab({
 
       {/* Debt Dialog */}
       <Dialog open={!!debtSupplier} onOpenChange={(open) => { if (!open) { setDebtSupplier(null); setDebtAmount(''); } }}>
-        <DialogContent className="sm:max-w-sm" dir="rtl">
+        <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{debtType === 'add' ? 'إضافة دين' : 'تسديد دين'} - {debtSupplier?.name}</DialogTitle>
+            <DialogTitle>{debtType === 'add' ? t('suppliers.addDebt') : t('suppliers.payment')} - {debtSupplier?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">الرصيد الحالي: <span className="font-bold">{debtSupplier?.debtBalance.toFixed(3)}</span></p>
+            <p className="text-sm text-muted-foreground">{t('suppliers.debtBalance')}: <span className="font-bold">{debtSupplier?.debtBalance.toFixed(3)}</span></p>
             <div>
-              <Label>المبلغ</Label>
+              <Label>{t('common.amount')}</Label>
               <Input type="number" value={debtAmount} onChange={(e) => setDebtAmount(e.target.value)} placeholder="0.000" dir="ltr" step="0.001" />
             </div>
             <Button className="w-full" onClick={handleDebt} variant={debtType === 'pay' ? 'default' : 'destructive'}>
-              {debtType === 'add' ? 'تسجيل الدين' : 'تسجيل التسديد'}
+              {t('common.confirm')}
             </Button>
           </div>
         </DialogContent>
@@ -206,8 +208,8 @@ export function SuppliersTab({
         open={!!deleteId}
         onOpenChange={(open) => { if (!open) setDeleteId(null); }}
         onConfirm={async () => { if (deleteId) { await onDeleteSupplier(deleteId); setDeleteId(null); } }}
-        title="حذف المورد"
-        description="هل أنت متأكد من حذف هذا المورد؟ لن يتم حذف المشتريات المرتبطة به."
+        title={t('suppliers.supplierDeleted')}
+        description={t('suppliers.confirmDelete')}
       />
     </div>
   );
