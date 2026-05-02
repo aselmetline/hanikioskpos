@@ -25,6 +25,7 @@ interface AddProductDialogProps {
 }
 
 export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProductDialogProps) {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -43,11 +44,11 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
     
     // Validation
     if (!formData.nameAr.trim()) {
-      toast.error('يرجى إدخال اسم المنتج بالعربية');
+      toast.error(t('inventory.productName'));
       return;
     }
     if (!formData.price || parseFloat(formData.price) <= 0) {
-      toast.error('يرجى إدخال سعر صحيح');
+      toast.error(t('inventory.sellPrice'));
       return;
     }
 
@@ -106,7 +107,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
               <Package className="w-5 h-5 text-primary" />
             </div>
-            <h2 className="text-lg font-bold">إضافة منتج جديد</h2>
+            <h2 className="text-lg font-bold">{t('inventory.addProduct')}</h2>
           </div>
           <button
             onClick={() => onOpenChange(false)}
@@ -121,14 +122,14 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
           {/* Arabic Name */}
           <div className="space-y-2">
             <Label htmlFor="nameAr" className="flex items-center gap-2">
-              <span>اسم المنتج بالعربية</span>
+              <span>{t('inventory.productName')}</span>
               <span className="text-destructive">*</span>
             </Label>
             <Input
               id="nameAr"
               value={formData.nameAr}
               onChange={(e) => setFormData({ ...formData, nameAr: e.target.value })}
-              placeholder="مثال: حليب طازج"
+              placeholder={t('inventory.productName')}
               className="text-right"
               dir="rtl"
             />
@@ -136,7 +137,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
 
           {/* English Name (Optional) */}
           <div className="space-y-2">
-            <Label htmlFor="name">اسم المنتج بالإنجليزية (اختياري)</Label>
+            <Label htmlFor="name">{t('inventory.productNameFr')} ({t('common.optional')})</Label>
             <Input
               id="name"
               value={formData.name}
@@ -151,7 +152,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
             <div className="space-y-2">
               <Label htmlFor="price" className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
-                <span>سعر البيع</span>
+                <span>{t('inventory.sellPrice')}</span>
                 <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -168,7 +169,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
             <div className="space-y-2">
               <Label htmlFor="cost" className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
-                <span>سعر الشراء</span>
+                <span>{t('inventory.costPrice')}</span>
               </Label>
               <Input
                 id="cost"
@@ -185,7 +186,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
 
           {/* Category */}
           <div className="space-y-2">
-            <Label>التصنيف</Label>
+            <Label>{t('common.category')}</Label>
             <Select
               value={formData.category}
               onValueChange={(value) => setFormData({ ...formData, category: value })}
@@ -210,13 +211,13 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
           <div className="space-y-2">
             <Label htmlFor="barcode" className="flex items-center gap-2">
               <Barcode className="w-4 h-4" />
-              <span>الباركود (اختياري)</span>
+              <span>{t('common.barcode')} ({t('common.optional')})</span>
             </Label>
             <Input
               id="barcode"
               value={formData.barcode}
               onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-              placeholder="مثال: 6281000000001"
+              placeholder="6281000000001"
               dir="ltr"
             />
           </div>
@@ -226,7 +227,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
             <div className="space-y-2">
               <Label htmlFor="stock" className="flex items-center gap-2">
                 <Hash className="w-4 h-4" />
-                <span>الكمية</span>
+                <span>{t('common.quantity')}</span>
               </Label>
               <Input
                 id="stock"
@@ -239,7 +240,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="unit">الوحدة</Label>
+              <Label htmlFor="unit">{t('common.type')}</Label>
               <Select
                 value={formData.unit}
                 onValueChange={(value) => setFormData({ ...formData, unit: value })}
@@ -263,7 +264,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
           <div className="space-y-2">
             <Label htmlFor="lowStockAlert" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-warning" />
-              <span>تنبيه المخزون المنخفض</span>
+              <span>{t('inventory.lowStock')}</span>
             </Label>
             <Input
               id="lowStockAlert"
@@ -275,7 +276,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
               dir="ltr"
             />
             <p className="text-xs text-muted-foreground">
-              سيتم تنبيهك عندما تقل الكمية عن هذا الرقم
+              {t('settings.lowStockThreshold')}
             </p>
           </div>
 
@@ -289,10 +290,10 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  جاري الحفظ...
+                  {t('common.loading')}
                 </span>
               ) : (
-                'إضافة المنتج'
+                t('inventory.addProduct')
               )}
             </Button>
           </div>
