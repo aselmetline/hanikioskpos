@@ -72,7 +72,7 @@ export default function ExpensesTab({
         <Card className="bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20">
           <CardContent className="p-4 text-center">
             <TrendingDown className="w-6 h-6 mx-auto mb-2 text-destructive" />
-            <p className="text-xs text-muted-foreground">مصروفات اليوم</p>
+            <p className="text-xs text-muted-foreground">{t('expenses.todayExpenses')}</p>
             <p className="text-xl font-bold text-destructive">{todayTotal.toFixed(3)}</p>
             <p className="text-xs text-muted-foreground">TND</p>
           </CardContent>
@@ -80,7 +80,7 @@ export default function ExpensesTab({
         <Card className="bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20">
           <CardContent className="p-4 text-center">
             <Receipt className="w-6 h-6 mx-auto mb-2 text-destructive" />
-            <p className="text-xs text-muted-foreground">مصروفات الشهر</p>
+            <p className="text-xs text-muted-foreground">{t('expenses.monthExpenses')}</p>
             <p className="text-xl font-bold text-destructive">{monthTotal.toFixed(3)}</p>
             <p className="text-xs text-muted-foreground">TND</p>
           </CardContent>
@@ -92,14 +92,14 @@ export default function ExpensesTab({
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Plus className="w-5 h-5" />
-            إضافة مصروف جديد
+            {t('expenses.addExpense')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Category Selection */}
             <div className="space-y-2">
-              <Label>التصنيف</Label>
+              <Label>{t('common.category')}</Label>
             <div className="grid grid-cols-4 gap-2">
                 {EXPENSE_CATEGORIES.map((cat) => (
                   <button
@@ -113,7 +113,7 @@ export default function ExpensesTab({
                     }`}
                   >
                     <span className="text-lg block">{cat.icon}</span>
-                    <span className="text-xs">{cat.label}</span>
+                    <span className="text-xs">{t(`expenses.categories.${cat.id}`)}</span>
                   </button>
                 ))}
               </div>
@@ -121,7 +121,7 @@ export default function ExpensesTab({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="amount">المبلغ (TND)</Label>
+                <Label htmlFor="amount">{t('common.amount')} (TND)</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -135,7 +135,7 @@ export default function ExpensesTab({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="date">التاريخ</Label>
+                <Label htmlFor="date">{t('common.date')}</Label>
                 <Input
                   id="date"
                   type="date"
@@ -146,19 +146,19 @@ export default function ExpensesTab({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">الوصف (اختياري)</Label>
+              <Label htmlFor="description">{t('common.description')} ({t('common.optional')})</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="تفاصيل إضافية..."
+                placeholder={t('common.notes') + '...'}
                 rows={2}
               />
             </div>
 
             <Button type="submit" className="w-full" size="lg">
               <Plus className="w-5 h-5 ml-2" />
-              إضافة المصروف
+              {t('expenses.addExpense')}
             </Button>
           </form>
         </CardContent>
@@ -167,23 +167,23 @@ export default function ExpensesTab({
       {/* Expenses List */}
       <Card className="flex-1">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">سجل المصروفات</CardTitle>
+          <CardTitle className="text-lg">{t('expenses.title')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[300px]">
             {expenses.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Receipt className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>لا توجد مصروفات مسجلة</p>
+                <p>{t('expenses.noExpenses')}</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-right">التصنيف</TableHead>
-                    <TableHead className="text-right">الوصف</TableHead>
-                    <TableHead className="text-right">المبلغ</TableHead>
-                    <TableHead className="text-right">التاريخ</TableHead>
+                    <TableHead className="text-right">{t('common.category')}</TableHead>
+                    <TableHead className="text-right">{t('common.description')}</TableHead>
+                    <TableHead className="text-right">{t('common.amount')}</TableHead>
+                    <TableHead className="text-right">{t('common.date')}</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -195,7 +195,7 @@ export default function ExpensesTab({
                         <TableCell>
                           <Badge variant="outline" className="gap-1">
                             <span>{catInfo.icon}</span>
-                            {catInfo.label}
+                            {t(`expenses.categories.${catInfo.id}`)}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
@@ -205,7 +205,7 @@ export default function ExpensesTab({
                           -{expense.amount.toFixed(3)} TND
                         </TableCell>
                         <TableCell className="text-sm">
-                          {format(new Date(expense.date), 'dd/MM', { locale: ar })}
+                          {format(new Date(expense.date), 'dd/MM', { locale: dateLocale })}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -232,8 +232,8 @@ export default function ExpensesTab({
         open={deleteExpenseId !== null}
         onOpenChange={(open) => !open && setDeleteExpenseId(null)}
         onConfirm={handleDeleteConfirm}
-        title="حذف المصروف"
-        description="هل أنت متأكد من حذف هذا المصروف؟ سيتم حذفه نهائياً من السجل."
+        title={t('expenses.expenseDeleted')}
+        description={t('common.confirm') + '?'}
       />
     </div>
   );
