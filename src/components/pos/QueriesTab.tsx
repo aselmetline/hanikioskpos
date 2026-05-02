@@ -19,6 +19,7 @@ import {
   StoreActivityReport,
   SuppliersReport
 } from './reports';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface QueryItem {
   id: string;
@@ -50,6 +51,7 @@ export function QueriesTab({
   cashBoxBalance = 0,
   suppliers = []
 }: QueriesTabProps) {
+  const { t } = useLanguage();
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [activeReport, setActiveReport] = useState<string | null>(null);
@@ -57,60 +59,60 @@ export function QueriesTab({
   const sections: QuerySection[] = [
     {
       id: 'store',
-      title: 'المتجر',
+      title: t('reports.storeActivity'),
       items: [
-        { id: 'store-activity', label: 'عرض حركة المتجر' },
-        { id: 'store-activity-chart', label: 'عرض حركة المتجر - رسم بياني' },
+        { id: 'store-activity', label: t('reports.storeActivity') },
+        { id: 'store-activity-chart', label: t('reports.storeActivity') + ' - ' + t('reports.title') },
       ],
     },
     {
       id: 'sales',
-      title: 'المبيعات',
+      title: t('reports.sales'),
       items: [
-        { id: 'sales-report', label: 'تقرير بالمبيعات' },
-        { id: 'profits-report', label: 'تقارير الأرباح' },
+        { id: 'sales-report', label: t('reports.sales') },
+        { id: 'profits-report', label: t('reports.profits') },
       ],
     },
     {
       id: 'customers',
-      title: 'العملاء',
+      title: t('customers.title'),
       items: [
-        { id: 'customer-debts', label: 'ذمم العملاء' },
+        { id: 'customer-debts', label: t('reports.customerDebts') },
       ],
     },
     {
       id: 'purchases',
-      title: 'المشتريات',
+      title: t('reports.purchases'),
       items: [
-        { id: 'purchases-report', label: 'تقرير بالمشتريات' },
+        { id: 'purchases-report', label: t('reports.purchases') },
       ],
     },
     {
       id: 'suppliers',
-      title: 'الموردين',
+      title: t('suppliers.title'),
       items: [
-        { id: 'suppliers-report', label: 'تقرير الموردين والديون' },
+        { id: 'suppliers-report', label: t('reports.supplierDebts') },
       ],
     },
     {
       id: 'cashbox',
-      title: 'الصندوق',
+      title: t('cashbox.title'),
       items: [
-        { id: 'cashbox-activity', label: 'تقرير بحركة الصندوق' },
+        { id: 'cashbox-activity', label: t('reports.cashBox') },
       ],
     },
     {
       id: 'expenses',
-      title: 'المصروفات',
+      title: t('reports.expenses'),
       items: [
-        { id: 'expenses-report', label: 'تقرير بالمصروفات' },
+        { id: 'expenses-report', label: t('reports.expenses') },
       ],
     },
   ];
 
   const getReportTitle = (reportId: string): string => {
     const allItems = sections.flatMap(s => s.items);
-    return allItems.find(i => i.id === reportId)?.label || 'تقرير';
+    return allItems.find(i => i.id === reportId)?.label || t('reports.title');
   };
 
   const renderReport = () => {
@@ -235,7 +237,7 @@ export function QueriesTab({
     <div className="flex flex-col h-full p-4 pb-24" dir="rtl">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-primary">الاستعلامات</h2>
+        <h2 className="text-2xl font-bold text-primary">{t('queries.title')}</h2>
         <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center">
           <BarChart3 className="w-10 h-10 text-primary" />
         </div>
@@ -247,7 +249,7 @@ export function QueriesTab({
           variant="outline" 
           size="icon"
           className="h-10 w-10"
-          title="حفظ"
+          title={t('common.save')}
         >
           <Save className="h-4 w-4" />
         </Button>
@@ -262,7 +264,7 @@ export function QueriesTab({
               )}
             >
               <Calendar className="ml-2 h-4 w-4" />
-              {dateTo ? format(dateTo, "yyyy/MM/dd") : "إلى"}
+              {dateTo ? format(dateTo, "yyyy/MM/dd") : t('common.to')}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -275,7 +277,7 @@ export function QueriesTab({
           </PopoverContent>
         </Popover>
 
-        <span className="text-muted-foreground">إلى</span>
+        <span className="text-muted-foreground">{t('common.to')}</span>
 
         <Popover>
           <PopoverTrigger asChild>
@@ -287,7 +289,7 @@ export function QueriesTab({
               )}
             >
               <Calendar className="ml-2 h-4 w-4" />
-              {dateFrom ? format(dateFrom, "yyyy/MM/dd") : "من"}
+              {dateFrom ? format(dateFrom, "yyyy/MM/dd") : t('common.from')}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -300,7 +302,7 @@ export function QueriesTab({
           </PopoverContent>
         </Popover>
 
-        <span className="text-muted-foreground font-medium">للفترة من</span>
+        <span className="text-muted-foreground font-medium">{t('reports.period')}</span>
       </div>
 
       {/* Query Sections */}

@@ -4,6 +4,7 @@ import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
 import { useState } from 'react';
 import { PointsHistoryDialog } from './PointsHistoryDialog';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CustomersTabProps {
   customers: Customer[];
@@ -20,6 +21,7 @@ export function CustomersTab({
   onAddCustomer,
   onFetchPointsHistory
 }: CustomersTabProps) {
+  const { t } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
@@ -40,7 +42,7 @@ export function CustomersTab({
         <SearchBar 
           value={searchQuery} 
           onChange={onSearchChange} 
-          placeholder="بحث بالاسم أو الهاتف..."
+          placeholder={t('common.search') + '...'}
         />
 
         {/* Stats */}
@@ -134,7 +136,7 @@ export function CustomersTab({
                 <button
                   onClick={() => setHistoryCustomer(customer)}
                   className="p-2 rounded-lg hover:bg-muted transition-colors"
-                  title="سجل النقاط"
+                  title={t('customers.pointsHistory')}
                 >
                   <History className="w-5 h-5 text-muted-foreground" />
                 </button>
@@ -146,7 +148,7 @@ export function CustomersTab({
         {customers.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>لا يوجد عملاء</p>
+            <p>{t('customers.noCustomers')}</p>
           </div>
         )}
       </div>

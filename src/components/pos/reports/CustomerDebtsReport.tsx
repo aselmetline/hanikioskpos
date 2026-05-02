@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Customer, Sale } from '@/types/pos';
 import { Users, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CustomerDebtsReportProps {
   customers: Customer[];
@@ -15,6 +16,7 @@ interface CustomerDebtsReportProps {
 }
 
 export function CustomerDebtsReport({ customers, sales, dateFrom, dateTo }: CustomerDebtsReportProps) {
+  const { t } = useLanguage();
   const customersWithDebts = useMemo(() => {
     return customers.filter(c => c.creditBalance > 0).sort((a, b) => b.creditBalance - a.creditBalance);
   }, [customers]);
@@ -43,7 +45,7 @@ export function CustomerDebtsReport({ customers, sales, dateFrom, dateTo }: Cust
   }, [sales]);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="bg-gradient-to-br from-red-500/10 to-red-500/5">
@@ -53,7 +55,7 @@ export function CustomerDebtsReport({ customers, sales, dateFrom, dateTo }: Cust
                 <DollarSign className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي الذمم</p>
+                <p className="text-sm text-muted-foreground">{t('customers.creditBalance')}</p>
                 <p className="text-xl font-bold text-red-600">{stats.totalDebts.toFixed(3)} TND</p>
               </div>
             </div>
@@ -67,7 +69,7 @@ export function CustomerDebtsReport({ customers, sales, dateFrom, dateTo }: Cust
                 <Users className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">عملاء بذمم</p>
+                <p className="text-sm text-muted-foreground">{t('customers.title')}</p>
                 <p className="text-xl font-bold text-blue-600">{stats.customersCount}</p>
               </div>
             </div>
@@ -81,7 +83,7 @@ export function CustomerDebtsReport({ customers, sales, dateFrom, dateTo }: Cust
                 <AlertTriangle className="h-5 w-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">ذمم عالية (&gt;100)</p>
+                <p className="text-sm text-muted-foreground">&gt; 100 TND</p>
                 <p className="text-xl font-bold text-orange-600">{stats.highDebtCustomers}</p>
               </div>
             </div>
@@ -95,7 +97,7 @@ export function CustomerDebtsReport({ customers, sales, dateFrom, dateTo }: Cust
                 <CheckCircle className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">متوسط الذمة</p>
+                <p className="text-sm text-muted-foreground">{t('reports.averageSale')}</p>
                 <p className="text-xl font-bold text-primary">{stats.averageDebt.toFixed(3)} TND</p>
               </div>
             </div>
@@ -106,24 +108,24 @@ export function CustomerDebtsReport({ customers, sales, dateFrom, dateTo }: Cust
       {/* Customers Table */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">تفاصيل ذمم العملاء</CardTitle>
+          <CardTitle className="text-lg">{t('reports.customerDebts')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[350px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">العميل</TableHead>
-                  <TableHead className="text-right">الهاتف</TableHead>
-                  <TableHead className="text-right">المبلغ المستحق</TableHead>
-                  <TableHead className="text-right">عدد الفواتير</TableHead>
+                  <TableHead className="text-right">{t('common.customer')}</TableHead>
+                  <TableHead className="text-right">{t('common.phone')}</TableHead>
+                  <TableHead className="text-right">{t('common.amount')}</TableHead>
+                  <TableHead className="text-right">{t('common.invoice')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {customersWithDebts.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      لا توجد ذمم مستحقة
+                      {t('common.noData')}
                     </TableCell>
                   </TableRow>
                 ) : (

@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { PurchaseReceiptPrinter } from './PurchaseReceiptPrinter';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PurchasesTabProps {
   products: Product[];
@@ -60,6 +61,7 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   storeAddress,
   commercialRegister,
 }) => {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [showProductSearch, setShowProductSearch] = useState(false);
@@ -83,7 +85,7 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
 
   const handleSave = async () => {
     if (currentItems.length === 0) {
-      toast.error('أضف منتجات للفاتورة أولاً');
+      toast.error(t('purchases.addItem'));
       return;
     }
 
@@ -124,7 +126,7 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
     <div className="flex flex-col h-full">
       <ScrollArea className="flex-1 px-4 pb-32">
         <div className="flex items-center justify-center py-4">
-          <h2 className="text-xl font-bold">المشتريات</h2>
+          <h2 className="text-xl font-bold">{t('purchases.title')}</h2>
         </div>
 
         {/* Stats Cards */}
@@ -133,21 +135,21 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
             <CardContent className="p-2 text-center">
               <ShoppingBag className="w-4 h-4 mx-auto mb-1 text-primary" />
               <p className="text-lg font-bold">{purchases.length}</p>
-              <p className="text-[10px] text-muted-foreground">الفواتير</p>
+              <p className="text-[10px] text-muted-foreground">{t('suppliers.invoiceCount')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-2 text-center">
               <Receipt className="w-4 h-4 mx-auto mb-1 text-blue-600" />
               <p className="text-lg font-bold">{totalPurchasesAmount.toFixed(3)}</p>
-              <p className="text-[10px] text-muted-foreground">الإجمالي</p>
+              <p className="text-[10px] text-muted-foreground">{t('common.total')}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-2 text-center">
               <Eye className="w-4 h-4 mx-auto mb-1 text-green-600" />
               <p className="text-lg font-bold">{totalItems}</p>
-              <p className="text-[10px] text-muted-foreground">الأصناف</p>
+              <p className="text-[10px] text-muted-foreground">{t('common.items')}</p>
             </CardContent>
           </Card>
         </div>
@@ -155,8 +157,8 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
         {/* Tabs */}
         <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'new' | 'history')} className="mb-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="new">فاتورة جديدة</TabsTrigger>
-            <TabsTrigger value="history">سجل المشتريات ({purchases.length})</TabsTrigger>
+            <TabsTrigger value="new">{t('purchases.newInvoice')}</TabsTrigger>
+            <TabsTrigger value="history">{t('purchases.history')} ({purchases.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="new" className="space-y-4 mt-4">
@@ -166,28 +168,28 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Input type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} className="w-36 text-center text-sm" dir="ltr" />
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">تاريخ الفاتورة</span>
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">{t('purchases.invoiceDate')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Input type="text" value={invoiceNumber} onChange={(e) => onSetInvoiceNumber(e.target.value)} className="w-16 text-center" dir="ltr" />
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">رقم الفاتورة</span>
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">{t('purchases.invoiceNumber')}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Select value={selectedSupplierId} onValueChange={setSelectedSupplierId}>
                     <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="اختر المورد (اختياري)" />
+                      <SelectValue placeholder={t('purchases.selectSupplier')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">بدون مورد</SelectItem>
+                      <SelectItem value="none">{t('purchases.noSupplier')}</SelectItem>
                       {suppliers.map(s => (
                         <SelectItem key={s.id} value={s.id}>
-                          {s.name} {s.debtBalance > 0 ? `(دين: ${s.debtBalance.toFixed(3)})` : ''}
+                          {s.name} {s.debtBalance > 0 ? `(${t('suppliers.debtBalance')}: ${s.debtBalance.toFixed(3)})` : ''}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">المورد</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">{t('common.supplier')}</span>
                 </div>
               </CardContent>
             </Card>
@@ -199,7 +201,7 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                   <Input
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowProductSearch(e.target.value.length > 0); }}
-                    placeholder="ابحث عن منتج بالاسم أو الباركود"
+                    placeholder={t('sell.searchProduct')}
                     className="text-right pr-3"
                     onFocus={() => searchQuery.length > 0 && setShowProductSearch(true)}
                   />
@@ -207,10 +209,10 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                     <div className="absolute top-full left-0 right-0 z-50 bg-background border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
                       {filteredProducts.slice(0, 8).map(product => (
                         <button key={product.id} onClick={() => handleSelectProduct(product)} className="w-full p-3 text-right hover:bg-muted flex justify-between items-center border-b last:border-0">
-                          <span className="text-muted-foreground text-sm">{(product.cost || product.price * 0.7).toFixed(3)} د.ت</span>
+                          <span className="text-muted-foreground text-sm">{(product.cost || product.price * 0.7).toFixed(3)} TND</span>
                           <div className="text-right">
                             <span>{product.name}</span>
-                            <span className="text-xs text-muted-foreground mr-2">(مخزون: {product.stock})</span>
+                            <span className="text-xs text-muted-foreground mr-2">({t('common.stock')}: {product.stock})</span>
                           </div>
                         </button>
                       ))}
@@ -229,17 +231,17 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-center w-20">الإجمالي</TableHead>
-                      <TableHead className="text-center w-20">الكمية</TableHead>
-                      <TableHead className="text-center w-20">التكلفه</TableHead>
-                      <TableHead className="text-right">المنتج</TableHead>
+                      <TableHead className="text-center w-20">{t('common.total')}</TableHead>
+                      <TableHead className="text-center w-20">{t('common.quantity')}</TableHead>
+                      <TableHead className="text-center w-20">{t('common.cost')}</TableHead>
+                      <TableHead className="text-right">{t('common.product')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {currentItems.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                          لا توجد منتجات - ابحث وأضف منتجات
+                          {t('sell.noProducts')}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -286,7 +288,7 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
 
           <TabsContent value="history" className="mt-4">
             {purchases.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">لا توجد فواتير مشتريات بعد</div>
+              <div className="text-center py-12 text-muted-foreground">{t('purchases.noInvoices')}</div>
             ) : (
               <div className="space-y-3">
                 {purchases.map(purchase => (
@@ -298,7 +300,7 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                       >
                         <div className="flex items-center gap-2">
                           {expandedPurchase === purchase.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                          <span className="font-bold text-primary">{purchase.total.toFixed(3)} د.ت</span>
+                          <span className="font-bold text-primary">{purchase.total.toFixed(3)} TND</span>
                         </div>
                         <div className="text-right">
                           <div className="flex items-center gap-2">
@@ -316,10 +318,10 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="text-center text-xs">الإجمالي</TableHead>
-                                <TableHead className="text-center text-xs">الكمية</TableHead>
-                                <TableHead className="text-center text-xs">التكلفة</TableHead>
-                                <TableHead className="text-right text-xs">المنتج</TableHead>
+                                <TableHead className="text-center text-xs">{t('common.total')}</TableHead>
+                                <TableHead className="text-center text-xs">{t('common.quantity')}</TableHead>
+                                <TableHead className="text-center text-xs">{t('common.cost')}</TableHead>
+                                <TableHead className="text-right text-xs">{t('common.product')}</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -335,11 +337,11 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                           </Table>
                           <div className="flex justify-between items-center mt-2 pt-2 border-t">
                             <Button size="sm" variant="destructive" className="gap-1 text-xs" onClick={() => setDeleteId(purchase.id)}>
-                              <Trash2 className="w-3 h-3" /> حذف الفاتورة
+                              <Trash2 className="w-3 h-3" /> {t('common.delete')}
                             </Button>
                             <div className="text-sm">
-                              <span className="text-muted-foreground">الإجمالي: </span>
-                              <span className="font-bold">{purchase.total.toFixed(3)} د.ت</span>
+                              <span className="text-muted-foreground">{t('common.total')}: </span>
+                              <span className="font-bold">{purchase.total.toFixed(3)} TND</span>
                             </div>
                           </div>
                         </div>
@@ -358,14 +360,14 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
         <div className="fixed bottom-16 left-0 right-0 bg-background border-t p-3">
           <div className="flex items-center justify-between gap-2 max-w-lg mx-auto">
             <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground">{currentItems.length} صنف</span>
+              <span className="text-xs text-muted-foreground">{currentItems.length} {t('common.items')}</span>
             </div>
             <div className="bg-destructive text-destructive-foreground rounded px-4 py-2">
               <span className="font-bold">{currentTotal.toFixed(3)}</span>
             </div>
-            <span className="font-medium">الإجمالي</span>
+            <span className="font-medium">{t('common.total')}</span>
             <Button onClick={handleSave} disabled={currentItems.length === 0} size="sm" className="gap-1">
-              <Save className="w-4 h-4" /> حفظ
+              <Save className="w-4 h-4" /> {t('common.save')}
             </Button>
           </div>
         </div>
@@ -375,8 +377,8 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
         open={!!deleteId}
         onOpenChange={(open) => { if (!open) setDeleteId(null); }}
         onConfirm={async () => { if (deleteId && onDeletePurchase) { await onDeletePurchase(deleteId); setDeleteId(null); } }}
-        title="حذف فاتورة المشتريات"
-        description="هل أنت متأكد من حذف هذه الفاتورة؟ سيتم حذف جميع بنودها."
+        title={t('purchases.invoiceDeleted')}
+        description={t('purchases.confirmDelete')}
       />
 
       {savedPurchaseData && (
