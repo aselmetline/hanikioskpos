@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Sale } from '@/types/pos';
 import { ShoppingCart, DollarSign, Receipt, TrendingUp } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SalesReportProps {
   sales: Sale[];
@@ -15,6 +16,7 @@ interface SalesReportProps {
 }
 
 export function SalesReport({ sales, dateFrom, dateTo }: SalesReportProps) {
+  const { t } = useLanguage();
   const filteredSales = useMemo(() => {
     return sales.filter(sale => {
       const saleDate = new Date(sale.createdAt);
@@ -45,7 +47,7 @@ export function SalesReport({ sales, dateFrom, dateTo }: SalesReportProps) {
   }, [filteredSales]);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
@@ -55,7 +57,7 @@ export function SalesReport({ sales, dateFrom, dateTo }: SalesReportProps) {
                 <DollarSign className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي المبيعات</p>
+                <p className="text-sm text-muted-foreground">{t('reports.totalRevenue')}</p>
                 <p className="text-xl font-bold text-primary">{stats.totalSales.toFixed(3)} TND</p>
               </div>
             </div>
@@ -69,7 +71,7 @@ export function SalesReport({ sales, dateFrom, dateTo }: SalesReportProps) {
                 <Receipt className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">عدد الفواتير</p>
+                <p className="text-sm text-muted-foreground">{t('reports.salesCount')}</p>
                 <p className="text-xl font-bold text-green-600">{stats.count}</p>
               </div>
             </div>
@@ -83,7 +85,7 @@ export function SalesReport({ sales, dateFrom, dateTo }: SalesReportProps) {
                 <ShoppingCart className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">مبيعات نقدية</p>
+                <p className="text-sm text-muted-foreground">{t('common.cash')}</p>
                 <p className="text-xl font-bold text-blue-600">{stats.cashSales.toFixed(3)} TND</p>
               </div>
             </div>
@@ -97,7 +99,7 @@ export function SalesReport({ sales, dateFrom, dateTo }: SalesReportProps) {
                 <TrendingUp className="h-5 w-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">مبيعات آجلة</p>
+                <p className="text-sm text-muted-foreground">{t('common.credit')}</p>
                 <p className="text-xl font-bold text-orange-600">{stats.creditSales.toFixed(3)} TND</p>
               </div>
             </div>
@@ -110,11 +112,11 @@ export function SalesReport({ sales, dateFrom, dateTo }: SalesReportProps) {
         <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm text-muted-foreground">إجمالي الضريبة</p>
+              <p className="text-sm text-muted-foreground">{t('common.tax')}</p>
               <p className="font-bold">{stats.totalTax.toFixed(3)} TND</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">إجمالي الخصومات</p>
+              <p className="text-sm text-muted-foreground">{t('common.discount')}</p>
               <p className="font-bold text-red-500">{stats.totalDiscount.toFixed(3)} TND</p>
             </div>
           </div>
@@ -124,24 +126,24 @@ export function SalesReport({ sales, dateFrom, dateTo }: SalesReportProps) {
       {/* Sales Table */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">تفاصيل الفواتير</CardTitle>
+          <CardTitle className="text-lg">{t('common.invoice')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[300px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">التاريخ</TableHead>
-                  <TableHead className="text-right">المبلغ</TableHead>
-                  <TableHead className="text-right">الضريبة</TableHead>
-                  <TableHead className="text-right">طريقة الدفع</TableHead>
+                  <TableHead className="text-right">{t('common.date')}</TableHead>
+                  <TableHead className="text-right">{t('common.amount')}</TableHead>
+                  <TableHead className="text-right">{t('common.tax')}</TableHead>
+                  <TableHead className="text-right">{t('common.type')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredSales.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      لا توجد مبيعات في هذه الفترة
+                      {t('common.noData')}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -152,7 +154,7 @@ export function SalesReport({ sales, dateFrom, dateTo }: SalesReportProps) {
                       <TableCell>{sale.tax.toFixed(3)} TND</TableCell>
                       <TableCell>
                         <Badge variant={sale.paymentMethod === 'cash' ? 'default' : 'secondary'}>
-                          {sale.paymentMethod === 'cash' ? 'نقدي' : 'آجل'}
+                          {sale.paymentMethod === 'cash' ? t('common.cash') : t('common.credit')}
                         </Badge>
                       </TableCell>
                     </TableRow>
