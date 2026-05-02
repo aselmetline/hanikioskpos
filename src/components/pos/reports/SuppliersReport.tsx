@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Supplier } from '@/hooks/useSuppliers';
 import { Purchase } from '@/types/pos';
 import { Truck, Banknote, ShoppingBag } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SuppliersReportProps {
   suppliers: Supplier[];
@@ -12,6 +13,7 @@ interface SuppliersReportProps {
 }
 
 export function SuppliersReport({ suppliers, purchases }: SuppliersReportProps) {
+  const { t } = useLanguage();
   const stats = useMemo(() => {
     const totalDebt = suppliers.reduce((sum, s) => sum + s.debtBalance, 0);
     const suppliersWithDebt = suppliers.filter(s => s.debtBalance > 0).length;
@@ -24,51 +26,51 @@ export function SuppliersReport({ suppliers, purchases }: SuppliersReportProps) 
   }, [suppliers, purchases]);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4">
       <div className="grid grid-cols-3 gap-3">
         <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
           <CardContent className="p-3 text-center">
             <Truck className="w-5 h-5 mx-auto mb-1 text-primary" />
             <p className="text-xl font-bold text-primary">{suppliers.length}</p>
-            <p className="text-xs text-muted-foreground">الموردين</p>
+            <p className="text-xs text-muted-foreground">{t('suppliers.title')}</p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-destructive/10 to-destructive/5">
           <CardContent className="p-3 text-center">
             <Banknote className="w-5 h-5 mx-auto mb-1 text-destructive" />
             <p className="text-xl font-bold text-destructive">{stats.totalDebt.toFixed(3)}</p>
-            <p className="text-xs text-muted-foreground">إجمالي الديون</p>
+            <p className="text-xs text-muted-foreground">{t('suppliers.totalDebt')}</p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5">
           <CardContent className="p-3 text-center">
             <ShoppingBag className="w-5 h-5 mx-auto mb-1 text-orange-600" />
             <p className="text-xl font-bold text-orange-600">{stats.suppliersWithDebt}</p>
-            <p className="text-xs text-muted-foreground">مورد بدين</p>
+            <p className="text-xs text-muted-foreground">{t('suppliers.suppliersWithDebt')}</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">تفاصيل الموردين</CardTitle>
+          <CardTitle className="text-lg">{t('suppliers.title')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[350px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">المورد</TableHead>
-                  <TableHead className="text-center">الفواتير</TableHead>
-                  <TableHead className="text-center">إجمالي المشتريات</TableHead>
-                  <TableHead className="text-center">رصيد الدين</TableHead>
+                  <TableHead className="text-right">{t('common.supplier')}</TableHead>
+                  <TableHead className="text-center">{t('suppliers.invoiceCount')}</TableHead>
+                  <TableHead className="text-center">{t('reports.purchases')}</TableHead>
+                  <TableHead className="text-center">{t('suppliers.debtBalance')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {suppliers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      لا يوجد موردين
+                      {t('suppliers.noSuppliers')}
                     </TableCell>
                   </TableRow>
                 ) : (
