@@ -10,8 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Plus, Trash2, Receipt, TrendingDown } from 'lucide-react';
 import { Expense, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar, fr } from 'date-fns/locale';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ExpensesTabProps {
   expenses: Expense[];
@@ -28,6 +29,8 @@ export default function ExpensesTab({
   monthTotal,
   todayTotal,
 }: ExpensesTabProps) {
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'fr' ? fr : ar;
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<ExpenseCategory>('other');
   const [description, setDescription] = useState('');
