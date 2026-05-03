@@ -42,7 +42,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
   }, [filteredPurchases]);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5">
