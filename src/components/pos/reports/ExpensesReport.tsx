@@ -63,7 +63,7 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
   };
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="bg-gradient-to-br from-red-500/10 to-red-500/5">
