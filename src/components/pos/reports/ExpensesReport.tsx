@@ -101,7 +101,7 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
                 <Wallet className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">متوسط المصروف</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.averageExpense')}</p>
                 <p className="text-xl font-bold text-primary">{stats.averageExpense.toFixed(3)} TND</p>
               </div>
             </div>
