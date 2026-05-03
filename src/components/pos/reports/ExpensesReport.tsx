@@ -115,7 +115,7 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <PieChart className="h-5 w-5" />
-              توزيع المصروفات حسب الفئة
+              {t('reportsX.expensesByCategory')}
             </CardTitle>
           </CardHeader>
           <CardContent>
