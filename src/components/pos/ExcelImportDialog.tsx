@@ -125,7 +125,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
             <>
               <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg">
                 <span className="text-success font-medium">
-                  تم قراءة {products.length} منتج
+                  {t('excel.productsRead')} {products.length} {t('excel.productsLabel')}
                 </span>
                 <Check className="w-5 h-5 text-success" />
               </div>
@@ -134,10 +134,10 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
                 <table className="w-full text-sm">
                   <thead className="bg-muted sticky top-0">
                     <tr>
-                      <th className="p-2 text-right">الاسم</th>
-                      <th className="p-2 text-right">السعر</th>
-                      <th className="p-2 text-right">الكمية</th>
-                      <th className="p-2 text-right">التصنيف</th>
+                      <th className="p-2 text-right">{t('common.name')}</th>
+                      <th className="p-2 text-right">{t('common.price')}</th>
+                      <th className="p-2 text-right">{t('common.quantity')}</th>
+                      <th className="p-2 text-right">{t('common.category')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -160,7 +160,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
                   disabled={importing}
                 >
                   <X className="w-4 h-4" />
-                  إلغاء
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleImport}
@@ -168,11 +168,11 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
                   disabled={importing}
                 >
                   {importing ? (
-                    'جاري الاستيراد...'
+                    t('excel.importing')
                   ) : (
                     <>
                       <Check className="w-4 h-4" />
-                      استيراد الكل
+                      {t('excel.importAll')}
                     </>
                   )}
                 </button>
