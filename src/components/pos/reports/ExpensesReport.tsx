@@ -18,6 +18,7 @@ interface ExpensesReportProps {
 const COLORS = ['#3b82f6', '#22c55e', '#f97316', '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1'];
 
 export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportProps) {
+  const { t, dir } = useLanguage();
   const filteredExpenses = useMemo(() => {
     return expenses.filter(expense => {
       const expenseDate = new Date(expense.date);
