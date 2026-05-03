@@ -4,7 +4,7 @@ import { Sale, Purchase, Expense } from '@/types/pos';
 import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format, eachDayOfInterval, startOfDay } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProfitsReportProps {
   sales: Sale[];
