@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Expense, EXPENSE_CATEGORIES } from '@/types/pos';
 import { Wallet, Receipt, TrendingDown, PieChart } from 'lucide-react';
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ExpensesReportProps {
   expenses: Expense[];
