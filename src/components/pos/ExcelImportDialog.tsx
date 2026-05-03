@@ -107,7 +107,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
                 className="w-full flex items-center justify-center gap-2 p-3 border rounded-xl hover:bg-muted transition-colors"
               >
                 <Download className="w-4 h-4" />
-                تحميل قالب Excel
+                {t('excel.downloadTemplate')}
               </button>
             </>
           )}
