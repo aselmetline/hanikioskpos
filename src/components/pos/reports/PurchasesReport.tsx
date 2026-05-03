@@ -15,6 +15,7 @@ interface PurchasesReportProps {
 }
 
 export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReportProps) {
+  const { t, dir } = useLanguage();
   const filteredPurchases = useMemo(() => {
     return purchases.filter(purchase => {
       const purchaseDate = new Date(purchase.invoiceDate);
