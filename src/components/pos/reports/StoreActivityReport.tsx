@@ -110,7 +110,7 @@ export function StoreActivityReport({
   }, [sales, purchases, expenses, dateFrom, dateTo]);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       {/* Header Stats */}
       <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
         <CardContent className="p-4">

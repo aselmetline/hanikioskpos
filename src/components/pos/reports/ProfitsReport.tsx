@@ -95,7 +95,7 @@ export function ProfitsReport({ sales, purchases, expenses, dateFrom, dateTo }: 
   ].filter(item => item.value > 0);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5">

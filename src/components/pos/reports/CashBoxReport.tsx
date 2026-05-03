@@ -94,7 +94,7 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
   };
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
