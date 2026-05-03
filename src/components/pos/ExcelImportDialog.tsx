@@ -35,7 +35,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
       const parsed = await parseExcelProducts(file);
       setProducts(parsed);
     } catch (err: any) {
-      setError(err.message || 'فشل في قراءة الملف');
+      setError(err.message || t('excel.fileReadFailed'));
     } finally {
       setLoading(false);
     }
