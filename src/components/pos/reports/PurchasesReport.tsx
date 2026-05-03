@@ -94,7 +94,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
                 <ShoppingBag className="h-5 w-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">متوسط الفاتورة</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.averageInvoice')}</p>
                 <p className="text-xl font-bold text-orange-600">{stats.averagePerInvoice.toFixed(3)} TND</p>
               </div>
             </div>
