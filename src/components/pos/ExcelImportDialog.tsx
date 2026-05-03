@@ -50,7 +50,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
       setProducts([]);
       onOpenChange(false);
     } catch (err: any) {
-      setError(err.message || 'فشل في استيراد المنتجات');
+      setError(err.message || t('excel.importFailed'));
     } finally {
       setImporting(false);
     }
