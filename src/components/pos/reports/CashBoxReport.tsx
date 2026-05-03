@@ -85,9 +85,9 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
-      case 'sales': return 'مبيعات';
-      case 'purchases': return 'مشتريات';
-      case 'expenses': return 'مصروفات';
+      case 'sales': return t('reportsX.sales');
+      case 'purchases': return t('reportsX.purchases');
+      case 'expenses': return t('reportsX.expenses');
       case 'manual': return 'يدوي';
       default: return category;
     }
@@ -238,7 +238,7 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
                       <TableCell>{format(new Date(tx.date), 'MM/dd HH:mm')}</TableCell>
                       <TableCell>
                         <Badge variant={tx.type === 'add' ? 'default' : 'destructive'}>
-                          {tx.type === 'add' ? 'إيداع' : 'سحب'}
+                          {tx.type === 'add' ? t('reportsX.deposit') : t('reportsX.withdrawal')}
                         </Badge>
                       </TableCell>
                       <TableCell>{getCategoryLabel(tx.category)}</TableCell>

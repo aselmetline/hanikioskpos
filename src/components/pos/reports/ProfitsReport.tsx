@@ -89,9 +89,9 @@ export function ProfitsReport({ sales, purchases, expenses, dateFrom, dateTo }: 
   }, [sales, expenses, dateFrom, dateTo]);
 
   const pieData = [
-    { name: 'المشتريات', value: stats.totalPurchases, color: '#3b82f6' },
-    { name: 'المصروفات', value: stats.totalExpenses, color: '#f97316' },
-    { name: 'صافي الربح', value: Math.max(0, stats.netProfit), color: '#22c55e' },
+    { name: t('reportsX.purchases'), value: stats.totalPurchases, color: '#3b82f6' },
+    { name: t('reportsX.expenses'), value: stats.totalExpenses, color: '#f97316' },
+    { name: t('reportsX.netProfit'), value: Math.max(0, stats.netProfit), color: '#22c55e' },
   ].filter(item => item.value > 0);
 
   return (
