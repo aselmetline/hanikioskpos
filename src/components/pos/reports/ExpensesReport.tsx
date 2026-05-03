@@ -73,7 +73,7 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
                 <TrendingDown className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي المصروفات</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.totalExpenses')}</p>
                 <p className="text-xl font-bold text-red-600">{stats.totalExpenses.toFixed(3)} TND</p>
               </div>
             </div>
