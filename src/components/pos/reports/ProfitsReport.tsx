@@ -15,6 +15,7 @@ interface ProfitsReportProps {
 }
 
 export function ProfitsReport({ sales, purchases, expenses, dateFrom, dateTo }: ProfitsReportProps) {
+  const { t, language, dir } = useLanguage();
   const stats = useMemo(() => {
     const from = new Date(dateFrom);
     from.setHours(0, 0, 0, 0);
