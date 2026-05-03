@@ -68,7 +68,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-primary" />
-            استيراد المنتجات من Excel
+            {t('excel.importProducts')}
           </DialogTitle>
         </DialogHeader>
 
