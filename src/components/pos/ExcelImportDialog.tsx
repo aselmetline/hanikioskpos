@@ -90,13 +90,13 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
                 {loading ? (
                   <div className="animate-pulse">
                     <FileSpreadsheet className="w-12 h-12 mx-auto text-primary mb-3" />
-                    <p>جاري قراءة الملف...</p>
+                    <p>{t('excel.readingFile')}</p>
                   </div>
                 ) : (
                   <>
                     <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                    <p className="font-medium mb-1">اضغط لاختيار ملف Excel</p>
-                    <p className="text-sm text-muted-foreground">أو اسحب الملف هنا</p>
+                    <p className="font-medium mb-1">{t('excel.clickToSelect')}</p>
+                    <p className="text-sm text-muted-foreground">{t('excel.orDragHere')}</p>
                   </>
                 )}
               </div>
