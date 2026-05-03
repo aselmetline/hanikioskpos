@@ -147,24 +147,24 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
       {/* Expenses Table */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">تفاصيل المصروفات</CardTitle>
+          <CardTitle className="text-lg">{t('reportsX.expensesDetails')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[250px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">التاريخ</TableHead>
-                  <TableHead className="text-right">الفئة</TableHead>
-                  <TableHead className="text-right">الوصف</TableHead>
-                  <TableHead className="text-right">المبلغ</TableHead>
+                  <TableHead className="text-right">{t('reportsX.date')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.category')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.description')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.amount')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredExpenses.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      لا توجد مصروفات في هذه الفترة
+                      {t('reportsX.noExpensesPeriod')}
                     </TableCell>
                   </TableRow>
                 ) : (
