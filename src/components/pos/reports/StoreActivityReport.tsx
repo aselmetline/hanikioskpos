@@ -4,6 +4,7 @@ import { Sale, Purchase, Expense, CashBoxTransaction } from '@/types/pos';
 import { Store, TrendingUp, TrendingDown, Activity, ShoppingCart, ShoppingBag, Wallet } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { format, eachDayOfInterval, startOfDay } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface StoreActivityReportProps {
   sales: Sale[];
@@ -24,6 +25,7 @@ export function StoreActivityReport({
   dateTo,
   showChart = false 
 }: StoreActivityReportProps) {
+  const { t } = useLanguage();
   const stats = useMemo(() => {
     const from = new Date(dateFrom);
     from.setHours(0, 0, 0, 0);

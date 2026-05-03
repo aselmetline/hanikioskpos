@@ -8,6 +8,7 @@ import { CashBoxTransaction } from '@/types/pos';
 import { Wallet, ArrowUpCircle, ArrowDownCircle, TrendingUp } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { eachDayOfInterval, startOfDay } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CashBoxReportProps {
   transactions: CashBoxTransaction[];
@@ -17,6 +18,7 @@ interface CashBoxReportProps {
 }
 
 export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashBoxReportProps) {
+  const { t } = useLanguage();
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
       const txDate = new Date(t.date);
@@ -212,7 +214,7 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
       {/* Transactions Table */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">سجل الحركات ({stats.transactionCount})</CardTitle>
+          <CardTitle className="text-lg">{t("reportsX.transactionsLog")} ({stats.transactionCount})</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[200px]">
@@ -229,7 +231,7 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
                 {filteredTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      لا توجد حركات في هذه الفترة
+                      {t("reportsX.noTransactionsPeriod")}
                     </TableCell>
                   </TableRow>
                 ) : (
