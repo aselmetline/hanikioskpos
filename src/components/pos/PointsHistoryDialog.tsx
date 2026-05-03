@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Award, TrendingUp, TrendingDown } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar, fr } from 'date-fns/locale';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PointsTransaction {
   id: string;
@@ -27,6 +28,8 @@ export function PointsHistoryDialog({
   customerId,
   onFetchHistory
 }: PointsHistoryDialogProps) {
+  const { t, language, dir } = useLanguage();
+  const dateLocale = language === 'ar' ? ar : fr;
   const [transactions, setTransactions] = useState<PointsTransaction[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -42,21 +45,21 @@ export function PointsHistoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col" dir="rtl">
+      <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col" dir={dir}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Award className="w-5 h-5 text-primary" />
-            سجل نقاط {customerName}
+            {t('customers.pointsHistoryTitle')} {customerName}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-2 py-2">
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">جاري التحميل...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>
           ) : transactions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Award className="w-10 h-10 mx-auto mb-2 opacity-40" />
-              <p>لا توجد عمليات نقاط بعد</p>
+              <p>{t('customers.noPointsTransactions')}</p>
             </div>
           ) : (
             transactions.map(tx => (
@@ -71,10 +74,10 @@ export function PointsHistoryDialog({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
-                    {tx.description || (tx.type === 'earn' ? 'كسب نقاط' : 'استبدال نقاط')}
+                    {tx.description || (tx.type === 'earn' ? t('customers.earnPoints') : t('customers.redeemPointsLabel'))}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {format(new Date(tx.created_at), 'dd MMM yyyy - HH:mm', { locale: ar })}
+                    {format(new Date(tx.created_at), 'dd MMM yyyy - HH:mm', { locale: dateLocale })}
                   </p>
                 </div>
                 <span className={`font-bold text-sm ${
