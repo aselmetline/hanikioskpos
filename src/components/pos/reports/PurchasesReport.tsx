@@ -66,7 +66,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
                 <Receipt className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">عدد الفواتير</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.invoicesCount')}</p>
                 <p className="text-xl font-bold text-primary">{stats.invoiceCount}</p>
               </div>
             </div>
