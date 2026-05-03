@@ -105,25 +105,25 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
       {/* Purchases Table */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">فواتير المشتريات</CardTitle>
+          <CardTitle className="text-lg">{t('reportsX.purchaseInvoices2')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[300px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">رقم الفاتورة</TableHead>
-                  <TableHead className="text-right">التاريخ</TableHead>
-                  <TableHead className="text-right">المورد</TableHead>
-                  <TableHead className="text-right">عدد الأصناف</TableHead>
-                  <TableHead className="text-right">الإجمالي</TableHead>
+                  <TableHead className="text-right">{t('reportsX.invoiceNumber')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.date')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.supplier')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.itemsCount')}</TableHead>
+                  <TableHead className="text-right">{t('receipt.total')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredPurchases.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                      لا توجد مشتريات في هذه الفترة
+                      {t('reportsX.noPurchasesPeriod')}
                     </TableCell>
                   </TableRow>
                 ) : (
