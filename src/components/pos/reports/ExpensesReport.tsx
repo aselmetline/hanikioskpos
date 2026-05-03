@@ -87,7 +87,7 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
                 <Receipt className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">عدد المصروفات</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.expensesCount')}</p>
                 <p className="text-xl font-bold text-blue-600">{stats.count}</p>
               </div>
             </div>
