@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { categories } from '@/data/sampleData';
 import { Product } from '@/types/pos';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EditProductDialogProps {
   open: boolean;
@@ -16,6 +17,7 @@ interface EditProductDialogProps {
 }
 
 export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct }: EditProductDialogProps) {
+  const { t, dir, language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -29,7 +31,6 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
     lowStockAlert: '10'
   });
 
-  // Update form when product changes
   useEffect(() => {
     if (product) {
       setFormData({
@@ -48,16 +49,14 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!product) return;
 
-    // Validation
     if (!formData.nameAr.trim()) {
-      toast.error('يرجى إدخال اسم المنتج بالعربية');
+      toast.error(t('editProduct.nameRequired'));
       return;
     }
     if (!formData.price || parseFloat(formData.price) <= 0) {
-      toast.error('يرجى إدخال سعر صحيح');
+      toast.error(t('editProduct.invalidPrice'));
       return;
     }
 
@@ -75,10 +74,10 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
         lowStockAlert: parseInt(formData.lowStockAlert) || 10
       });
       
-      toast.success('تم تحديث المنتج بنجاح');
+      toast.success(t('editProduct.updated'));
       onOpenChange(false);
     } catch (error) {
-      toast.error('فشل في تحديث المنتج');
+      toast.error(t('editProduct.updateFailed'));
     } finally {
       setLoading(false);
     }
@@ -86,23 +85,29 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
 
   if (!open || !product) return null;
 
+  const units = [
+    { value: 'قطعة', label: t('editProduct.units.piece') },
+    { value: 'كيلو', label: t('editProduct.units.kg') },
+    { value: 'لتر', label: t('editProduct.units.liter') },
+    { value: 'متر', label: t('editProduct.units.meter') },
+    { value: 'علبة', label: t('editProduct.units.box') },
+    { value: 'كرتون', label: t('editProduct.units.carton') },
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" dir={dir}>
       <div 
         className="fixed inset-0 bg-black/60 backdrop-blur-sm"
         onClick={() => onOpenChange(false)}
       />
       
-      {/* Dialog */}
       <div className="relative z-50 w-full max-w-lg max-h-[90vh] overflow-y-auto bg-background rounded-t-3xl sm:rounded-2xl shadow-2xl animate-slide-up">
-        {/* Header */}
         <div className="sticky top-0 bg-background z-10 flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
               <Package className="w-5 h-5 text-primary" />
             </div>
-            <h2 className="text-lg font-bold">تعديل المنتج</h2>
+            <h2 className="text-lg font-bold">{t('editProduct.title')}</h2>
           </div>
           <button
             onClick={() => onOpenChange(false)}
@@ -112,42 +117,35 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          {/* Arabic Name */}
           <div className="space-y-2">
             <Label htmlFor="editNameAr" className="flex items-center gap-2">
-              <span>اسم المنتج بالعربية</span>
+              <span>{t('editProduct.nameAr')}</span>
               <span className="text-destructive">*</span>
             </Label>
             <Input
               id="editNameAr"
               value={formData.nameAr}
               onChange={(e) => setFormData({ ...formData, nameAr: e.target.value })}
-              placeholder="مثال: حليب طازج"
-              className="text-right"
-              dir="rtl"
+              dir={dir}
             />
           </div>
 
-          {/* English Name (Optional) */}
           <div className="space-y-2">
-            <Label htmlFor="editName">اسم المنتج بالإنجليزية (اختياري)</Label>
+            <Label htmlFor="editName">{t('editProduct.nameEn')}</Label>
             <Input
               id="editName"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Example: Fresh Milk"
               dir="ltr"
             />
           </div>
 
-          {/* Price & Cost Row */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="editPrice" className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
-                <span>سعر البيع</span>
+                <span>{t('editProduct.sellPrice')}</span>
                 <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -164,7 +162,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
             <div className="space-y-2">
               <Label htmlFor="editCost" className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
-                <span>سعر الشراء</span>
+                <span>{t('editProduct.buyPrice')}</span>
               </Label>
               <Input
                 id="editCost"
@@ -179,9 +177,8 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
             </div>
           </div>
 
-          {/* Category */}
           <div className="space-y-2">
-            <Label>التصنيف</Label>
+            <Label>{t('editProduct.category')}</Label>
             <Select
               value={formData.category}
               onValueChange={(value) => setFormData({ ...formData, category: value })}
@@ -194,7 +191,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
                   <SelectItem key={cat.id} value={cat.id}>
                     <span className="flex items-center gap-2">
                       <span>{cat.icon}</span>
-                      <span>{cat.nameAr}</span>
+                      <span>{language === 'fr' && (cat as any).nameFr ? (cat as any).nameFr : cat.nameAr}</span>
                     </span>
                   </SelectItem>
                 ))}
@@ -202,27 +199,24 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
             </Select>
           </div>
 
-          {/* Barcode */}
           <div className="space-y-2">
             <Label htmlFor="editBarcode" className="flex items-center gap-2">
               <Barcode className="w-4 h-4" />
-              <span>الباركود (اختياري)</span>
+              <span>{t('editProduct.barcode')}</span>
             </Label>
             <Input
               id="editBarcode"
               value={formData.barcode}
               onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-              placeholder="مثال: 6281000000001"
               dir="ltr"
             />
           </div>
 
-          {/* Stock & Unit Row */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="editStock" className="flex items-center gap-2">
                 <Hash className="w-4 h-4" />
-                <span>الكمية</span>
+                <span>{t('editProduct.quantity')}</span>
               </Label>
               <Input
                 id="editStock"
@@ -235,7 +229,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="editUnit">الوحدة</Label>
+              <Label htmlFor="editUnit">{t('editProduct.unit')}</Label>
               <Select
                 value={formData.unit}
                 onValueChange={(value) => setFormData({ ...formData, unit: value })}
@@ -244,22 +238,18 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="قطعة">قطعة</SelectItem>
-                  <SelectItem value="كيلو">كيلو</SelectItem>
-                  <SelectItem value="لتر">لتر</SelectItem>
-                  <SelectItem value="متر">متر</SelectItem>
-                  <SelectItem value="علبة">علبة</SelectItem>
-                  <SelectItem value="كرتون">كرتون</SelectItem>
+                  {units.map(u => (
+                    <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Low Stock Alert */}
           <div className="space-y-2">
             <Label htmlFor="editLowStockAlert" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-warning" />
-              <span>تنبيه المخزون المنخفض</span>
+              <span>{t('editProduct.lowStockAlert')}</span>
             </Label>
             <Input
               id="editLowStockAlert"
@@ -271,11 +261,10 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
               dir="ltr"
             />
             <p className="text-xs text-muted-foreground">
-              سيتم تنبيهك عندما تقل الكمية عن هذا الرقم
+              {t('editProduct.lowStockHelp')}
             </p>
           </div>
 
-          {/* Submit Button */}
           <div className="pt-4 pb-safe">
             <Button
               type="submit"
@@ -285,10 +274,10 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  جاري الحفظ...
+                  {t('editProduct.saving')}
                 </span>
               ) : (
-                'حفظ التغييرات'
+                t('editProduct.saveChanges')
               )}
             </Button>
           </div>

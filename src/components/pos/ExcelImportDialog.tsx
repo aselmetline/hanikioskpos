@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { parseExcelProducts, downloadSampleTemplate, ExcelProduct } from '@/utils/excelUtils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ExcelImportDialogProps {
   open: boolean;
@@ -16,6 +17,7 @@ interface ExcelImportDialogProps {
 }
 
 export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportDialogProps) {
+  const { t } = useLanguage();
   const [products, setProducts] = useState<ExcelProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -33,7 +35,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
       const parsed = await parseExcelProducts(file);
       setProducts(parsed);
     } catch (err: any) {
-      setError(err.message || 'فشل في قراءة الملف');
+      setError(err.message || t('excel.fileReadFailed'));
     } finally {
       setLoading(false);
     }
@@ -48,7 +50,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
       setProducts([]);
       onOpenChange(false);
     } catch (err: any) {
-      setError(err.message || 'فشل في استيراد المنتجات');
+      setError(err.message || t('excel.importFailed'));
     } finally {
       setImporting(false);
     }
@@ -66,7 +68,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-primary" />
-            استيراد المنتجات من Excel
+            {t('excel.importProducts')}
           </DialogTitle>
         </DialogHeader>
 
@@ -88,13 +90,13 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
                 {loading ? (
                   <div className="animate-pulse">
                     <FileSpreadsheet className="w-12 h-12 mx-auto text-primary mb-3" />
-                    <p>جاري قراءة الملف...</p>
+                    <p>{t('excel.readingFile')}</p>
                   </div>
                 ) : (
                   <>
                     <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                    <p className="font-medium mb-1">اضغط لاختيار ملف Excel</p>
-                    <p className="text-sm text-muted-foreground">أو اسحب الملف هنا</p>
+                    <p className="font-medium mb-1">{t('excel.clickToSelect')}</p>
+                    <p className="text-sm text-muted-foreground">{t('excel.orDragHere')}</p>
                   </>
                 )}
               </div>
@@ -105,7 +107,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
                 className="w-full flex items-center justify-center gap-2 p-3 border rounded-xl hover:bg-muted transition-colors"
               >
                 <Download className="w-4 h-4" />
-                تحميل قالب Excel
+                {t('excel.downloadTemplate')}
               </button>
             </>
           )}
@@ -123,7 +125,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
             <>
               <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg">
                 <span className="text-success font-medium">
-                  تم قراءة {products.length} منتج
+                  {t('excel.productsRead')} {products.length} {t('excel.productsLabel')}
                 </span>
                 <Check className="w-5 h-5 text-success" />
               </div>
@@ -132,10 +134,10 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
                 <table className="w-full text-sm">
                   <thead className="bg-muted sticky top-0">
                     <tr>
-                      <th className="p-2 text-right">الاسم</th>
-                      <th className="p-2 text-right">السعر</th>
-                      <th className="p-2 text-right">الكمية</th>
-                      <th className="p-2 text-right">التصنيف</th>
+                      <th className="p-2 text-right">{t('common.name')}</th>
+                      <th className="p-2 text-right">{t('common.price')}</th>
+                      <th className="p-2 text-right">{t('common.quantity')}</th>
+                      <th className="p-2 text-right">{t('common.category')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -158,7 +160,7 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
                   disabled={importing}
                 >
                   <X className="w-4 h-4" />
-                  إلغاء
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleImport}
@@ -166,11 +168,11 @@ export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportD
                   disabled={importing}
                 >
                   {importing ? (
-                    'جاري الاستيراد...'
+                    t('excel.importing')
                   ) : (
                     <>
                       <Check className="w-4 h-4" />
-                      استيراد الكل
+                      {t('excel.importAll')}
                     </>
                   )}
                 </button>

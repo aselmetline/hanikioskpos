@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Purchase } from '@/types/pos';
 import { ShoppingBag, Receipt, Package, TrendingDown } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PurchasesReportProps {
   purchases: Purchase[];
@@ -14,6 +15,7 @@ interface PurchasesReportProps {
 }
 
 export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReportProps) {
+  const { t, dir } = useLanguage();
   const filteredPurchases = useMemo(() => {
     return purchases.filter(purchase => {
       const purchaseDate = new Date(purchase.invoiceDate);
@@ -40,7 +42,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
   }, [filteredPurchases]);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5">
@@ -50,7 +52,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
                 <TrendingDown className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي المشتريات</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.totalPurchases')}</p>
                 <p className="text-xl font-bold text-blue-600">{stats.totalPurchases.toFixed(3)} TND</p>
               </div>
             </div>
@@ -64,7 +66,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
                 <Receipt className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">عدد الفواتير</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.invoicesCount')}</p>
                 <p className="text-xl font-bold text-primary">{stats.invoiceCount}</p>
               </div>
             </div>
@@ -78,7 +80,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
                 <Package className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">عدد الأصناف</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.itemsCount')}</p>
                 <p className="text-xl font-bold text-green-600">{stats.totalItems}</p>
               </div>
             </div>
@@ -92,7 +94,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
                 <ShoppingBag className="h-5 w-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">متوسط الفاتورة</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.averageInvoice')}</p>
                 <p className="text-xl font-bold text-orange-600">{stats.averagePerInvoice.toFixed(3)} TND</p>
               </div>
             </div>
@@ -103,25 +105,25 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
       {/* Purchases Table */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">فواتير المشتريات</CardTitle>
+          <CardTitle className="text-lg">{t('reportsX.purchaseInvoices2')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[300px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">رقم الفاتورة</TableHead>
-                  <TableHead className="text-right">التاريخ</TableHead>
-                  <TableHead className="text-right">المورد</TableHead>
-                  <TableHead className="text-right">عدد الأصناف</TableHead>
-                  <TableHead className="text-right">الإجمالي</TableHead>
+                  <TableHead className="text-right">{t('reportsX.invoiceNumber')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.date')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.supplier')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.itemsCount')}</TableHead>
+                  <TableHead className="text-right">{t('receipt.total')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredPurchases.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                      لا توجد مشتريات في هذه الفترة
+                      {t('reportsX.noPurchasesPeriod')}
                     </TableCell>
                   </TableRow>
                 ) : (

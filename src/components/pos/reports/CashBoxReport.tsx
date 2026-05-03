@@ -8,6 +8,7 @@ import { CashBoxTransaction } from '@/types/pos';
 import { Wallet, ArrowUpCircle, ArrowDownCircle, TrendingUp } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { eachDayOfInterval, startOfDay } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CashBoxReportProps {
   transactions: CashBoxTransaction[];
@@ -17,6 +18,7 @@ interface CashBoxReportProps {
 }
 
 export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashBoxReportProps) {
+  const { t } = useLanguage();
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
       const txDate = new Date(t.date);
@@ -85,16 +87,16 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
-      case 'sales': return 'مبيعات';
-      case 'purchases': return 'مشتريات';
-      case 'expenses': return 'مصروفات';
-      case 'manual': return 'يدوي';
+      case 'sales': return t('reportsX.sales');
+      case 'purchases': return t('reportsX.purchases');
+      case 'expenses': return t('reportsX.expenses');
+      case 'manual': return t('reportsX.manual');
       default: return category;
     }
   };
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
@@ -104,7 +106,7 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
                 <Wallet className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">الرصيد الحالي</p>
+                <p className="text-sm text-muted-foreground">{t("reportsX.currentBalance")}</p>
                 <p className="text-xl font-bold text-primary">{balance.toFixed(3)} TND</p>
               </div>
             </div>
@@ -118,7 +120,7 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
                 <ArrowUpCircle className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي الإيداعات</p>
+                <p className="text-sm text-muted-foreground">{t("reportsX.totalDeposits")}</p>
                 <p className="text-xl font-bold text-green-600">{stats.totalAdded.toFixed(3)} TND</p>
               </div>
             </div>
@@ -132,7 +134,7 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
                 <ArrowDownCircle className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي السحوبات</p>
+                <p className="text-sm text-muted-foreground">{t("reportsX.totalWithdrawals")}</p>
                 <p className="text-xl font-bold text-red-600">{stats.totalDeducted.toFixed(3)} TND</p>
               </div>
             </div>
@@ -146,7 +148,7 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
                 <TrendingUp className={`h-5 w-5 ${stats.netChange >= 0 ? 'text-blue-600' : 'text-orange-600'}`} />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">صافي التغيير</p>
+                <p className="text-sm text-muted-foreground">{t("reportsX.netChange")}</p>
                 <p className={`text-xl font-bold ${stats.netChange >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
                   {stats.netChange >= 0 ? '+' : ''}{stats.netChange.toFixed(3)} TND
                 </p>
@@ -161,19 +163,19 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
         <CardContent className="p-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">من المبيعات:</span>
+              <span className="text-muted-foreground">{t("reportsX.fromSales")}:</span>
               <span className="font-medium text-green-600">+{stats.bySales.toFixed(3)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">من المشتريات:</span>
+              <span className="text-muted-foreground">{t("reportsX.fromPurchases")}:</span>
               <span className="font-medium text-red-600">{stats.byPurchases.toFixed(3)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">من المصروفات:</span>
+              <span className="text-muted-foreground">{t("reportsX.fromExpenses")}:</span>
               <span className="font-medium text-orange-600">{stats.byExpenses.toFixed(3)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">يدوي:</span>
+              <span className="text-muted-foreground">{t("reportsX.manual")}:</span>
               <span className={`font-medium ${stats.byManual >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
                 {stats.byManual >= 0 ? '+' : ''}{stats.byManual.toFixed(3)}
               </span>
@@ -186,7 +188,7 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
       {chartData.length > 1 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">حركة الرصيد</CardTitle>
+            <CardTitle className="text-lg">{t("reportsX.balanceMovement")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[180px]">
@@ -212,24 +214,24 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
       {/* Transactions Table */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">سجل الحركات ({stats.transactionCount})</CardTitle>
+          <CardTitle className="text-lg">{t("reportsX.transactionsLog")} ({stats.transactionCount})</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[200px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">التاريخ</TableHead>
-                  <TableHead className="text-right">النوع</TableHead>
-                  <TableHead className="text-right">الفئة</TableHead>
-                  <TableHead className="text-right">المبلغ</TableHead>
+                  <TableHead className="text-right">{t("reportsX.date")}</TableHead>
+                  <TableHead className="text-right">{t("reportsX.type")}</TableHead>
+                  <TableHead className="text-right">{t("reportsX.category")}</TableHead>
+                  <TableHead className="text-right">{t("reportsX.amount")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      لا توجد حركات في هذه الفترة
+                      {t("reportsX.noTransactionsPeriod")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -238,7 +240,7 @@ export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashB
                       <TableCell>{format(new Date(tx.date), 'MM/dd HH:mm')}</TableCell>
                       <TableCell>
                         <Badge variant={tx.type === 'add' ? 'default' : 'destructive'}>
-                          {tx.type === 'add' ? 'إيداع' : 'سحب'}
+                          {tx.type === 'add' ? t('reportsX.deposit') : t('reportsX.withdrawal')}
                         </Badge>
                       </TableCell>
                       <TableCell>{getCategoryLabel(tx.category)}</TableCell>

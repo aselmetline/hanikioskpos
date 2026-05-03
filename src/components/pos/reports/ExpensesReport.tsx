@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Expense, EXPENSE_CATEGORIES } from '@/types/pos';
 import { Wallet, Receipt, TrendingDown, PieChart } from 'lucide-react';
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ExpensesReportProps {
   expenses: Expense[];
@@ -17,6 +18,7 @@ interface ExpensesReportProps {
 const COLORS = ['#3b82f6', '#22c55e', '#f97316', '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1'];
 
 export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportProps) {
+  const { t, dir } = useLanguage();
   const filteredExpenses = useMemo(() => {
     return expenses.filter(expense => {
       const expenseDate = new Date(expense.date);
@@ -61,7 +63,7 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
   };
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="bg-gradient-to-br from-red-500/10 to-red-500/5">
@@ -71,7 +73,7 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
                 <TrendingDown className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي المصروفات</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.totalExpenses')}</p>
                 <p className="text-xl font-bold text-red-600">{stats.totalExpenses.toFixed(3)} TND</p>
               </div>
             </div>
@@ -85,7 +87,7 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
                 <Receipt className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">عدد المصروفات</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.expensesCount')}</p>
                 <p className="text-xl font-bold text-blue-600">{stats.count}</p>
               </div>
             </div>
@@ -99,7 +101,7 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
                 <Wallet className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">متوسط المصروف</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.averageExpense')}</p>
                 <p className="text-xl font-bold text-primary">{stats.averageExpense.toFixed(3)} TND</p>
               </div>
             </div>
@@ -113,7 +115,7 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <PieChart className="h-5 w-5" />
-              توزيع المصروفات حسب الفئة
+              {t('reportsX.expensesByCategory')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -145,24 +147,24 @@ export function ExpensesReport({ expenses, dateFrom, dateTo }: ExpensesReportPro
       {/* Expenses Table */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">تفاصيل المصروفات</CardTitle>
+          <CardTitle className="text-lg">{t('reportsX.expensesDetails')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[250px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">التاريخ</TableHead>
-                  <TableHead className="text-right">الفئة</TableHead>
-                  <TableHead className="text-right">الوصف</TableHead>
-                  <TableHead className="text-right">المبلغ</TableHead>
+                  <TableHead className="text-right">{t('reportsX.date')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.category')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.description')}</TableHead>
+                  <TableHead className="text-right">{t('reportsX.amount')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredExpenses.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      لا توجد مصروفات في هذه الفترة
+                      {t('reportsX.noExpensesPeriod')}
                     </TableCell>
                   </TableRow>
                 ) : (

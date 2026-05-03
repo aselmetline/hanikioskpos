@@ -1,4 +1,4 @@
-import { Download, Printer, Share2, X } from 'lucide-react';
+import { Download, Printer, Share2 } from 'lucide-react';
 import { PurchaseItem } from '@/types/pos';
 import { Supplier } from '@/hooks/useSuppliers';
 import {
@@ -8,10 +8,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { useRef, useCallback, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PurchaseReceiptPrinterProps {
   open: boolean;
@@ -44,7 +44,11 @@ export function PurchaseReceiptPrinter({
   commercialRegister,
   autoExport = false,
 }: PurchaseReceiptPrinterProps) {
+  const { t, language, dir } = useLanguage();
   const receiptRef = useRef<HTMLDivElement>(null);
+
+  const productLabel = (item: PurchaseItem) =>
+    language === 'fr' ? (item.product.name || item.product.nameAr) : (item.product.nameAr || item.product.name);
 
   const handleExportPDF = useCallback(async () => {
     if (!receiptRef.current) return;
@@ -63,11 +67,11 @@ export function PurchaseReceiptPrinter({
         format: [imgWidth, imgHeight + 10],
       });
       pdf.addImage(imgData, 'PNG', 0, 5, imgWidth, imgHeight);
-      pdf.save(`فاتورة-مشتريات-${invoiceNumber}.pdf`);
+      pdf.save(`${t('receipt.purchaseInvoice')}-${invoiceNumber}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     }
-  }, [invoiceNumber]);
+  }, [invoiceNumber, t]);
 
   useEffect(() => {
     if (open && autoExport) {
@@ -81,11 +85,8 @@ export function PurchaseReceiptPrinter({
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
-        <!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>فاتورة مشتريات - ${invoiceNumber}</title>
-        <style>* { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: 'Courier New', monospace; font-size: 12px; width: 80mm; padding: 5mm; direction: rtl; }
-        .header { text-align: center; margin-bottom: 10px; } .header h1 { font-size: 16px; } .divider { border-top: 1px dashed #000; margin: 8px 0; }
-        .item { display: flex; justify-content: space-between; margin: 4px 0; } .total-row { display: flex; justify-content: space-between; margin: 4px 0; }
-        .grand-total { font-size: 14px; font-weight: bold; } .footer { text-align: center; margin-top: 15px; font-size: 10px; color: #666; }</style>
+        <!DOCTYPE html><html dir="${dir}"><head><meta charset="UTF-8"><title>${t('receipt.purchaseInvoice')} - ${invoiceNumber}</title>
+        <style>* { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: 'Courier New', monospace; font-size: 12px; width: 80mm; padding: 5mm; direction: ${dir}; }</style>
         </head><body>${receiptRef.current.innerHTML}<script>window.print(); window.close();</script></body></html>
       `);
       printWindow.document.close();
@@ -94,18 +95,18 @@ export function PurchaseReceiptPrinter({
 
   const handleShare = async () => {
     const text = `
-${kioskName} - فاتورة مشتريات
-رقم الفاتورة: ${invoiceNumber}
-التاريخ: ${format(invoiceDate, 'dd/MM/yyyy')}
-${supplier ? `المورد: ${supplier.name}` : ''}
+${language === 'fr' ? kioskNameFr : kioskName} - ${t('receipt.purchaseInvoice')}
+${t('receipt.invoiceNumber')}: ${invoiceNumber}
+${t('receipt.date')}: ${format(invoiceDate, 'dd/MM/yyyy')}
+${supplier ? `${t('receipt.supplier')}: ${supplier.name}` : ''}
 ${'─'.repeat(20)}
-${items.map(item => `${item.product.nameAr || item.product.name} x${item.quantity} @ ${item.cost.toFixed(3)} = ${item.total.toFixed(3)}`).join('\n')}
+${items.map(item => `${productLabel(item)} x${item.quantity} @ ${item.cost.toFixed(3)} = ${item.total.toFixed(3)}`).join('\n')}
 ${'─'.repeat(20)}
-الإجمالي: ${total.toFixed(3)} د.ت
+${t('receipt.total')}: ${total.toFixed(3)} TND
     `.trim();
 
     if (navigator.share) {
-      try { await navigator.share({ title: `فاتورة مشتريات ${invoiceNumber}`, text }); } catch {}
+      try { await navigator.share({ title: `${t('receipt.purchaseInvoice')} ${invoiceNumber}`, text }); } catch {}
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
@@ -117,32 +118,32 @@ ${'─'.repeat(20)}
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Printer className="w-5 h-5 text-primary" />
-            فاتورة مشتريات
+            {t('receipt.purchaseInvoice')}
           </DialogTitle>
         </DialogHeader>
 
         <div
           ref={receiptRef}
           className="bg-white text-black rounded-xl shadow-lg overflow-hidden text-sm"
-          style={{ direction: 'rtl', fontFamily: "'Cairo', 'Courier New', monospace" }}
+          style={{ direction: dir, fontFamily: "'Cairo', 'Courier New', monospace" }}
         >
           <div className="bg-gradient-to-l from-orange-600 to-amber-600 text-white px-5 py-4 text-center">
-            <h1 className="text-xl font-bold tracking-wide">{kioskName}</h1>
-            <p className="text-orange-100 text-xs mt-0.5">{kioskNameFr}</p>
-            <p className="text-orange-200 text-[10px] mt-1 font-bold">فاتورة مشتريات</p>
+            <h1 className="text-xl font-bold tracking-wide">{language === 'fr' ? kioskNameFr : kioskName}</h1>
+            <p className="text-orange-100 text-xs mt-0.5">{language === 'fr' ? kioskName : kioskNameFr}</p>
+            <p className="text-orange-200 text-[10px] mt-1 font-bold">{t('receipt.purchaseInvoice')}</p>
             {storeAddress && <p className="text-orange-100 text-[10px] mt-1">📍 {storeAddress}</p>}
             {storePhone && <p className="text-orange-100 text-[10px]">📞 {storePhone}</p>}
-            {commercialRegister && <p className="text-orange-100 text-[10px]">🏷️ س.ت: {commercialRegister}</p>}
+            {commercialRegister && <p className="text-orange-100 text-[10px]">🏷️ {t('receipt.commercialRegister')}: {commercialRegister}</p>}
           </div>
 
           <div className="px-5 py-3">
             <div className="flex justify-between items-center bg-gray-50 rounded-lg px-3 py-2 mb-3">
               <div>
-                <p className="text-[10px] text-gray-400">رقم الفاتورة</p>
+                <p className="text-[10px] text-gray-400">{t('receipt.invoiceNumber')}</p>
                 <p className="text-xs font-bold text-gray-800">#{invoiceNumber}</p>
               </div>
               <div className="text-left">
-                <p className="text-[10px] text-gray-400">التاريخ</p>
+                <p className="text-[10px] text-gray-400">{t('receipt.date')}</p>
                 <p className="text-xs font-bold text-gray-800">{format(invoiceDate, 'dd/MM/yyyy')}</p>
               </div>
             </div>
@@ -150,21 +151,21 @@ ${'─'.repeat(20)}
             {supplier && (
               <div className="bg-amber-50 rounded-lg px-3 py-2 mb-3 flex justify-between items-center">
                 <span className="text-xs font-bold text-amber-800">{supplier.name}</span>
-                <span className="text-[10px] text-amber-600">المورد</span>
+                <span className="text-[10px] text-amber-600">{t('receipt.supplier')}</span>
               </div>
             )}
 
             <div className="flex justify-between text-[10px] text-gray-400 font-bold border-b border-gray-200 pb-1 mb-1">
-              <span className="flex-1">المنتج</span>
-              <span className="w-8 text-center">الكمية</span>
-              <span className="w-14 text-center">التكلفة</span>
-              <span className="w-16 text-left">الإجمالي</span>
+              <span className="flex-1">{t('receipt.product')}</span>
+              <span className="w-8 text-center">{t('receipt.qty')}</span>
+              <span className="w-14 text-center">{t('receipt.cost')}</span>
+              <span className="w-16 text-left">{t('receipt.total')}</span>
             </div>
 
             <div className="space-y-1.5 mb-3">
               {items.map((item, idx) => (
                 <div key={idx} className="flex justify-between text-xs items-center">
-                  <span className="flex-1 truncate font-medium text-gray-800">{item.product.nameAr || item.product.name}</span>
+                  <span className="flex-1 truncate font-medium text-gray-800">{productLabel(item)}</span>
                   <span className="w-8 text-center text-gray-500 bg-gray-100 rounded text-[10px] py-0.5">{item.quantity}</span>
                   <span className="w-14 text-center text-gray-500">{item.cost.toFixed(3)}</span>
                   <span className="w-16 text-left font-semibold text-gray-700">{item.total.toFixed(3)}</span>
@@ -175,12 +176,12 @@ ${'─'.repeat(20)}
             <div className="border-t-2 border-dashed border-gray-200 my-2" />
 
             <div className="bg-gradient-to-l from-orange-50 to-amber-50 rounded-lg px-3 py-2.5 flex justify-between items-center">
-              <span className="font-bold text-gray-700">الإجمالي</span>
-              <span className="font-black text-lg text-orange-700">{total.toFixed(3)} <span className="text-xs">د.ت</span></span>
+              <span className="font-bold text-gray-700">{t('receipt.total')}</span>
+              <span className="font-black text-lg text-orange-700">{total.toFixed(3)} <span className="text-xs">TND</span></span>
             </div>
 
             <div className="border-t border-gray-100 mt-3 pt-3 text-center">
-              <p className="text-xs text-gray-400">فاتورة مشتريات 📦</p>
+              <p className="text-xs text-gray-400">{t('receipt.purchaseInvoice')} 📦</p>
               <p className="text-[9px] text-gray-300 mt-1">Powered by Hani Kiosk POS</p>
             </div>
           </div>
@@ -188,13 +189,13 @@ ${'─'.repeat(20)}
 
         <div className="grid grid-cols-3 gap-2 mt-4">
           <button onClick={handlePrint} className="pos-button-primary text-sm">
-            <Printer className="w-4 h-4" /> طباعة
+            <Printer className="w-4 h-4" /> {t('receipt.print')}
           </button>
           <button onClick={handleExportPDF} className="pos-button-outline text-sm">
-            <Download className="w-4 h-4" /> PDF
+            <Download className="w-4 h-4" /> {t('receipt.pdf')}
           </button>
           <button onClick={handleShare} className="pos-button-outline text-sm">
-            <Share2 className="w-4 h-4" /> مشاركة
+            <Share2 className="w-4 h-4" /> {t('receipt.share')}
           </button>
         </div>
       </DialogContent>
