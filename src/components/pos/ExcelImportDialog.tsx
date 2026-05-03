@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { parseExcelProducts, downloadSampleTemplate, ExcelProduct } from '@/utils/excelUtils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ExcelImportDialogProps {
   open: boolean;
