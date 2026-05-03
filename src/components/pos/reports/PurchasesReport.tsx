@@ -52,7 +52,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
                 <TrendingDown className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي المشتريات</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.totalPurchases')}</p>
                 <p className="text-xl font-bold text-blue-600">{stats.totalPurchases.toFixed(3)} TND</p>
               </div>
             </div>
