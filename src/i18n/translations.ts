@@ -210,6 +210,10 @@ export const translations = {
     noCustomers: { ar: 'لا يوجد عملاء', fr: 'Aucun client' },
     earned: { ar: 'مكتسبة', fr: 'Gagnés' },
     redeemed: { ar: 'مستبدلة', fr: 'Utilisés' },
+    pointsHistoryTitle: { ar: 'سجل نقاط', fr: 'Historique des points de' },
+    earnPoints: { ar: 'كسب نقاط', fr: 'Gain de points' },
+    redeemPointsLabel: { ar: 'استبدال نقاط', fr: 'Échange de points' },
+    noPointsTransactions: { ar: 'لا توجد عمليات نقاط بعد', fr: 'Aucune transaction de points' },
   },
 
   // ===== Expenses =====
