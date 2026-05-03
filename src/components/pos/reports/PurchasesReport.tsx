@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Purchase } from '@/types/pos';
 import { ShoppingBag, Receipt, Package, TrendingDown } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PurchasesReportProps {
   purchases: Purchase[];
