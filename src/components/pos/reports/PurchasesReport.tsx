@@ -80,7 +80,7 @@ export function PurchasesReport({ purchases, dateFrom, dateTo }: PurchasesReport
                 <Package className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">عدد الأصناف</p>
+                <p className="text-sm text-muted-foreground">{t('reportsX.itemsCount')}</p>
                 <p className="text-xl font-bold text-green-600">{stats.totalItems}</p>
               </div>
             </div>
