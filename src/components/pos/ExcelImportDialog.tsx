@@ -17,6 +17,7 @@ interface ExcelImportDialogProps {
 }
 
 export function ExcelImportDialog({ open, onOpenChange, onImport }: ExcelImportDialogProps) {
+  const { t } = useLanguage();
   const [products, setProducts] = useState<ExcelProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
