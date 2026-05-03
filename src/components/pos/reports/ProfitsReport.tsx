@@ -105,7 +105,7 @@ export function ProfitsReport({ sales, purchases, expenses, dateFrom, dateTo }: 
                 <DollarSign className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي الإيرادات</p>
+                <p className="text-sm text-muted-foreground">{t("reportsX.totalRevenue")}</p>
                 <p className="text-xl font-bold text-green-600">{stats.totalRevenue.toFixed(3)} TND</p>
               </div>
             </div>
@@ -119,7 +119,7 @@ export function ProfitsReport({ sales, purchases, expenses, dateFrom, dateTo }: 
                 <TrendingDown className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">تكلفة المشتريات</p>
+                <p className="text-sm text-muted-foreground">{t("reportsX.purchasesCost")}</p>
                 <p className="text-xl font-bold text-blue-600">{stats.totalPurchases.toFixed(3)} TND</p>
               </div>
             </div>
@@ -133,7 +133,7 @@ export function ProfitsReport({ sales, purchases, expenses, dateFrom, dateTo }: 
                 <TrendingDown className="h-5 w-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">المصروفات</p>
+                <p className="text-sm text-muted-foreground">{t("reportsX.expenses")}</p>
                 <p className="text-xl font-bold text-orange-600">{stats.totalExpenses.toFixed(3)} TND</p>
               </div>
             </div>
@@ -147,7 +147,7 @@ export function ProfitsReport({ sales, purchases, expenses, dateFrom, dateTo }: 
                 <TrendingUp className={`h-5 w-5 ${stats.netProfit >= 0 ? 'text-primary' : 'text-red-600'}`} />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">صافي الربح</p>
+                <p className="text-sm text-muted-foreground">{t("reportsX.netProfit")}</p>
                 <p className={`text-xl font-bold ${stats.netProfit >= 0 ? 'text-primary' : 'text-red-600'}`}>
                   {stats.netProfit.toFixed(3)} TND
                 </p>
@@ -163,7 +163,7 @@ export function ProfitsReport({ sales, purchases, expenses, dateFrom, dateTo }: 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <BarChart3 className="h-5 w-5 text-primary" />
-              <span className="font-medium">هامش الربح</span>
+              <span className="font-medium">{t("reportsX.profitMargin")}</span>
             </div>
             <span className={`text-xl font-bold ${stats.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {stats.profitMargin.toFixed(1)}%
@@ -176,7 +176,7 @@ export function ProfitsReport({ sales, purchases, expenses, dateFrom, dateTo }: 
       {dailyData.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">المبيعات vs المصروفات</CardTitle>
+            <CardTitle className="text-lg">{t("reportsX.salesVsExpenses")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -199,7 +199,7 @@ export function ProfitsReport({ sales, purchases, expenses, dateFrom, dateTo }: 
       {pieData.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">توزيع الإيرادات</CardTitle>
+            <CardTitle className="text-lg">{t("reportsX.revenueDistribution")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">

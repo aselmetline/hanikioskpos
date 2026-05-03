@@ -120,12 +120,12 @@ export function StoreActivityReport({
                 <Store className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي الحركات</p>
+                <p className="text-sm text-muted-foreground">{t("reportsX.totalActivity")}</p>
                 <p className="text-2xl font-bold text-primary">{stats.totalTransactions}</p>
               </div>
             </div>
             <div className="text-left">
-              <p className="text-sm text-muted-foreground">صافي الربح</p>
+              <p className="text-sm text-muted-foreground">{t("reportsX.netProfit")}</p>
               <p className={`text-xl font-bold ${stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {stats.netProfit.toFixed(3)} TND
               </p>
@@ -142,9 +142,9 @@ export function StoreActivityReport({
               <div className="p-2 bg-green-500/20 rounded-lg mb-2">
                 <ShoppingCart className="h-5 w-5 text-green-600" />
               </div>
-              <p className="text-xs text-muted-foreground">المبيعات</p>
+              <p className="text-xs text-muted-foreground">{t("reportsX.sales")}</p>
               <p className="text-lg font-bold text-green-600">{stats.totalSales.toFixed(3)}</p>
-              <p className="text-xs text-muted-foreground">{stats.salesCount} فاتورة</p>
+              <p className="text-xs text-muted-foreground">{stats.salesCount} {t("reportsX.invoiceLabel")}</p>
             </div>
           </CardContent>
         </Card>
@@ -155,9 +155,9 @@ export function StoreActivityReport({
               <div className="p-2 bg-blue-500/20 rounded-lg mb-2">
                 <ShoppingBag className="h-5 w-5 text-blue-600" />
               </div>
-              <p className="text-xs text-muted-foreground">المشتريات</p>
+              <p className="text-xs text-muted-foreground">{t("reportsX.purchases")}</p>
               <p className="text-lg font-bold text-blue-600">{stats.totalPurchases.toFixed(3)}</p>
-              <p className="text-xs text-muted-foreground">{stats.purchasesCount} فاتورة</p>
+              <p className="text-xs text-muted-foreground">{stats.purchasesCount} {t("reportsX.invoiceLabel")}</p>
             </div>
           </CardContent>
         </Card>
@@ -168,9 +168,9 @@ export function StoreActivityReport({
               <div className="p-2 bg-orange-500/20 rounded-lg mb-2">
                 <Wallet className="h-5 w-5 text-orange-600" />
               </div>
-              <p className="text-xs text-muted-foreground">المصروفات</p>
+              <p className="text-xs text-muted-foreground">{t("reportsX.expenses")}</p>
               <p className="text-lg font-bold text-orange-600">{stats.totalExpenses.toFixed(3)}</p>
-              <p className="text-xs text-muted-foreground">{stats.expensesCount} مصروف</p>
+              <p className="text-xs text-muted-foreground">{stats.expensesCount} {t("reportsX.expenseLabel")}</p>
             </div>
           </CardContent>
         </Card>
@@ -183,28 +183,28 @@ export function StoreActivityReport({
             <div className="flex justify-between items-center py-2 border-b">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-green-600" />
-                <span>إجمالي الدخل (المبيعات)</span>
+                <span>{t("reportsX.incomeTotal")}</span>
               </div>
               <span className="font-bold text-green-600">+{stats.totalSales.toFixed(3)} TND</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b">
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-4 w-4 text-blue-600" />
-                <span>تكلفة المشتريات</span>
+                <span>{t("reportsX.purchasesCost")}</span>
               </div>
               <span className="font-bold text-blue-600">-{stats.totalPurchases.toFixed(3)} TND</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b">
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-4 w-4 text-orange-600" />
-                <span>المصروفات التشغيلية</span>
+                <span>{t("reportsX.operatingExpenses")}</span>
               </div>
               <span className="font-bold text-orange-600">-{stats.totalExpenses.toFixed(3)} TND</span>
             </div>
             <div className="flex justify-between items-center py-2 bg-muted/50 rounded-lg px-2">
               <div className="flex items-center gap-2">
                 <Activity className={`h-4 w-4 ${stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
-                <span className="font-medium">صافي الربح</span>
+                <span className="font-medium">{t("reportsX.netProfit")}</span>
               </div>
               <span className={`font-bold text-lg ${stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {stats.netProfit >= 0 ? '+' : ''}{stats.netProfit.toFixed(3)} TND
@@ -218,7 +218,7 @@ export function StoreActivityReport({
       {showChart && chartData.length > 1 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">الرسم البياني للحركة</CardTitle>
+            <CardTitle className="text-lg">{t("reportsX.activityChart")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[250px]">
