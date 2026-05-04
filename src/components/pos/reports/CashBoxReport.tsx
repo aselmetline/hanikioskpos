@@ -18,7 +18,7 @@ interface CashBoxReportProps {
 }
 
 export function CashBoxReport({ transactions, balance, dateFrom, dateTo }: CashBoxReportProps) {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
       const txDate = new Date(t.date);

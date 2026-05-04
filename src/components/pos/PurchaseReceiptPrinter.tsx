@@ -26,6 +26,7 @@ interface PurchaseReceiptPrinterProps {
   storePhone?: string;
   storeAddress?: string;
   commercialRegister?: string;
+  logo?: string | null;
   autoExport?: boolean;
 }
 
@@ -42,6 +43,7 @@ export function PurchaseReceiptPrinter({
   storePhone,
   storeAddress,
   commercialRegister,
+  logo,
   autoExport = false,
 }: PurchaseReceiptPrinterProps) {
   const { t, language, dir } = useLanguage();
@@ -55,18 +57,25 @@ export function PurchaseReceiptPrinter({
     try {
       const canvas = await html2canvas(receiptRef.current, {
         scale: 2,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#FAFAF7',
         useCORS: true,
       });
       const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 80;
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: [imgWidth, imgHeight + 10],
-      });
-      pdf.addImage(imgData, 'PNG', 0, 5, imgWidth, imgHeight);
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
       pdf.save(`${t('receipt.purchaseInvoice')}-${invoiceNumber}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -75,7 +84,7 @@ export function PurchaseReceiptPrinter({
 
   useEffect(() => {
     if (open && autoExport) {
-      const timer = setTimeout(() => handleExportPDF(), 500);
+      const timer = setTimeout(() => handleExportPDF(), 600);
       return () => clearTimeout(timer);
     }
   }, [open, autoExport, handleExportPDF]);
@@ -85,9 +94,15 @@ export function PurchaseReceiptPrinter({
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
-        <!DOCTYPE html><html dir="${dir}"><head><meta charset="UTF-8"><title>${t('receipt.purchaseInvoice')} - ${invoiceNumber}</title>
-        <style>* { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: 'Courier New', monospace; font-size: 12px; width: 80mm; padding: 5mm; direction: ${dir}; }</style>
-        </head><body>${receiptRef.current.innerHTML}<script>window.print(); window.close();</script></body></html>
+        <!DOCTYPE html><html dir="${dir}"><head><meta charset="UTF-8">
+        <title>${t('receipt.purchaseInvoice')} - ${invoiceNumber}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+        <style>
+          @page { size: A4; margin: 0; }
+          * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          body { font-family: 'Cairo', sans-serif; direction: ${dir}; background: #FAFAF7; }
+        </style>
+        </head><body>${receiptRef.current.outerHTML}<script>setTimeout(()=>{window.print();window.close();},300);</script></body></html>
       `);
       printWindow.document.close();
     }
@@ -112,9 +127,16 @@ ${t('receipt.total')}: ${total.toFixed(3)} TND
     }
   };
 
+  // Classic Corporate palette
+  const INK = '#0A1428';
+  const INK_LIGHT = '#2D3A54';
+  const INK_FADED = '#64748B';
+  const GOLD = '#9E7B3A';
+  const PAPER = '#FAFAF7';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Printer className="w-5 h-5 text-primary" />
@@ -124,67 +146,128 @@ ${t('receipt.total')}: ${total.toFixed(3)} TND
 
         <div
           ref={receiptRef}
-          className="bg-white text-black rounded-xl shadow-lg overflow-hidden text-sm"
-          style={{ direction: dir, fontFamily: "'Cairo', 'Courier New', monospace" }}
+          dir={dir}
+          style={{
+            fontFamily: "'Cairo', sans-serif",
+            background: PAPER,
+            color: INK,
+            width: '210mm',
+            minHeight: '297mm',
+            margin: '0 auto',
+            position: 'relative',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+            overflow: 'hidden',
+            transform: 'scale(0.7)',
+            transformOrigin: 'top center',
+          }}
         >
-          <div className="bg-gradient-to-l from-orange-600 to-amber-600 text-white px-5 py-4 text-center">
-            <h1 className="text-xl font-bold tracking-wide">{language === 'fr' ? kioskNameFr : kioskName}</h1>
-            <p className="text-orange-100 text-xs mt-0.5">{language === 'fr' ? kioskName : kioskNameFr}</p>
-            <p className="text-orange-200 text-[10px] mt-1 font-bold">{t('receipt.purchaseInvoice')}</p>
-            {storeAddress && <p className="text-orange-100 text-[10px] mt-1">📍 {storeAddress}</p>}
-            {storePhone && <p className="text-orange-100 text-[10px]">📞 {storePhone}</p>}
-            {commercialRegister && <p className="text-orange-100 text-[10px]">🏷️ {t('receipt.commercialRegister')}: {commercialRegister}</p>}
+          {/* Watermark */}
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', opacity: 0.03 }}>
+            <div style={{ fontSize: '180px', fontWeight: 'bold', transform: 'rotate(-30deg)', lineHeight: 1, letterSpacing: '-0.05em' }}>HANI</div>
           </div>
 
-          <div className="px-5 py-3">
-            <div className="flex justify-between items-center bg-gray-50 rounded-lg px-3 py-2 mb-3">
-              <div>
-                <p className="text-[10px] text-gray-400">{t('receipt.invoiceNumber')}</p>
-                <p className="text-xs font-bold text-gray-800">#{invoiceNumber}</p>
-              </div>
-              <div className="text-left">
-                <p className="text-[10px] text-gray-400">{t('receipt.date')}</p>
-                <p className="text-xs font-bold text-gray-800">{format(invoiceDate, 'dd/MM/yyyy')}</p>
-              </div>
-            </div>
+          <div style={{ height: '16px', background: INK }} />
+          <div style={{ height: '4px', background: GOLD, marginTop: '4px' }} />
 
+          <div style={{ padding: '40px 56px', display: 'flex', flexDirection: 'column', minHeight: 'calc(297mm - 60px)' }}>
+            {/* Header */}
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: `2px solid ${INK}`, paddingBottom: '24px', marginBottom: '32px' }}>
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                {logo && (
+                  <div style={{ background: 'rgba(10,20,40,0.05)', border: '1px solid rgba(10,20,40,0.2)', padding: '6px', flexShrink: 0 }}>
+                    <img src={logo} alt="Logo" style={{ width: '72px', height: '72px', objectFit: 'cover' }} />
+                  </div>
+                )}
+                <div>
+                  <h1 style={{ fontSize: '26px', fontWeight: 700, marginBottom: '4px' }}>
+                    {language === 'fr' ? kioskNameFr : kioskName}
+                    <span style={{ fontSize: '16px', fontWeight: 400, color: INK_LIGHT, margin: '0 12px' }} dir="ltr">
+                      {language === 'fr' ? kioskName : kioskNameFr}
+                    </span>
+                  </h1>
+                  <div style={{ fontSize: '12px', color: INK_LIGHT, lineHeight: 1.8, marginTop: '8px' }}>
+                    {storeAddress && <p>📍 {storeAddress}</p>}
+                    {storePhone && <p>📞 <span dir="ltr">{storePhone}</span></p>}
+                    {commercialRegister && (
+                      <p style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(10,20,40,0.1)', display: 'inline-block' }}>
+                        <span style={{ fontWeight: 600 }}>RC:</span> <span dir="ltr">{commercialRegister}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'left' }} dir="ltr">
+                <div style={{ display: 'inline-block', border: `4px solid ${INK}`, padding: '8px 24px', marginBottom: '16px' }}>
+                  <h2 style={{ fontSize: '28px', fontWeight: 700, fontFamily: "'Playfair Display', serif", letterSpacing: '0.12em' }}>BON D'ACHAT</h2>
+                  <h3 style={{ fontSize: '14px', fontWeight: 700, textAlign: 'center', letterSpacing: '0.15em' }}>فاتورة شراء</h3>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 16px', fontSize: '12px' }}>
+                  <span style={{ color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', alignSelf: 'center' }}>N° Facture</span>
+                  <span style={{ fontWeight: 700, fontSize: '15px' }}>{invoiceNumber}</span>
+                  <span style={{ color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', alignSelf: 'center' }}>Date</span>
+                  <span style={{ fontWeight: 600 }}>{format(invoiceDate, 'dd MMM yyyy')}</span>
+                </div>
+              </div>
+            </header>
+
+            {/* Supplier block */}
             {supplier && (
-              <div className="bg-amber-50 rounded-lg px-3 py-2 mb-3 flex justify-between items-center">
-                <span className="text-xs font-bold text-amber-800">{supplier.name}</span>
-                <span className="text-[10px] text-amber-600">{t('receipt.supplier')}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+                <div style={{ background: '#FDFBF5', border: `1px solid ${GOLD}40`, padding: '16px' }}>
+                  <h4 style={{ fontSize: '10px', fontWeight: 700, color: GOLD, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
+                    {t('receipt.supplier')} / Fournisseur
+                  </h4>
+                  <p style={{ fontWeight: 700, fontSize: '15px' }}>{supplier.name}</p>
+                  {supplier.phone && <p style={{ fontSize: '12px', color: INK_LIGHT, marginTop: '4px' }} dir="ltr">{supplier.phone}</p>}
+                </div>
+                <div />
               </div>
             )}
 
-            <div className="flex justify-between text-[10px] text-gray-400 font-bold border-b border-gray-200 pb-1 mb-1">
-              <span className="flex-1">{t('receipt.product')}</span>
-              <span className="w-8 text-center">{t('receipt.qty')}</span>
-              <span className="w-14 text-center">{t('receipt.cost')}</span>
-              <span className="w-16 text-left">{t('receipt.total')}</span>
+            {/* Products table */}
+            <div style={{ marginBottom: '32px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', borderTop: `2px solid ${INK}`, borderBottom: `2px solid ${INK}`, padding: '12px 0', fontSize: '12px', fontWeight: 700 }}>
+                <div>{t('receipt.product')} <span style={{ color: INK_FADED, fontWeight: 400 }}>/ Désignation</span></div>
+                <div style={{ textAlign: 'center' }}>{t('receipt.qty')} <span style={{ color: INK_FADED, fontWeight: 400 }}>/ Qté</span></div>
+                <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">P.U (TND)</div>
+                <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">Total (TND)</div>
+              </div>
+              <div style={{ fontSize: '13px' }}>
+                {items.map((item, idx) => (
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', padding: '14px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', alignItems: 'center' }}>
+                    <div style={{ fontWeight: 600 }}>{productLabel(item)}</div>
+                    <div style={{ textAlign: 'center', fontWeight: 600 }}>{item.quantity}</div>
+                    <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">{item.cost.toFixed(3)}</div>
+                    <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left', fontWeight: 600 }} dir="ltr">{item.total.toFixed(3)}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="space-y-1.5 mb-3">
-              {items.map((item, idx) => (
-                <div key={idx} className="flex justify-between text-xs items-center">
-                  <span className="flex-1 truncate font-medium text-gray-800">{productLabel(item)}</span>
-                  <span className="w-8 text-center text-gray-500 bg-gray-100 rounded text-[10px] py-0.5">{item.quantity}</span>
-                  <span className="w-14 text-center text-gray-500">{item.cost.toFixed(3)}</span>
-                  <span className="w-16 text-left font-semibold text-gray-700">{item.total.toFixed(3)}</span>
+            {/* Totals */}
+            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(10,20,40,0.2)', paddingTop: '32px' }}>
+              <div style={{ width: '320px' }} dir="ltr">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: INK, color: 'white', borderLeft: `4px solid ${GOLD}` }}>
+                  <div>
+                    <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', opacity: 0.8, marginBottom: '2px' }}>Total à Payer</p>
+                    <p style={{ fontSize: '12px', opacity: 0.9 }}>المبلغ الجملي</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '28px', fontFamily: "'Playfair Display', serif", letterSpacing: '-0.02em' }}>{total.toFixed(3)}</span>
+                    <span style={{ fontSize: '13px', marginLeft: '6px', opacity: 0.8 }}>TND</span>
+                  </div>
                 </div>
-              ))}
-            </div>
-
-            <div className="border-t-2 border-dashed border-gray-200 my-2" />
-
-            <div className="bg-gradient-to-l from-orange-50 to-amber-50 rounded-lg px-3 py-2.5 flex justify-between items-center">
-              <span className="font-bold text-gray-700">{t('receipt.total')}</span>
-              <span className="font-black text-lg text-orange-700">{total.toFixed(3)} <span className="text-xs">TND</span></span>
-            </div>
-
-            <div className="border-t border-gray-100 mt-3 pt-3 text-center">
-              <p className="text-xs text-gray-400">{t('receipt.purchaseInvoice')} 📦</p>
-              <p className="text-[9px] text-gray-300 mt-1">Powered by Hani Kiosk POS</p>
+              </div>
             </div>
           </div>
+
+          <footer style={{ background: 'rgba(10,20,40,0.05)', padding: '20px', textAlign: 'center', borderTop: '1px solid rgba(10,20,40,0.1)' }}>
+            <p style={{ color: INK, fontWeight: 600, fontSize: '13px' }}>{t('receipt.purchaseInvoice')} 📦</p>
+            <p style={{ fontSize: '10px', color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: '8px' }}>
+              ━━━ Powered by Hani Kiosk POS ━━━
+            </p>
+          </footer>
         </div>
 
         <div className="grid grid-cols-3 gap-2 mt-4">
