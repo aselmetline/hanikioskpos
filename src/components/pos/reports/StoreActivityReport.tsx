@@ -25,7 +25,7 @@ export function StoreActivityReport({
   dateTo,
   showChart = false 
 }: StoreActivityReportProps) {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   const stats = useMemo(() => {
     const from = new Date(dateFrom);
     from.setHours(0, 0, 0, 0);
