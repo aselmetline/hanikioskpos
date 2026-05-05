@@ -9,8 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { useRef, useCallback, useEffect } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { exportElementToA4PDF } from '@/utils/pdfPaginate';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PurchaseReceiptPrinterProps {
