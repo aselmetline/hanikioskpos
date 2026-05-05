@@ -60,18 +60,13 @@ const Index = () => {
       {
         pointsToRedeem: pointsToRedeem ?? 0,
         autoAddToCashbox: paymentMethod === 'cash' && cashBox.settings.autoAddSales,
-        pointsPerDinar: customers.POINTS_PER_DINAR ?? 1,
+        pointsPerDinar: 1,
       }
     );
 
     if (!result) return null;
 
-    // Refresh local caches that the RPC mutated server-side
-    await Promise.all([
-      products.fetchProducts?.(),
-      customer ? customers.fetchCustomers?.() : Promise.resolve(),
-      cashBox.fetchTransactions?.(),
-    ].filter(Boolean) as Promise<unknown>[]);
+    // Realtime subscriptions in each hook will refresh products/customers/cashBox automatically.
 
     if (pointsToRedeem && pointsToRedeem > 0) {
       toast.success(`تم استبدال ${pointsToRedeem} نقطة بخصم ${pointsDiscount.toFixed(3)} TND`);
