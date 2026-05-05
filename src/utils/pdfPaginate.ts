@@ -21,8 +21,11 @@ export async function exportElementToA4PDF(
     scale,
     backgroundColor: background,
     useCORS: true,
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
+    onclone: (_doc, cloned) => {
+      // Neutralize preview-only scale transform so PDF captures full size
+      (cloned as HTMLElement).style.transform = 'none';
+      (cloned as HTMLElement).style.boxShadow = 'none';
+    },
   });
 
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
