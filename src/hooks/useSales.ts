@@ -80,52 +80,46 @@ export const useSales = () => {
     discount: number,
     total: number,
     paymentMethod: 'cash' | 'credit',
-    customer?: Customer
-  ): Promise<Sale | null> => {
+    customer?: Customer,
+    options?: {
+      pointsToRedeem?: number;
+      autoAddToCashbox?: boolean;
+      pointsPerDinar?: number;
+    }
+  ): Promise<{ sale: Sale; pointsEarned: number } | null> => {
     if (!user || items.length === 0) return null;
 
-    // Insert sale
-    const { data: saleData, error: saleError } = await supabase
-      .from('sales')
-      .insert({
-        user_id: user.id,
-        subtotal,
-        tax,
-        discount,
-        total,
-        payment_method: paymentMethod,
-        customer_id: customer?.id || null
-      })
-      .select()
-      .single();
-
-    if (saleError) {
-      console.error('Error creating sale:', saleError);
-      toast.error('خطأ في تسجيل البيع');
-      return null;
-    }
-
-    // Insert sale items
-    const saleItems = items.map(item => ({
-      sale_id: saleData.id,
-      product_id: item.product.id,
+    const payload = items.map(item => ({
+      product_id: item.product.id || null,
       product_name: item.product.nameAr || item.product.name,
       price: item.product.price,
       quantity: item.quantity,
-      discount: item.discount,
-      total: (item.product.price * item.quantity) - item.discount
+      discount: item.discount || 0,
     }));
 
-    const { error: itemsError } = await supabase
-      .from('sale_items')
-      .insert(saleItems);
+    const { data, error } = await supabase.rpc('process_sale', {
+      p_items: payload,
+      p_subtotal: subtotal,
+      p_tax: tax,
+      p_discount: discount,
+      p_total: total,
+      p_payment_method: paymentMethod,
+      p_customer_id: customer?.id ?? null,
+      p_points_to_redeem: options?.pointsToRedeem ?? 0,
+      p_auto_add_to_cashbox: options?.autoAddToCashbox ?? false,
+      p_points_per_dinar: options?.pointsPerDinar ?? 1,
+    });
 
-    if (itemsError) {
-      console.error('Error saving sale items:', itemsError);
+    if (error) {
+      console.error('Error creating sale:', error);
+      toast.error(error.message || 'خطأ في تسجيل البيع');
+      return null;
     }
 
+    const result = data as { sale_id: string; points_earned: number };
+
     const newSale: Sale = {
-      id: saleData.id,
+      id: result.sale_id,
       items: [...items],
       subtotal,
       tax,
@@ -133,11 +127,11 @@ export const useSales = () => {
       total,
       paymentMethod,
       customerId: customer?.id,
-      createdAt: new Date(saleData.created_at)
+      createdAt: new Date(),
     };
 
     setSales(prev => [newSale, ...prev]);
-    return newSale;
+    return { sale: newSale, pointsEarned: result.points_earned };
   }, [user]);
 
   return {

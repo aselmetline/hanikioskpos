@@ -44,59 +44,46 @@ const Index = () => {
   const handleCheckout = async (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number): Promise<string | null> => {
     if (cart.items.length === 0) return null;
 
-    // Calculate points discount
     const pointsDiscount = pointsToRedeem ? pointsToRedeem / customers.POINTS_TO_DINAR_RATE : 0;
     const saleTotal = cart.total - pointsDiscount;
 
-    // Create sale in database
-    const sale = await salesHook.createSale(
+    // Atomic sale: insert sale + items, decrement stock, redeem/earn points,
+    // update credit balance, and add cash-box transaction in a single DB transaction.
+    const result = await salesHook.createSale(
       cart.items,
       cart.subtotal,
       cart.tax,
       cart.globalDiscount + cart.itemsDiscount + pointsDiscount,
       saleTotal,
       paymentMethod,
-      customer
+      customer,
+      {
+        pointsToRedeem: pointsToRedeem ?? 0,
+        autoAddToCashbox: paymentMethod === 'cash' && cashBox.settings.autoAddSales,
+        pointsPerDinar: 1,
+      }
     );
 
-    if (!sale) return null;
+    if (!result) return null;
 
-    // Update stock
-    for (const item of cart.items) {
-      await products.updateStock(item.product.id, item.quantity);
-    }
+    // Realtime subscriptions in each hook will refresh products/customers/cashBox automatically.
 
-    // Redeem points if used
-    if (customer && pointsToRedeem && pointsToRedeem > 0) {
-      await customers.redeemPoints(customer.id, pointsToRedeem);
+    if (pointsToRedeem && pointsToRedeem > 0) {
       toast.success(`تم استبدال ${pointsToRedeem} نقطة بخصم ${pointsDiscount.toFixed(3)} TND`);
     }
-
-    // Auto-add to cash box if enabled and payment is cash
-    if (paymentMethod === 'cash' && cashBox.settings.autoAddSales) {
-      await cashBox.addTransaction('add', saleTotal, `مبيعات - ${cart.itemCount} منتج`, 'sales');
-    }
-
-    // Add points to customer (on final total after discount)
-    if (customer) {
-      const pointsAdded = await customers.addPoints(customer.id, saleTotal);
-      if (paymentMethod === 'credit') {
-        await customers.updateCreditBalance(customer.id, saleTotal);
-      }
-      if (pointsAdded > 0) {
-        toast.success(`تم إضافة ${pointsAdded} نقطة جديدة لـ ${customer.name}`);
-      }
+    if (customer && result.pointsEarned > 0) {
+      toast.success(`تم إضافة ${result.pointsEarned} نقطة جديدة لـ ${customer.name}`);
     }
 
     cart.clearCart();
-    
+
     toast.success(
-      paymentMethod === 'cash' 
-        ? `تم البيع بنجاح - ${saleTotal.toFixed(3)} TND` 
+      paymentMethod === 'cash'
+        ? `تم البيع بنجاح - ${saleTotal.toFixed(3)} TND`
         : `تم تسجيل البيع الآجل - ${saleTotal.toFixed(3)} TND`
     );
 
-    return sale.id;
+    return result.sale.id;
   };
 
   // Handle saving purchase and auto-deduct from cash box

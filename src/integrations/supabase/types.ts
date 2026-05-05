@@ -529,7 +529,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      process_sale: {
+        Args: {
+          p_auto_add_to_cashbox?: boolean
+          p_customer_id?: string
+          p_discount: number
+          p_items: Json
+          p_payment_method: string
+          p_points_per_dinar?: number
+          p_points_to_redeem?: number
+          p_subtotal: number
+          p_tax: number
+          p_total: number
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
