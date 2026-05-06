@@ -185,7 +185,7 @@ Deno.test({ name: "authenticated user cannot use another user's customer_id", ig
   }
 }});
 
-Deno.test("insufficient stock raises and aborts the transaction", async () => {
+Deno.test({ name: "insufficient stock raises and aborts the transaction", ignore: !HAS_ADMIN, fn: async () => {
   const user = await createTestUser("stock");
   try {
     const productId = await seedProduct(user.id, 2);
