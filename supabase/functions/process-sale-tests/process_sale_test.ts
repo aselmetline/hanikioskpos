@@ -154,7 +154,7 @@ Deno.test({ name: "authenticated user cannot use another user's product_id", ign
     await cleanupUser(userA.id);
     await cleanupUser(userB.id);
   }
-});
+}});
 
 Deno.test("authenticated user cannot use another user's customer_id", async () => {
   const userA = await createTestUser("a-cust");
