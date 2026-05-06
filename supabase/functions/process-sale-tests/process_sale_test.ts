@@ -214,7 +214,7 @@ Deno.test({ name: "insufficient stock raises and aborts the transaction", ignore
   } finally {
     await cleanupUser(user.id);
   }
-});
+}});
 
 Deno.test("happy path: authenticated user with own data succeeds", async () => {
   const user = await createTestUser("happy");
