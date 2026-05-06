@@ -251,4 +251,4 @@ Deno.test({ name: "happy path: authenticated user with own data succeeds", ignor
   } finally {
     await cleanupUser(user.id);
   }
-});
+}});
