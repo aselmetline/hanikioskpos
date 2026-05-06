@@ -156,7 +156,7 @@ Deno.test({ name: "authenticated user cannot use another user's product_id", ign
   }
 }});
 
-Deno.test("authenticated user cannot use another user's customer_id", async () => {
+Deno.test({ name: "authenticated user cannot use another user's customer_id", ignore: !HAS_ADMIN, fn: async () => {
   const userA = await createTestUser("a-cust");
   const userB = await createTestUser("b-cust");
   try {
