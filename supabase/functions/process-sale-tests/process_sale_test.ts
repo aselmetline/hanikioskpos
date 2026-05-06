@@ -120,7 +120,7 @@ Deno.test("anon role cannot execute process_sale (REVOKE enforced)", async () =>
   );
 });
 
-Deno.test("authenticated user cannot use another user's product_id", async () => {
+Deno.test({ name: "authenticated user cannot use another user's product_id", ignore: !HAS_ADMIN, fn: async () => {
   const userA = await createTestUser("a-prod");
   const userB = await createTestUser("b-prod");
   try {
