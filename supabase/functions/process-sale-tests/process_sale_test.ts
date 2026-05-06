@@ -216,7 +216,7 @@ Deno.test({ name: "insufficient stock raises and aborts the transaction", ignore
   }
 }});
 
-Deno.test("happy path: authenticated user with own data succeeds", async () => {
+Deno.test({ name: "happy path: authenticated user with own data succeeds", ignore: !HAS_ADMIN, fn: async () => {
   const user = await createTestUser("happy");
   try {
     const productId = await seedProduct(user.id, 10);
