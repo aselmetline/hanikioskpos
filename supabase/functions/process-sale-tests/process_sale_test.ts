@@ -183,7 +183,7 @@ Deno.test({ name: "authenticated user cannot use another user's customer_id", ig
     await cleanupUser(userA.id);
     await cleanupUser(userB.id);
   }
-});
+}});
 
 Deno.test("insufficient stock raises and aborts the transaction", async () => {
   const user = await createTestUser("stock");
