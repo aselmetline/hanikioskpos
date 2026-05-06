@@ -21,9 +21,11 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const HAS_ADMIN = SERVICE_KEY.length > 0;
 if (!ANON_KEY) throw new Error("Missing anon/publishable key env var");
 
-const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+const admin = HAS_ADMIN
+  ? createClient(SUPABASE_URL, SERVICE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+  : (null as unknown as SupabaseClient);
 
 interface TestUser {
   id: string;
