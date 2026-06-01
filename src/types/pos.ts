@@ -22,8 +22,22 @@ export interface Customer {
   id: string;
   name: string;
   phone: string;
+  email?: string;
+  address?: string;
+  birthday?: string;
+  notes?: string;
+  creditLimit: number;
   points: number;
   creditBalance: number;
+  createdAt: Date;
+}
+
+export interface CustomerPayment {
+  id: string;
+  customerId: string;
+  amount: number;
+  paymentMethod: string;
+  notes?: string;
   createdAt: Date;
 }
 
