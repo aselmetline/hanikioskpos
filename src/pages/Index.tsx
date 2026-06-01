@@ -115,7 +115,7 @@ const Index = () => {
     toast.success('تم حذف المصروف');
   };
 
-  const handleAddCustomer = async (customerData: { name: string; phone: string }) => {
+  const handleAddCustomer = async (customerData: Parameters<typeof customers.addCustomer>[0]) => {
     const customer = await customers.addCustomer(customerData);
     if (customer) {
       toast.success(`تم إضافة العميل ${customerData.name}`);
@@ -230,8 +230,14 @@ const Index = () => {
           <CustomersTab
             customers={customers.filteredCustomers}
             searchQuery={customers.searchQuery}
+            storeName={settings.kioskName}
             onSearchChange={customers.setSearchQuery}
             onAddCustomer={handleAddCustomer}
+            onUpdateCustomer={customers.updateCustomer}
+            onDeleteCustomer={customers.deleteCustomer}
+            onRecordPayment={customers.recordPayment}
+            onFetchPayments={customers.getCustomerPayments}
+            onFetchSales={customers.getCustomerSales}
             onFetchPointsHistory={customers.getPointsHistory}
           />
         )}

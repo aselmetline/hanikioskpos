@@ -44,32 +44,77 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_id: string
+          id: string
+          notes: string | null
+          payment_method: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          customer_id: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_id?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
+          address: string | null
+          birthday: string | null
           created_at: string
           credit_balance: number
+          credit_limit: number
+          email: string | null
           id: string
           name: string
+          notes: string | null
           phone: string | null
           points: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          address?: string | null
+          birthday?: string | null
           created_at?: string
           credit_balance?: number
+          credit_limit?: number
+          email?: string | null
           id?: string
           name: string
+          notes?: string | null
           phone?: string | null
           points?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          address?: string | null
+          birthday?: string | null
           created_at?: string
           credit_balance?: number
+          credit_limit?: number
+          email?: string | null
           id?: string
           name?: string
+          notes?: string | null
           phone?: string | null
           points?: number
           updated_at?: string
@@ -541,6 +586,16 @@ export type Database = {
           p_subtotal: number
           p_tax: number
           p_total: number
+        }
+        Returns: Json
+      }
+      record_customer_payment: {
+        Args: {
+          p_add_to_cashbox?: boolean
+          p_amount: number
+          p_customer_id: string
+          p_notes?: string
+          p_payment_method?: string
         }
         Returns: Json
       }

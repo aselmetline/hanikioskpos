@@ -112,7 +112,12 @@ export const useSales = () => {
 
     if (error) {
       console.error('Error creating sale:', error);
-      toast.error(error.message || 'خطأ في تسجيل البيع');
+      const msg = error.message || '';
+      if (msg.includes('CREDIT_LIMIT_EXCEEDED')) {
+        toast.error('تم تجاوز الحد الائتماني المسموح لهذا العميل');
+      } else {
+        toast.error(msg || 'خطأ في تسجيل البيع');
+      }
       return null;
     }
 
