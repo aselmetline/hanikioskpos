@@ -115,7 +115,7 @@ const Index = () => {
     toast.success('تم حذف المصروف');
   };
 
-  const handleAddCustomer = async (customerData: { name: string; phone: string }) => {
+  const handleAddCustomer = async (customerData: Parameters<typeof customers.addCustomer>[0]) => {
     const customer = await customers.addCustomer(customerData);
     if (customer) {
       toast.success(`تم إضافة العميل ${customerData.name}`);
