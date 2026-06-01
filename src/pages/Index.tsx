@@ -230,7 +230,7 @@ const Index = () => {
           <CustomersTab
             customers={customers.filteredCustomers}
             searchQuery={customers.searchQuery}
-            storeName={cashBox.settings.kioskName}
+            storeName={settings.kioskName}
             onSearchChange={customers.setSearchQuery}
             onAddCustomer={handleAddCustomer}
             onUpdateCustomer={customers.updateCustomer}
