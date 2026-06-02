@@ -4,12 +4,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
+import {
+  buildBaseCustomerId,
+  generateUniqueCustomerId,
+  type CustomerIdInput,
+} from '@/utils/customerId';
 
 const POINTS_PER_DINAR = 1;
 const POINTS_TO_DINAR_RATE = 100;
 
 const mapCustomer = (c: any): Customer => ({
   id: c.id,
+  externalId: c.external_id || undefined,
   name: c.name,
   phone: c.phone || '',
   email: c.email || undefined,
@@ -30,6 +36,10 @@ export type NewCustomerInput = {
   birthday?: string;
   notes?: string;
   creditLimit?: number;
+  /** Optional override; when omitted we derive a deterministic ID from the name. */
+  externalId?: string;
+  /** Source used to derive the externalId when not provided. Defaults to "name". */
+  externalIdSource?: CustomerIdInput;
 };
 
 export function useCustomers() {
