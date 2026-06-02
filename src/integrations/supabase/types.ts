@@ -82,6 +82,7 @@ export type Database = {
           credit_balance: number
           credit_limit: number
           email: string | null
+          external_id: string | null
           id: string
           name: string
           notes: string | null
@@ -97,6 +98,7 @@ export type Database = {
           credit_balance?: number
           credit_limit?: number
           email?: string | null
+          external_id?: string | null
           id?: string
           name: string
           notes?: string | null
@@ -112,6 +114,7 @@ export type Database = {
           credit_balance?: number
           credit_limit?: number
           email?: string | null
+          external_id?: string | null
           id?: string
           name?: string
           notes?: string | null
