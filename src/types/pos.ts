@@ -20,6 +20,7 @@ export interface CartItem {
 
 export interface Customer {
   id: string;
+  externalId?: string;
   name: string;
   phone: string;
   email?: string;

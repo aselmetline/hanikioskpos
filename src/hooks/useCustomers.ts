@@ -4,12 +4,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
+import {
+  buildBaseCustomerId,
+  generateUniqueCustomerId,
+  type CustomerIdInput,
+} from '@/utils/customerId';
 
 const POINTS_PER_DINAR = 1;
 const POINTS_TO_DINAR_RATE = 100;
 
 const mapCustomer = (c: any): Customer => ({
   id: c.id,
+  externalId: c.external_id || undefined,
   name: c.name,
   phone: c.phone || '',
   email: c.email || undefined,
@@ -30,6 +36,10 @@ export type NewCustomerInput = {
   birthday?: string;
   notes?: string;
   creditLimit?: number;
+  /** Optional override; when omitted we derive a deterministic ID from the name. */
+  externalId?: string;
+  /** Source used to derive the externalId when not provided. Defaults to "name". */
+  externalIdSource?: CustomerIdInput;
 };
 
 export function useCustomers() {
@@ -84,8 +94,47 @@ export function useCustomers() {
     );
   }, [customers, searchQuery]);
 
+  /** DB-level uniqueness check using the (user_id, external_id) unique index. */
+  const isExternalIdTaken = useCallback(async (externalId: string): Promise<boolean> => {
+    if (!user) return false;
+    const { data, error } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('external_id', externalId)
+      .maybeSingle();
+    if (error) return false;
+    return !!data;
+  }, [user]);
+
+  /** Look up a loaded customer by their deterministic external_id. */
+  const findByExternalId = useCallback(
+    (externalId: string) => customers.find(c => c.externalId === externalId),
+    [customers],
+  );
+
+  /** Build (and verify uniqueness of) an external_id from qr | code | name input. */
+  const resolveExternalId = useCallback(
+    (source: CustomerIdInput) => generateUniqueCustomerId(source, isExternalIdTaken),
+    [isExternalIdTaken],
+  );
+
   const addCustomer = useCallback(async (input: NewCustomerInput) => {
     if (!user) return null;
+
+    // Derive a deterministic external_id when the caller did not pass one.
+    let externalId = input.externalId?.trim();
+    if (!externalId) {
+      const source: CustomerIdInput = input.externalIdSource ?? { type: 'name', value: input.name };
+      try {
+        externalId = await generateUniqueCustomerId(source, isExternalIdTaken);
+      } catch (e) {
+        console.error('Error generating external_id:', e);
+      }
+    } else if (await isExternalIdTaken(externalId)) {
+      toast.error('معرّف العميل (Customer ID) مستخدم بالفعل');
+      return null;
+    }
 
     const { data, error } = await supabase
       .from('customers')
@@ -98,6 +147,7 @@ export function useCustomers() {
         birthday: input.birthday || null,
         notes: input.notes || null,
         credit_limit: input.creditLimit ?? 0,
+        external_id: externalId ?? null,
         points: 0,
         credit_balance: 0,
       })
@@ -106,14 +156,18 @@ export function useCustomers() {
 
     if (error) {
       console.error('Error adding customer:', error);
-      toast.error('خطأ في إضافة العميل');
+      if ((error as any).code === '23505') {
+        toast.error('معرّف العميل (Customer ID) مستخدم بالفعل');
+      } else {
+        toast.error('خطأ في إضافة العميل');
+      }
       return null;
     }
 
     const newCustomer = mapCustomer(data);
     setCustomers(prev => [newCustomer, ...prev]);
     return newCustomer;
-  }, [user]);
+  }, [user, isExternalIdTaken]);
 
   const updateCustomer = useCallback(async (id: string, updates: Partial<Customer>) => {
     const dbUpdates: Record<string, unknown> = {};
@@ -124,13 +178,18 @@ export function useCustomers() {
     if (updates.birthday !== undefined) dbUpdates.birthday = updates.birthday || null;
     if (updates.notes !== undefined) dbUpdates.notes = updates.notes || null;
     if (updates.creditLimit !== undefined) dbUpdates.credit_limit = updates.creditLimit;
+    if (updates.externalId !== undefined) dbUpdates.external_id = updates.externalId || null;
     if (updates.points !== undefined) dbUpdates.points = updates.points;
     if (updates.creditBalance !== undefined) dbUpdates.credit_balance = updates.creditBalance;
 
     const { error } = await supabase.from('customers').update(dbUpdates).eq('id', id);
     if (error) {
       console.error('Error updating customer:', error);
-      toast.error('خطأ في تحديث العميل');
+      if ((error as any).code === '23505') {
+        toast.error('معرّف العميل (Customer ID) مستخدم بالفعل');
+      } else {
+        toast.error('خطأ في تحديث العميل');
+      }
       return false;
     }
     setCustomers(prev => prev.map(c => (c.id === id ? { ...c, ...updates } : c)));
@@ -272,6 +331,10 @@ export function useCustomers() {
     redeemPoints,
     calculatePointsDiscount,
     findByPhone,
+    findByExternalId,
+    resolveExternalId,
+    isExternalIdTaken,
+    buildCustomerIdPreview: buildBaseCustomerId,
     getPointsHistory,
     loading,
     POINTS_TO_DINAR_RATE,
