@@ -25,6 +25,7 @@ const mapCustomer = (c: any): Customer => ({
   creditLimit: Number(c.credit_limit ?? 0),
   points: c.points,
   creditBalance: Number(c.credit_balance),
+  openingDebtBalance: Number(c.opening_debt_balance ?? 0),
   createdAt: new Date(c.created_at),
 });
 
