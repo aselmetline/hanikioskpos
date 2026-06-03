@@ -94,6 +94,8 @@ export function CustomersTab({
           <input className="pos-input" placeholder="العنوان (اختياري)" value={form.address || ''} onChange={e => setForm({ ...form, address: e.target.value })} />
           <input className="pos-input" type="number" step="0.001" placeholder={`الحد الائتماني (${CURRENCY}) - اتركه 0 للسماح غير المحدود`}
                  value={form.creditLimit || ''} onChange={e => setForm({ ...form, creditLimit: parseFloat(e.target.value) || 0 })} />
+          <input className="pos-input" type="number" step="0.001" placeholder={`رصيد دين افتتاحي (${CURRENCY}) - اتركه 0 إن لم يكن هناك دين سابق`}
+                 value={form.openingDebtBalance || ''} onChange={e => setForm({ ...form, openingDebtBalance: parseFloat(e.target.value) || 0 })} />
           <div className="flex gap-2">
             <button onClick={handleAdd} className="flex-1 pos-button-success">إضافة</button>
             <button onClick={() => setShowAddForm(false)} className="flex-1 pos-button-outline">إلغاء</button>
