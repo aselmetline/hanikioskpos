@@ -1,4 +1,4 @@
-import { Users, Plus, Phone, Award, CreditCard, AlertTriangle, History, MessageCircle } from 'lucide-react';
+import { Users, Plus, Phone, Award, CreditCard, AlertTriangle, History, MessageCircle, QrCode } from 'lucide-react';
 import { Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
