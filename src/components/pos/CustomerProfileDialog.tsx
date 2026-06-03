@@ -67,6 +67,7 @@ export function CustomerProfileDialog({
       birthday: form.birthday,
       notes: form.notes,
       creditLimit: Number(form.creditLimit) || 0,
+      openingDebtBalance: Number(form.openingDebtBalance) || 0,
     });
     if (ok) { toast.success('تم تحديث بيانات العميل'); setEditing(false); }
   };
