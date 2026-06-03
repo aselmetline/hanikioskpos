@@ -217,6 +217,7 @@ export function CustomerProfileDialog({
                     <InfoRow icon={<MapPin className="w-4 h-4" />} label="العنوان" value={customer.address || '—'} />
                     <InfoRow icon={<Calendar className="w-4 h-4" />} label="تاريخ الميلاد" value={customer.birthday ? format(new Date(customer.birthday), 'dd MMM yyyy', { locale }) : '—'} />
                     <InfoRow icon={<CreditCard className="w-4 h-4" />} label="الحد الائتماني" value={customer.creditLimit > 0 ? `${customer.creditLimit.toFixed(3)} ${CURRENCY}` : 'غير محدد'} />
+                    <InfoRow icon={<Wallet className="w-4 h-4" />} label="رصيد دين افتتاحي" value={customer.openingDebtBalance > 0 ? `${customer.openingDebtBalance.toFixed(3)} ${CURRENCY}` : '—'} />
                     <InfoRow icon={<FileText className="w-4 h-4" />} label="ملاحظات" value={customer.notes || '—'} />
                   </>
                 )}
