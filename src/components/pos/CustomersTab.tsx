@@ -1,10 +1,11 @@
-import { Users, Plus, Phone, Award, CreditCard, AlertTriangle, History, MessageCircle } from 'lucide-react';
+import { Users, Plus, Phone, Award, CreditCard, AlertTriangle, History, MessageCircle, QrCode } from 'lucide-react';
 import { Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
 import { useState, useMemo } from 'react';
 import { PointsHistoryDialog } from './PointsHistoryDialog';
 import { CustomerProfileDialog } from './CustomerProfileDialog';
+import { LoyaltyCardDialog } from './LoyaltyCardDialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { NewCustomerInput } from '@/hooks/useCustomers';
 
@@ -33,6 +34,7 @@ export function CustomersTab({
   const [form, setForm] = useState<NewCustomerInput>({ name: '', phone: '', email: '', address: '', creditLimit: 0 });
   const [historyCustomer, setHistoryCustomer] = useState<Customer | null>(null);
   const [profileCustomer, setProfileCustomer] = useState<Customer | null>(null);
+  const [loyaltyCustomer, setLoyaltyCustomer] = useState<Customer | null>(null);
   const [filterOverdue, setFilterOverdue] = useState(false);
 
   const displayed = useMemo(() => {
@@ -144,6 +146,14 @@ export function CustomersTab({
                   )}
                 </div>
 
+                <button
+                  onClick={(e) => { e.stopPropagation(); setLoyaltyCustomer(customer); }}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0"
+                  title="بطاقة الولاء"
+                >
+                  <QrCode className="w-5 h-5 text-primary" />
+                </button>
+
                 {onFetchPointsHistory && (
                   <button
                     onClick={(e) => { e.stopPropagation(); setHistoryCustomer(customer); }}
@@ -196,6 +206,15 @@ export function CustomersTab({
           onRecordPayment={onRecordPayment}
           onFetchPayments={onFetchPayments}
           onFetchSales={onFetchSales}
+        />
+      )}
+
+      {loyaltyCustomer && (
+        <LoyaltyCardDialog
+          open={!!loyaltyCustomer}
+          onOpenChange={(open) => !open && setLoyaltyCustomer(null)}
+          customer={loyaltyCustomer}
+          storeName={storeName}
         />
       )}
     </div>
