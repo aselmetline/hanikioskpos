@@ -31,7 +31,7 @@ export function CustomersTab({
 }: CustomersTabProps) {
   const { t } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [form, setForm] = useState<NewCustomerInput>({ name: '', phone: '', email: '', address: '', creditLimit: 0 });
+  const [form, setForm] = useState<NewCustomerInput>({ name: '', phone: '', email: '', address: '', creditLimit: 0, openingDebtBalance: 0 });
   const [historyCustomer, setHistoryCustomer] = useState<Customer | null>(null);
   const [profileCustomer, setProfileCustomer] = useState<Customer | null>(null);
   const [loyaltyCustomer, setLoyaltyCustomer] = useState<Customer | null>(null);
