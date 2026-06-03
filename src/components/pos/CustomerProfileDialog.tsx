@@ -199,6 +199,9 @@ export function CustomerProfileDialog({
                     <Field icon={<CreditCard className="w-4 h-4" />} label={`الحد الائتماني (${CURRENCY}) - 0 = بلا حد`}>
                       <input type="number" step="0.001" className="pos-input" value={form.creditLimit} onChange={e => setForm({ ...form, creditLimit: parseFloat(e.target.value) || 0 })} />
                     </Field>
+                    <Field icon={<Wallet className="w-4 h-4" />} label={`رصيد دين افتتاحي (${CURRENCY})`}>
+                      <input type="number" step="0.001" className="pos-input" value={form.openingDebtBalance} onChange={e => setForm({ ...form, openingDebtBalance: parseFloat(e.target.value) || 0 })} />
+                    </Field>
                     <Field icon={<FileText className="w-4 h-4" />} label="ملاحظات">
                       <textarea className="pos-input min-h-[60px]" value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} />
                     </Field>
