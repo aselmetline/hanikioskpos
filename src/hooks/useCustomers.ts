@@ -139,6 +139,7 @@ export function useCustomers() {
       return null;
     }
 
+    const openingDebt = input.openingDebtBalance ?? 0;
     const { data, error } = await supabase
       .from('customers')
       .insert({
@@ -152,7 +153,8 @@ export function useCustomers() {
         credit_limit: input.creditLimit ?? 0,
         external_id: externalId ?? null,
         points: 0,
-        credit_balance: 0,
+        opening_debt_balance: openingDebt,
+        credit_balance: openingDebt,
       })
       .select()
       .single();
