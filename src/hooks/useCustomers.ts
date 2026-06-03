@@ -383,6 +383,8 @@ export function useCustomers() {
     calculatePointsDiscount,
     findByPhone,
     findByExternalId,
+    findByExternalIdSource,
+    findOrCreateByExternalIdSource,
     resolveExternalId,
     isExternalIdTaken,
     buildCustomerIdPreview: buildBaseCustomerId,
