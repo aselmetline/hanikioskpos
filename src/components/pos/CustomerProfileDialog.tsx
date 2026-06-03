@@ -67,6 +67,7 @@ export function CustomerProfileDialog({
       birthday: form.birthday,
       notes: form.notes,
       creditLimit: Number(form.creditLimit) || 0,
+      openingDebtBalance: Number(form.openingDebtBalance) || 0,
     });
     if (ok) { toast.success('تم تحديث بيانات العميل'); setEditing(false); }
   };
@@ -198,6 +199,9 @@ export function CustomerProfileDialog({
                     <Field icon={<CreditCard className="w-4 h-4" />} label={`الحد الائتماني (${CURRENCY}) - 0 = بلا حد`}>
                       <input type="number" step="0.001" className="pos-input" value={form.creditLimit} onChange={e => setForm({ ...form, creditLimit: parseFloat(e.target.value) || 0 })} />
                     </Field>
+                    <Field icon={<Wallet className="w-4 h-4" />} label={`رصيد دين افتتاحي (${CURRENCY})`}>
+                      <input type="number" step="0.001" className="pos-input" value={form.openingDebtBalance} onChange={e => setForm({ ...form, openingDebtBalance: parseFloat(e.target.value) || 0 })} />
+                    </Field>
                     <Field icon={<FileText className="w-4 h-4" />} label="ملاحظات">
                       <textarea className="pos-input min-h-[60px]" value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} />
                     </Field>
@@ -213,6 +217,7 @@ export function CustomerProfileDialog({
                     <InfoRow icon={<MapPin className="w-4 h-4" />} label="العنوان" value={customer.address || '—'} />
                     <InfoRow icon={<Calendar className="w-4 h-4" />} label="تاريخ الميلاد" value={customer.birthday ? format(new Date(customer.birthday), 'dd MMM yyyy', { locale }) : '—'} />
                     <InfoRow icon={<CreditCard className="w-4 h-4" />} label="الحد الائتماني" value={customer.creditLimit > 0 ? `${customer.creditLimit.toFixed(3)} ${CURRENCY}` : 'غير محدد'} />
+                    <InfoRow icon={<Wallet className="w-4 h-4" />} label="رصيد دين افتتاحي" value={customer.openingDebtBalance > 0 ? `${customer.openingDebtBalance.toFixed(3)} ${CURRENCY}` : '—'} />
                     <InfoRow icon={<FileText className="w-4 h-4" />} label="ملاحظات" value={customer.notes || '—'} />
                   </>
                 )}

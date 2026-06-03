@@ -30,6 +30,7 @@ export interface Customer {
   creditLimit: number;
   points: number;
   creditBalance: number;
+  openingDebtBalance: number;
   createdAt: Date;
 }
 

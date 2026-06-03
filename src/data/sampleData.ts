@@ -42,9 +42,9 @@ export const sampleProducts: Product[] = [
 ];
 
 export const sampleCustomers: Customer[] = [
-  { id: '1', name: 'أحمد بن علي', phone: '22123456', points: 150, creditBalance: 25.500, creditLimit: 0, createdAt: new Date('2024-01-15') },
-  { id: '2', name: 'محمد الصالح', phone: '55987654', points: 80, creditBalance: 0, creditLimit: 0, createdAt: new Date('2024-02-20') },
-  { id: '3', name: 'فاطمة الزهراء', phone: '99456789', points: 200, creditBalance: 15.000, creditLimit: 0, createdAt: new Date('2024-03-10') },
+  { id: '1', name: 'أحمد بن علي', phone: '22123456', points: 150, creditBalance: 25.500, openingDebtBalance: 0, creditLimit: 0, createdAt: new Date('2024-01-15') },
+  { id: '2', name: 'محمد الصالح', phone: '55987654', points: 80, creditBalance: 0, openingDebtBalance: 0, creditLimit: 0, createdAt: new Date('2024-02-20') },
+  { id: '3', name: 'فاطمة الزهراء', phone: '99456789', points: 200, creditBalance: 15.000, openingDebtBalance: 0, creditLimit: 0, createdAt: new Date('2024-03-10') },
 ];
 
 export const TAX_RATE = 0.19; // 19% TVA

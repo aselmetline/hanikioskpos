@@ -31,7 +31,7 @@ export function CustomersTab({
 }: CustomersTabProps) {
   const { t } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [form, setForm] = useState<NewCustomerInput>({ name: '', phone: '', email: '', address: '', creditLimit: 0 });
+  const [form, setForm] = useState<NewCustomerInput>({ name: '', phone: '', email: '', address: '', creditLimit: 0, openingDebtBalance: 0 });
   const [historyCustomer, setHistoryCustomer] = useState<Customer | null>(null);
   const [profileCustomer, setProfileCustomer] = useState<Customer | null>(null);
   const [loyaltyCustomer, setLoyaltyCustomer] = useState<Customer | null>(null);
@@ -48,7 +48,7 @@ export function CustomersTab({
   const handleAdd = async () => {
     if (!form.name.trim()) return;
     await onAddCustomer(form);
-    setForm({ name: '', phone: '', email: '', address: '', creditLimit: 0 });
+    setForm({ name: '', phone: '', email: '', address: '', creditLimit: 0, openingDebtBalance: 0 });
     setShowAddForm(false);
   };
 
@@ -94,6 +94,8 @@ export function CustomersTab({
           <input className="pos-input" placeholder="العنوان (اختياري)" value={form.address || ''} onChange={e => setForm({ ...form, address: e.target.value })} />
           <input className="pos-input" type="number" step="0.001" placeholder={`الحد الائتماني (${CURRENCY}) - اتركه 0 للسماح غير المحدود`}
                  value={form.creditLimit || ''} onChange={e => setForm({ ...form, creditLimit: parseFloat(e.target.value) || 0 })} />
+          <input className="pos-input" type="number" step="0.001" placeholder={`رصيد دين افتتاحي (${CURRENCY}) - اتركه 0 إن لم يكن هناك دين سابق`}
+                 value={form.openingDebtBalance || ''} onChange={e => setForm({ ...form, openingDebtBalance: parseFloat(e.target.value) || 0 })} />
           <div className="flex gap-2">
             <button onClick={handleAdd} className="flex-1 pos-button-success">إضافة</button>
             <button onClick={() => setShowAddForm(false)} className="flex-1 pos-button-outline">إلغاء</button>
