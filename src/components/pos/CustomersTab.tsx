@@ -34,6 +34,7 @@ export function CustomersTab({
   const [form, setForm] = useState<NewCustomerInput>({ name: '', phone: '', email: '', address: '', creditLimit: 0 });
   const [historyCustomer, setHistoryCustomer] = useState<Customer | null>(null);
   const [profileCustomer, setProfileCustomer] = useState<Customer | null>(null);
+  const [loyaltyCustomer, setLoyaltyCustomer] = useState<Customer | null>(null);
   const [filterOverdue, setFilterOverdue] = useState(false);
 
   const displayed = useMemo(() => {
