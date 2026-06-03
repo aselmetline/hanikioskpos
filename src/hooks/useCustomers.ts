@@ -37,6 +37,7 @@ export type NewCustomerInput = {
   birthday?: string;
   notes?: string;
   creditLimit?: number;
+  openingDebtBalance?: number;
   /** Optional override; when omitted we derive a deterministic ID from the name. */
   externalId?: string;
   /** Source used to derive the externalId when not provided. Defaults to "name". */
