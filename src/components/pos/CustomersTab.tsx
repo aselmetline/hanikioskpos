@@ -48,7 +48,7 @@ export function CustomersTab({
   const handleAdd = async () => {
     if (!form.name.trim()) return;
     await onAddCustomer(form);
-    setForm({ name: '', phone: '', email: '', address: '', creditLimit: 0 });
+    setForm({ name: '', phone: '', email: '', address: '', creditLimit: 0, openingDebtBalance: 0 });
     setShowAddForm(false);
   };
 
