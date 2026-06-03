@@ -208,6 +208,15 @@ export function CustomersTab({
           onFetchSales={onFetchSales}
         />
       )}
+
+      {loyaltyCustomer && (
+        <LoyaltyCardDialog
+          open={!!loyaltyCustomer}
+          onOpenChange={(open) => !open && setLoyaltyCustomer(null)}
+          customer={loyaltyCustomer}
+          storeName={storeName}
+        />
+      )}
     </div>
   );
 }
