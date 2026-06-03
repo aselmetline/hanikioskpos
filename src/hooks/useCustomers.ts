@@ -225,6 +225,7 @@ export function useCustomers() {
 
 
   const updateCustomer = useCallback(async (id: string, updates: Partial<Customer>) => {
+    const existing = customers.find(c => c.id === id);
     const dbUpdates: Record<string, unknown> = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.phone !== undefined) dbUpdates.phone = updates.phone || null;
@@ -237,6 +238,14 @@ export function useCustomers() {
     if (updates.points !== undefined) dbUpdates.points = updates.points;
     if (updates.creditBalance !== undefined) dbUpdates.credit_balance = updates.creditBalance;
 
+    if (updates.openingDebtBalance !== undefined && existing) {
+      const diff = updates.openingDebtBalance - existing.openingDebtBalance;
+      dbUpdates.opening_debt_balance = updates.openingDebtBalance;
+      if (diff !== 0) {
+        dbUpdates.credit_balance = existing.creditBalance + diff;
+      }
+    }
+
     const { error } = await supabase.from('customers').update(dbUpdates).eq('id', id);
     if (error) {
       console.error('Error updating customer:', error);
@@ -247,9 +256,16 @@ export function useCustomers() {
       }
       return false;
     }
-    setCustomers(prev => prev.map(c => (c.id === id ? { ...c, ...updates } : c)));
+    setCustomers(prev => prev.map(c => {
+      if (c.id !== id) return c;
+      const patched = { ...c, ...updates };
+      if (updates.openingDebtBalance !== undefined && existing && updates.openingDebtBalance !== existing.openingDebtBalance) {
+        patched.creditBalance = existing.creditBalance + (updates.openingDebtBalance - existing.openingDebtBalance);
+      }
+      return patched;
+    }));
     return true;
-  }, []);
+  }, [customers]);
 
   const deleteCustomer = useCallback(async (id: string) => {
     const { error } = await supabase.from('customers').delete().eq('id', id);
