@@ -86,6 +86,7 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          opening_debt_balance: number
           phone: string | null
           points: number
           updated_at: string
@@ -102,6 +103,7 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          opening_debt_balance?: number
           phone?: string | null
           points?: number
           updated_at?: string
@@ -118,6 +120,7 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          opening_debt_balance?: number
           phone?: string | null
           points?: number
           updated_at?: string
