@@ -146,6 +146,14 @@ export function CustomersTab({
                   )}
                 </div>
 
+                <button
+                  onClick={(e) => { e.stopPropagation(); setLoyaltyCustomer(customer); }}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0"
+                  title="بطاقة الولاء"
+                >
+                  <QrCode className="w-5 h-5 text-primary" />
+                </button>
+
                 {onFetchPointsHistory && (
                   <button
                     onClick={(e) => { e.stopPropagation(); setHistoryCustomer(customer); }}
