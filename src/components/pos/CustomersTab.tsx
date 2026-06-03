@@ -5,6 +5,7 @@ import { SearchBar } from './SearchBar';
 import { useState, useMemo } from 'react';
 import { PointsHistoryDialog } from './PointsHistoryDialog';
 import { CustomerProfileDialog } from './CustomerProfileDialog';
+import { LoyaltyCardDialog } from './LoyaltyCardDialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { NewCustomerInput } from '@/hooks/useCustomers';
 
