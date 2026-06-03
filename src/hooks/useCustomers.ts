@@ -119,6 +119,7 @@ export function useCustomers() {
     [isExternalIdTaken],
   );
 
+
   const addCustomer = useCallback(async (input: NewCustomerInput) => {
     if (!user) return null;
 
@@ -168,6 +169,56 @@ export function useCustomers() {
     setCustomers(prev => [newCustomer, ...prev]);
     return newCustomer;
   }, [user, isExternalIdTaken]);
+
+  /**
+   * Look up a customer by the deterministic external_id derived from a
+   * QR / code / name input — querying the DB directly so we never miss
+   * a customer that isn't in the local cache yet. Returns null if none.
+   */
+  const findByExternalIdSource = useCallback(async (
+    source: CustomerIdInput,
+  ): Promise<Customer | null> => {
+    if (!user) return null;
+    const externalId = buildBaseCustomerId(source);
+    const cached = customers.find(c => c.externalId === externalId);
+    if (cached) return cached;
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('external_id', externalId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return mapCustomer(data);
+  }, [user, customers]);
+
+  /**
+   * Resolve a QR/code/name to an existing customer (preserving their points
+   * and credit balance), or create a fresh one if no match exists. This is
+   * the core guarantee that scanning the same QR/code twice always returns
+   * the SAME customer record — so HaniWafa points never get lost.
+   */
+  const findOrCreateByExternalIdSource = useCallback(async (
+    source: CustomerIdInput,
+    fallback?: Omit<NewCustomerInput, 'externalId' | 'externalIdSource' | 'name'> & { name?: string },
+  ): Promise<Customer | null> => {
+    const existing = await findByExternalIdSource(source);
+    if (existing) return existing;
+    const defaultName = source.type === 'name'
+      ? source.value.trim()
+      : `${source.type.toUpperCase()} ${source.value.trim()}`;
+    return addCustomer({
+      name: fallback?.name?.trim() || defaultName,
+      phone: fallback?.phone,
+      email: fallback?.email,
+      address: fallback?.address,
+      birthday: fallback?.birthday,
+      notes: fallback?.notes,
+      creditLimit: fallback?.creditLimit,
+      externalIdSource: source,
+    });
+  }, [findByExternalIdSource, addCustomer]);
+
 
   const updateCustomer = useCallback(async (id: string, updates: Partial<Customer>) => {
     const dbUpdates: Record<string, unknown> = {};
@@ -332,6 +383,8 @@ export function useCustomers() {
     calculatePointsDiscount,
     findByPhone,
     findByExternalId,
+    findByExternalIdSource,
+    findOrCreateByExternalIdSource,
     resolveExternalId,
     isExternalIdTaken,
     buildCustomerIdPreview: buildBaseCustomerId,
