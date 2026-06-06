@@ -74,6 +74,8 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   purchases = [],
   onDeletePurchase,
   onUpdatePurchase,
+  onAddProduct,
+
 
   kioskName,
   kioskNameFr,
