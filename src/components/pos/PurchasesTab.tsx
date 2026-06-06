@@ -44,6 +44,8 @@ interface PurchasesTabProps {
   onUpdateSupplierDebt?: (id: string, amount: number) => Promise<void>;
   purchases?: Purchase[];
   onDeletePurchase?: (id: string) => Promise<void>;
+  onUpdatePurchase?: (id: string, items: PurchaseItem[], invoiceDate: Date, supplierId?: string) => Promise<boolean>;
+
   onAddProduct?: (product: {
     name: string; nameAr: string; price: number; cost?: number; category: string;
     barcode?: string; stock: number; unit: string; lowStockAlert: number;
