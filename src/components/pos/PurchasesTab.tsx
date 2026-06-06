@@ -73,7 +73,8 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   onUpdateSupplierDebt,
   purchases = [],
   onDeletePurchase,
-  onAddProduct,
+  onUpdatePurchase,
+
   kioskName,
   kioskNameFr,
   storePhone,
