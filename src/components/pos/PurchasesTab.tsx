@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import {
   Barcode, Save, Trash2, Plus, Minus, ShoppingBag, Receipt, Eye, ChevronDown, ChevronUp,
   PackagePlus, Wallet, TrendingUp, CalendarDays, Search, ArrowUpDown, Crown, X, BadgeDollarSign,
+  Printer, Pencil, BarChart3,
 } from 'lucide-react';
 import { Product, PurchaseItem, Purchase } from '@/types/pos';
 import { Supplier } from '@/hooks/useSuppliers';
@@ -19,7 +20,10 @@ import { toast } from 'sonner';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { PurchaseReceiptPrinter } from './PurchaseReceiptPrinter';
 import { AddProductDialog } from './AddProductDialog';
+import { EditPurchaseDialog } from './EditPurchaseDialog';
+import { PurchasesReportView } from './PurchasesReportView';
 import { useLanguage } from '@/contexts/LanguageContext';
+
 
 type PaymentMode = 'cash' | 'credit';
 type SortKey = 'date_desc' | 'date_asc' | 'total_desc' | 'total_asc';
