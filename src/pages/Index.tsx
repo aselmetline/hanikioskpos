@@ -205,6 +205,8 @@ const Index = () => {
             onUpdateSupplierDebt={suppliersHook.updateDebt}
             purchases={purchases.purchases}
             onDeletePurchase={purchases.deletePurchase}
+            onUpdatePurchase={purchases.updatePurchase}
+
             onAddProduct={products.addProduct}
             kioskName={settings.kioskName}
             kioskNameFr={settings.kioskNameFr}
