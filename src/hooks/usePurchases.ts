@@ -189,6 +189,48 @@ export const usePurchases = () => {
     toast.success('تم حذف فاتورة المشتريات');
   }, [user]);
 
+  const updatePurchase = useCallback(async (
+    id: string,
+    items: PurchaseItem[],
+    invoiceDate: Date,
+    supplierId?: string
+  ): Promise<boolean> => {
+    if (!user || items.length === 0) return false;
+    const total = items.reduce((s, it) => s + it.total, 0);
+
+    const { error: upErr } = await supabase
+      .from('purchases')
+      .update({
+        invoice_date: invoiceDate.toISOString().split('T')[0],
+        supplier_id: supplierId || null,
+        total,
+      })
+      .eq('id', id);
+    if (upErr) { toast.error('خطأ في تحديث الفاتورة'); return false; }
+
+    await supabase.from('purchase_items').delete().eq('purchase_id', id);
+    const rows = items.map(item => ({
+      purchase_id: id,
+      product_id: item.product.id,
+      product_name: item.product.nameAr || item.product.name,
+      cost: item.cost,
+      quantity: item.quantity,
+      total: item.total,
+    }));
+    const { error: itemsErr } = await supabase.from('purchase_items').insert(rows);
+    if (itemsErr) { toast.error('خطأ في تحديث بنود الفاتورة'); return false; }
+
+    setPurchases(prev => prev.map(p => p.id === id ? {
+      ...p,
+      invoiceDate,
+      supplierId,
+      items: [...items],
+      total,
+    } : p));
+    toast.success('تم تحديث الفاتورة');
+    return true;
+  }, [user]);
+
   const currentTotal = useMemo(() => {
     return currentItems.reduce((sum, item) => sum + item.total, 0);
   }, [currentItems]);
@@ -205,7 +247,9 @@ export const usePurchases = () => {
     removeItem,
     clearCurrentItems,
     savePurchase,
+    updatePurchase,
     deletePurchase,
     loading
   };
 };
+
