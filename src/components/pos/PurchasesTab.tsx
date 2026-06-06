@@ -719,10 +719,21 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
           storePhone={storePhone}
           storeAddress={storeAddress}
           commercialRegister={commercialRegister}
-          autoExport
+        />
+      )}
+
+      {onUpdatePurchase && (
+        <EditPurchaseDialog
+          open={!!editPurchase}
+          onOpenChange={(open) => { if (!open) setEditPurchase(null); }}
+          purchase={editPurchase}
+          products={products}
+          suppliers={suppliers}
+          onSave={onUpdatePurchase}
         />
       )}
     </div>
+
   );
 };
 
