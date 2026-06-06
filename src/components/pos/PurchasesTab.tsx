@@ -91,10 +91,12 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('credit');
   const [expandedPurchase, setExpandedPurchase] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'new' | 'history'>('new');
+  const [activeView, setActiveView] = useState<'new' | 'history' | 'reports'>('new');
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [savedPurchaseData, setSavedPurchaseData] = useState<{ items: PurchaseItem[]; total: number; invoiceNumber: string; invoiceDate: Date; supplier?: Supplier } | null>(null);
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [editPurchase, setEditPurchase] = useState<Purchase | null>(null);
+
 
   // History filters
   const [histSearch, setHistSearch] = useState('');
