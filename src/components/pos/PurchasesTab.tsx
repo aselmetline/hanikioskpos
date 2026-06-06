@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import {
   Barcode, Save, Trash2, Plus, Minus, ShoppingBag, Receipt, Eye, ChevronDown, ChevronUp,
   PackagePlus, Wallet, TrendingUp, CalendarDays, Search, ArrowUpDown, Crown, X, BadgeDollarSign,
+  Printer, Pencil, BarChart3,
 } from 'lucide-react';
 import { Product, PurchaseItem, Purchase } from '@/types/pos';
 import { Supplier } from '@/hooks/useSuppliers';
@@ -19,7 +20,10 @@ import { toast } from 'sonner';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { PurchaseReceiptPrinter } from './PurchaseReceiptPrinter';
 import { AddProductDialog } from './AddProductDialog';
+import { EditPurchaseDialog } from './EditPurchaseDialog';
+import { PurchasesReportView } from './PurchasesReportView';
 import { useLanguage } from '@/contexts/LanguageContext';
+
 
 type PaymentMode = 'cash' | 'credit';
 type SortKey = 'date_desc' | 'date_asc' | 'total_desc' | 'total_asc';
@@ -40,6 +44,8 @@ interface PurchasesTabProps {
   onUpdateSupplierDebt?: (id: string, amount: number) => Promise<void>;
   purchases?: Purchase[];
   onDeletePurchase?: (id: string) => Promise<void>;
+  onUpdatePurchase?: (id: string, items: PurchaseItem[], invoiceDate: Date, supplierId?: string) => Promise<boolean>;
+
   onAddProduct?: (product: {
     name: string; nameAr: string; price: number; cost?: number; category: string;
     barcode?: string; stock: number; unit: string; lowStockAlert: number;
@@ -67,7 +73,10 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   onUpdateSupplierDebt,
   purchases = [],
   onDeletePurchase,
+  onUpdatePurchase,
   onAddProduct,
+
+
   kioskName,
   kioskNameFr,
   storePhone,
@@ -82,10 +91,12 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('credit');
   const [expandedPurchase, setExpandedPurchase] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'new' | 'history'>('new');
+  const [activeView, setActiveView] = useState<'new' | 'history' | 'reports'>('new');
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [savedPurchaseData, setSavedPurchaseData] = useState<{ items: PurchaseItem[]; total: number; invoiceNumber: string; invoiceDate: Date; supplier?: Supplier } | null>(null);
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [editPurchase, setEditPurchase] = useState<Purchase | null>(null);
+
 
   // History filters
   const [histSearch, setHistSearch] = useState('');
@@ -287,11 +298,13 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
         )}
 
         {/* Tabs */}
-        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'new' | 'history')} className="mb-4">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'new' | 'history' | 'reports')} className="mb-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="new">{t('purchases.newInvoice')}</TabsTrigger>
             <TabsTrigger value="history">{t('purchases.history')} ({purchases.length})</TabsTrigger>
+            <TabsTrigger value="reports" className="gap-1"><BarChart3 className="w-3 h-3" /> تقارير</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="new" className="space-y-4 mt-4">
             {/* Invoice Info */}
@@ -581,10 +594,29 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                               ))}
                             </TableBody>
                           </Table>
-                          <div className="flex justify-between items-center mt-2 pt-2 border-t">
-                            <Button size="sm" variant="destructive" className="gap-1 text-xs" onClick={() => setDeleteId(purchase.id)}>
-                              <Trash2 className="w-3 h-3" /> {t('common.delete')}
-                            </Button>
+                          <div className="flex flex-wrap justify-between items-center gap-2 mt-2 pt-2 border-t">
+                            <div className="flex gap-1 flex-wrap">
+                              <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" onClick={() => setDeleteId(purchase.id)}>
+                                <Trash2 className="w-3 h-3" /> {t('common.delete')}
+                              </Button>
+                              {onUpdatePurchase && (
+                                <Button size="sm" variant="outline" className="gap-1 text-xs h-7" onClick={() => setEditPurchase(purchase)}>
+                                  <Pencil className="w-3 h-3" /> {t('common.edit') || 'تعديل'}
+                                </Button>
+                              )}
+                              <Button size="sm" variant="outline" className="gap-1 text-xs h-7" onClick={() => {
+                                setSavedPurchaseData({
+                                  items: purchase.items,
+                                  total: purchase.total,
+                                  invoiceNumber: purchase.invoiceNumber,
+                                  invoiceDate: new Date(purchase.invoiceDate),
+                                  supplier: suppliers.find(s => s.id === purchase.supplierId),
+                                });
+                                setReceiptOpen(true);
+                              }}>
+                                <Printer className="w-3 h-3" /> {t('receipt.print')}
+                              </Button>
+                            </div>
                             <div className="text-sm">
                               <span className="text-muted-foreground">{t('common.total')}: </span>
                               <span className="font-bold">{purchase.total.toFixed(3)} TND</span>
@@ -598,8 +630,13 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="reports" className="mt-4">
+            <PurchasesReportView purchases={purchases} />
+          </TabsContent>
         </Tabs>
       </ScrollArea>
+
 
       {/* Fixed Footer */}
       {activeView === 'new' && (
@@ -682,10 +719,21 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
           storePhone={storePhone}
           storeAddress={storeAddress}
           commercialRegister={commercialRegister}
-          autoExport
+        />
+      )}
+
+      {onUpdatePurchase && (
+        <EditPurchaseDialog
+          open={!!editPurchase}
+          onOpenChange={(open) => { if (!open) setEditPurchase(null); }}
+          purchase={editPurchase}
+          products={products}
+          suppliers={suppliers}
+          onSave={onUpdatePurchase}
         />
       )}
     </div>
+
   );
 };
 
