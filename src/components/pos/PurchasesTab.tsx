@@ -594,10 +594,29 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                               ))}
                             </TableBody>
                           </Table>
-                          <div className="flex justify-between items-center mt-2 pt-2 border-t">
-                            <Button size="sm" variant="destructive" className="gap-1 text-xs" onClick={() => setDeleteId(purchase.id)}>
-                              <Trash2 className="w-3 h-3" /> {t('common.delete')}
-                            </Button>
+                          <div className="flex flex-wrap justify-between items-center gap-2 mt-2 pt-2 border-t">
+                            <div className="flex gap-1 flex-wrap">
+                              <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" onClick={() => setDeleteId(purchase.id)}>
+                                <Trash2 className="w-3 h-3" /> {t('common.delete')}
+                              </Button>
+                              {onUpdatePurchase && (
+                                <Button size="sm" variant="outline" className="gap-1 text-xs h-7" onClick={() => setEditPurchase(purchase)}>
+                                  <Pencil className="w-3 h-3" /> {t('common.edit') || 'تعديل'}
+                                </Button>
+                              )}
+                              <Button size="sm" variant="outline" className="gap-1 text-xs h-7" onClick={() => {
+                                setSavedPurchaseData({
+                                  items: purchase.items,
+                                  total: purchase.total,
+                                  invoiceNumber: purchase.invoiceNumber,
+                                  invoiceDate: new Date(purchase.invoiceDate),
+                                  supplier: suppliers.find(s => s.id === purchase.supplierId),
+                                });
+                                setReceiptOpen(true);
+                              }}>
+                                <Printer className="w-3 h-3" /> {t('receipt.print')}
+                              </Button>
+                            </div>
                             <div className="text-sm">
                               <span className="text-muted-foreground">{t('common.total')}: </span>
                               <span className="font-bold">{purchase.total.toFixed(3)} TND</span>
@@ -611,8 +630,13 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="reports" className="mt-4">
+            <PurchasesReportView purchases={purchases} />
+          </TabsContent>
         </Tabs>
       </ScrollArea>
+
 
       {/* Fixed Footer */}
       {activeView === 'new' && (
