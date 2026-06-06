@@ -298,11 +298,13 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
         )}
 
         {/* Tabs */}
-        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'new' | 'history')} className="mb-4">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'new' | 'history' | 'reports')} className="mb-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="new">{t('purchases.newInvoice')}</TabsTrigger>
             <TabsTrigger value="history">{t('purchases.history')} ({purchases.length})</TabsTrigger>
+            <TabsTrigger value="reports" className="gap-1"><BarChart3 className="w-3 h-3" /> تقارير</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="new" className="space-y-4 mt-4">
             {/* Invoice Info */}
