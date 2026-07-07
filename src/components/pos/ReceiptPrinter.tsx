@@ -191,9 +191,18 @@ ${t('receipt.thankYou')}
                   <div style={{ fontSize: '12px', color: INK_LIGHT, lineHeight: 1.8, marginTop: '8px' }}>
                     {storeAddress && <p>📍 {storeAddress}</p>}
                     {storePhone && <p dir="ltr" style={{ direction: dir }}>📞 <span dir="ltr">{storePhone}</span></p>}
-                    {commercialRegister && (
-                      <p style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(10,20,40,0.1)', display: 'inline-block' }}>
-                        <span style={{ fontWeight: 600 }}>RC:</span> <span dir="ltr">{commercialRegister}</span>
+                    {(commercialRegister || matriculeFiscal) && (
+                      <p style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(10,20,40,0.1)' }}>
+                        {commercialRegister && (
+                          <span style={{ marginRight: '12px' }}>
+                            <span style={{ fontWeight: 600 }}>RC:</span> <span dir="ltr">{commercialRegister}</span>
+                          </span>
+                        )}
+                        {matriculeFiscal && (
+                          <span>
+                            <span style={{ fontWeight: 600 }}>MF:</span> <span dir="ltr">{matriculeFiscal}</span>
+                          </span>
+                        )}
                       </p>
                     )}
                   </div>
@@ -275,15 +284,33 @@ ${t('receipt.thankYou')}
                     <span style={{ fontWeight: 600 }}>-{discount.toFixed(3)}</span>
                   </div>
                 )}
-                {taxEnabled && (
+                {taxEnabled && taxBreakdown && Object.keys(taxBreakdown).length > 0 ? (
+                  Object.entries(taxBreakdown)
+                    .filter(([, v]) => (v?.tax ?? 0) > 0.0005 || (v?.base ?? 0) > 0.0005)
+                    .sort()
+                    .map(([rate, v]) => (
+                      <div key={rate} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', fontSize: '12px' }}>
+                        <span style={{ color: INK_LIGHT }}>
+                          TVA {(Number(rate) * 100).toFixed(0)}% <span style={{ color: INK_FADED }}>(base {Number(v.base).toFixed(3)})</span>
+                        </span>
+                        <span style={{ fontWeight: 600 }}>{Number(v.tax).toFixed(3)}</span>
+                      </div>
+                    ))
+                ) : taxEnabled ? (
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', fontSize: '13px' }}>
                     <span style={{ color: INK_LIGHT }}>TVA ({(taxRate * 100).toFixed(0)}%)</span>
                     <span style={{ fontWeight: 600 }}>{tax.toFixed(3)}</span>
                   </div>
+                ) : null}
+                {fiscalStamp > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', fontSize: '13px' }}>
+                    <span style={{ color: INK_LIGHT }}>Timbre fiscal / الطابع الجبائي</span>
+                    <span style={{ fontWeight: 600 }}>{fiscalStamp.toFixed(3)}</span>
+                  </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', marginTop: '8px', background: INK, color: 'white', borderLeft: `4px solid ${GOLD}` }}>
                   <div>
-                    <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', opacity: 0.8, marginBottom: '2px' }}>Net à Payer</p>
+                    <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', opacity: 0.8, marginBottom: '2px' }}>Net à Payer TTC</p>
                     <p style={{ fontSize: '12px', opacity: 0.9 }}>المبلغ الجملي</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
