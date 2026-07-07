@@ -5,6 +5,14 @@ import { useT } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
 import { ReceiptPrinter } from './ReceiptPrinter';
 
+interface CheckoutResult {
+  saleId: string;
+  invoiceNumber?: number;
+  fiscalStamp?: number;
+  total?: number;
+  taxBreakdown?: Record<string, { base: number; tax: number }>;
+}
+
 interface CartSheetProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,7 +24,7 @@ interface CartSheetProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
   onSetDiscount: (discount: number) => void;
-  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<string | null>;
+  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<CheckoutResult | null>;
   customers: Customer[];
   kioskName?: string;
   kioskNameFr?: string;
@@ -26,6 +34,10 @@ interface CartSheetProps {
   storePhone?: string;
   storeAddress?: string;
   commercialRegister?: string;
+  matriculeFiscal?: string;
+  fiscalStampEnabled?: boolean;
+  fiscalStampAmount?: number;
+  taxBreakdown?: Record<string, { base: number; tax: number }>;
 }
 
 export function CartSheet({
@@ -49,6 +61,10 @@ export function CartSheet({
   storePhone,
   storeAddress,
   commercialRegister,
+  matriculeFiscal,
+  fiscalStampEnabled = true,
+  fiscalStampAmount = 1,
+  taxBreakdown,
 }: CartSheetProps) {
   const t = useT();
   const [discountInput, setDiscountInput] = useState('');
@@ -56,8 +72,10 @@ export function CartSheet({
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastPaymentMethod, setLastPaymentMethod] = useState<'cash' | 'credit'>('cash');
   const [lastItems, setLastItems] = useState<CartItem[]>([]);
-  const [lastTotals, setLastTotals] = useState({ subtotal: 0, tax: 0, total: 0, discount: 0 });
+  const [lastTotals, setLastTotals] = useState({ subtotal: 0, tax: 0, total: 0, discount: 0, fiscalStamp: 0 });
   const [lastSaleId, setLastSaleId] = useState<string | undefined>();
+  const [lastInvoiceNumber, setLastInvoiceNumber] = useState<number | undefined>();
+  const [lastBreakdown, setLastBreakdown] = useState<Record<string, { base: number; tax: number }> | undefined>();
   const [usePoints, setUsePoints] = useState(false);
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
 
