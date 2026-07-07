@@ -5,6 +5,14 @@ import { useT } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
 import { ReceiptPrinter } from './ReceiptPrinter';
 
+interface CheckoutResult {
+  saleId: string;
+  invoiceNumber?: number;
+  fiscalStamp?: number;
+  total?: number;
+  taxBreakdown?: Record<string, { base: number; tax: number }>;
+}
+
 interface CartSheetProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,7 +24,7 @@ interface CartSheetProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
   onSetDiscount: (discount: number) => void;
-  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<string | null>;
+  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<CheckoutResult | null>;
   customers: Customer[];
   kioskName?: string;
   kioskNameFr?: string;
@@ -26,6 +34,10 @@ interface CartSheetProps {
   storePhone?: string;
   storeAddress?: string;
   commercialRegister?: string;
+  matriculeFiscal?: string;
+  fiscalStampEnabled?: boolean;
+  fiscalStampAmount?: number;
+  taxBreakdown?: Record<string, { base: number; tax: number }>;
 }
 
 export function CartSheet({
@@ -49,6 +61,10 @@ export function CartSheet({
   storePhone,
   storeAddress,
   commercialRegister,
+  matriculeFiscal,
+  fiscalStampEnabled = true,
+  fiscalStampAmount = 1,
+  taxBreakdown,
 }: CartSheetProps) {
   const t = useT();
   const [discountInput, setDiscountInput] = useState('');
@@ -56,8 +72,10 @@ export function CartSheet({
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastPaymentMethod, setLastPaymentMethod] = useState<'cash' | 'credit'>('cash');
   const [lastItems, setLastItems] = useState<CartItem[]>([]);
-  const [lastTotals, setLastTotals] = useState({ subtotal: 0, tax: 0, total: 0, discount: 0 });
+  const [lastTotals, setLastTotals] = useState({ subtotal: 0, tax: 0, total: 0, discount: 0, fiscalStamp: 0 });
   const [lastSaleId, setLastSaleId] = useState<string | undefined>();
+  const [lastInvoiceNumber, setLastInvoiceNumber] = useState<number | undefined>();
+  const [lastBreakdown, setLastBreakdown] = useState<Record<string, { base: number; tax: number }> | undefined>();
   const [usePoints, setUsePoints] = useState(false);
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
 
@@ -76,14 +94,18 @@ export function CartSheet({
 
   const handleCheckout = async (method: 'cash' | 'credit') => {
     const customer = customers.find(c => c.id === selectedCustomerId);
-    
-    // Save for receipt
-    setLastItems([...items]);
-    setLastTotals({ subtotal, tax, total: finalTotal, discount: globalDiscount + pointsDiscount });
     setLastPaymentMethod(method);
-    
-    const saleId = await onCheckout(method, customer, usePoints ? pointsToRedeem : 0);
-    setLastSaleId(saleId || undefined);
+
+    const result = await onCheckout(method, customer, usePoints ? pointsToRedeem : 0);
+
+    const stamp = result?.fiscalStamp ?? (fiscalStampEnabled && method === 'cash' ? fiscalStampAmount : 0);
+    const serverTotal = result?.total ?? (finalTotal + stamp);
+
+    setLastItems([...items]);
+    setLastTotals({ subtotal, tax, total: serverTotal, discount: globalDiscount + pointsDiscount, fiscalStamp: stamp });
+    setLastSaleId(result?.saleId || undefined);
+    setLastInvoiceNumber(result?.invoiceNumber);
+    setLastBreakdown(result?.taxBreakdown ?? taxBreakdown);
     setShowReceipt(true);
     setUsePoints(false);
     setPointsToRedeem(0);
@@ -306,14 +328,30 @@ export function CartSheet({
                   <span>-{pointsDiscount.toFixed(3)} {CURRENCY}</span>
                 </div>
               )}
-              {taxEnabled && (
+              {taxEnabled && taxBreakdown && Object.keys(taxBreakdown).length > 0 ? (
+                Object.entries(taxBreakdown)
+                  .filter(([, v]) => v.tax > 0.0005)
+                  .sort()
+                  .map(([rate, v]) => (
+                    <div key={rate} className="flex justify-between text-sm">
+                      <span>TVA {(Number(rate) * 100).toFixed(0)}% (base {v.base.toFixed(3)})</span>
+                      <span>{v.tax.toFixed(3)} {CURRENCY}</span>
+                    </div>
+                  ))
+              ) : taxEnabled ? (
                 <div className="flex justify-between text-sm">
                   <span>TVA {(taxRate * 100).toFixed(0)}%</span>
                   <span>{tax.toFixed(3)} {CURRENCY}</span>
                 </div>
+              ) : null}
+              {fiscalStampEnabled && (
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>الطابع الجبائي (نقدي)</span>
+                  <span>+{fiscalStampAmount.toFixed(3)} {CURRENCY}</span>
+                </div>
               )}
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
-                <span>{t('common.total')}</span>
+                <span>{t('common.total')} TTC</span>
                 <span className="text-success">{finalTotal.toFixed(3)} {CURRENCY}</span>
               </div>
             </div>
@@ -321,7 +359,7 @@ export function CartSheet({
           </>
         )}
       </div>
-      
+
       {/* Receipt Printer Dialog */}
       <ReceiptPrinter
         open={showReceipt}
@@ -341,6 +379,10 @@ export function CartSheet({
         storePhone={storePhone}
         storeAddress={storeAddress}
         commercialRegister={commercialRegister}
+        matriculeFiscal={matriculeFiscal}
+        invoiceNumber={lastInvoiceNumber}
+        fiscalStamp={lastTotals.fiscalStamp}
+        taxBreakdown={lastBreakdown}
       />
     </div>
   );

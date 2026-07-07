@@ -222,12 +222,21 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="commercialRegister" className="flex items-center gap-1">
-              <FileText className="w-3.5 h-3.5" />
-              {t('settings.commercialRegister')}
-            </Label>
-            <Input id="commercialRegister" value={localSettings.commercialRegister} onChange={(e) => handleChange('commercialRegister', e.target.value)} placeholder={t('settings.commercialRegister')} className={inputAlign} />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="commercialRegister" className="flex items-center gap-1">
+                <FileText className="w-3.5 h-3.5" />
+                {t('settings.commercialRegister')} (RC)
+              </Label>
+              <Input id="commercialRegister" value={localSettings.commercialRegister} onChange={(e) => handleChange('commercialRegister', e.target.value)} placeholder="RC B 12345" className={inputAlign} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="matriculeFiscal" className="flex items-center gap-1">
+                <FileText className="w-3.5 h-3.5" />
+                المعرف الجبائي (MF)
+              </Label>
+              <Input id="matriculeFiscal" value={localSettings.matriculeFiscal} onChange={(e) => handleChange('matriculeFiscal', e.target.value)} placeholder="1234567/A/M/000" dir="ltr" />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -279,8 +288,42 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
               <span className="text-muted-foreground">{t('settings.pointsUnit')}</span>
             </div>
           </div>
+
+          <Separator />
+
+          {/* Fiscal Stamp (Tunisia) */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>الطابع الجبائي (Timbre fiscal)</Label>
+              <p className="text-xs text-muted-foreground">يضاف تلقائياً على الفواتير النقدية</p>
+            </div>
+            <Switch checked={localSettings.fiscalStampEnabled} onCheckedChange={(checked) => handleChange('fiscalStampEnabled', checked)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="fiscalStampAmount">قيمة الطابع الجبائي (TND)</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="fiscalStampAmount"
+                type="number"
+                min="0"
+                step="0.001"
+                value={localSettings.fiscalStampAmount}
+                onChange={(e) => handleChange('fiscalStampAmount', parseFloat(e.target.value) || 0)}
+                className="w-32 text-center"
+                dir="ltr"
+                disabled={!localSettings.fiscalStampEnabled}
+              />
+              <span className="text-muted-foreground">TND</span>
+            </div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <Info className="w-3 h-3" />
+              القيمة الرسمية 1.000 TND حسب قانون المالية التونسي
+            </p>
+          </div>
         </CardContent>
       </Card>
+
 
       {/* Printer */}
       <Card>

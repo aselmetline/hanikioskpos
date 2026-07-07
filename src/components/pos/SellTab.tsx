@@ -25,8 +25,9 @@ interface SellTabProps {
   total: number;
   itemCount: number;
   globalDiscount: number;
+  taxBreakdown?: Record<string, { base: number; tax: number }>;
   onSetDiscount: (discount: number) => void;
-  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<string | null>;
+  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<{ saleId: string; invoiceNumber?: number; fiscalStamp?: number; total?: number; taxBreakdown?: Record<string, { base: number; tax: number }> } | null>;
   customers: Customer[];
   loading?: boolean;
   kioskName?: string;
@@ -38,6 +39,9 @@ interface SellTabProps {
   storePhone?: string;
   storeAddress?: string;
   commercialRegister?: string;
+  matriculeFiscal?: string;
+  fiscalStampEnabled?: boolean;
+  fiscalStampAmount?: number;
 }
 
 export function SellTab({
@@ -55,6 +59,7 @@ export function SellTab({
   total,
   itemCount,
   globalDiscount,
+  taxBreakdown,
   onSetDiscount,
   onCheckout,
   customers,
@@ -68,6 +73,9 @@ export function SellTab({
   storePhone,
   storeAddress,
   commercialRegister,
+  matriculeFiscal,
+  fiscalStampEnabled = true,
+  fiscalStampAmount = 1,
 }: SellTabProps) {
   const t = useT();
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -157,6 +165,7 @@ export function SellTab({
         onUpdateQuantity={onUpdateQuantity}
         onRemoveItem={onRemoveItem}
         onSetDiscount={onSetDiscount}
+        taxBreakdown={taxBreakdown}
         onCheckout={onCheckout}
         customers={customers}
         kioskName={kioskName}
@@ -167,6 +176,9 @@ export function SellTab({
         storePhone={storePhone}
         storeAddress={storeAddress}
         commercialRegister={commercialRegister}
+        matriculeFiscal={matriculeFiscal}
+        fiscalStampEnabled={fiscalStampEnabled}
+        fiscalStampAmount={fiscalStampAmount}
       />
 
       {/* Barcode Scanner */}

@@ -41,14 +41,12 @@ const Index = () => {
   const salesHook = useSales();
   const suppliersHook = useSuppliers();
 
-  const handleCheckout = async (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number): Promise<string | null> => {
+  const handleCheckout = async (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => {
     if (cart.items.length === 0) return null;
 
     const pointsDiscount = pointsToRedeem ? pointsToRedeem / customers.POINTS_TO_DINAR_RATE : 0;
     const saleTotal = cart.total - pointsDiscount;
 
-    // Atomic sale: insert sale + items, decrement stock, redeem/earn points,
-    // update credit balance, and add cash-box transaction in a single DB transaction.
     const result = await salesHook.createSale(
       cart.items,
       cart.subtotal,
@@ -66,8 +64,6 @@ const Index = () => {
 
     if (!result) return null;
 
-    // Realtime subscriptions in each hook will refresh products/customers/cashBox automatically.
-
     if (pointsToRedeem && pointsToRedeem > 0) {
       toast.success(`تم استبدال ${pointsToRedeem} نقطة بخصم ${pointsDiscount.toFixed(3)} TND`);
     }
@@ -77,13 +73,20 @@ const Index = () => {
 
     cart.clearCart();
 
+    const finalTotal = result.sale.total;
     toast.success(
       paymentMethod === 'cash'
-        ? `تم البيع بنجاح - ${saleTotal.toFixed(3)} TND`
-        : `تم تسجيل البيع الآجل - ${saleTotal.toFixed(3)} TND`
+        ? `تم البيع بنجاح - ${finalTotal.toFixed(3)} TND`
+        : `تم تسجيل البيع الآجل - ${finalTotal.toFixed(3)} TND`
     );
 
-    return result.sale.id;
+    return {
+      saleId: result.sale.id,
+      invoiceNumber: result.invoiceNumber,
+      fiscalStamp: result.fiscalStamp,
+      total: finalTotal,
+      taxBreakdown: result.taxBreakdown,
+    };
   };
 
   // Handle saving purchase and auto-deduct from cash box
@@ -159,6 +162,7 @@ const Index = () => {
             total={cart.total}
             itemCount={cart.itemCount}
             globalDiscount={cart.globalDiscount}
+            taxBreakdown={cart.taxBreakdown}
             onSetDiscount={cart.setGlobalDiscount}
             onCheckout={handleCheckout}
             customers={customers.customers}
@@ -172,6 +176,9 @@ const Index = () => {
             storePhone={settings.storePhone}
             storeAddress={[settings.storeAddressCity, settings.storeAddressArea, settings.storeAddressStreet].filter(Boolean).join('، ')}
             commercialRegister={settings.commercialRegister}
+            matriculeFiscal={settings.matriculeFiscal}
+            fiscalStampEnabled={settings.fiscalStampEnabled}
+            fiscalStampAmount={settings.fiscalStampAmount}
           />
         )}
 

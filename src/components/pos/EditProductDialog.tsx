@@ -28,7 +28,8 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
     barcode: '',
     stock: '',
     unit: 'قطعة',
-    lowStockAlert: '10'
+    lowStockAlert: '10',
+    taxRate: '0.19',
   });
 
   useEffect(() => {
@@ -42,7 +43,8 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
         barcode: product.barcode || '',
         stock: product.stock?.toString() || '0',
         unit: product.unit || 'قطعة',
-        lowStockAlert: product.lowStockAlert?.toString() || '10'
+        lowStockAlert: product.lowStockAlert?.toString() || '10',
+        taxRate: (product.taxRate ?? 0.19).toString(),
       });
     }
   }, [product]);
@@ -71,7 +73,8 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
         barcode: formData.barcode.trim() || undefined,
         stock: parseInt(formData.stock) || 0,
         unit: formData.unit,
-        lowStockAlert: parseInt(formData.lowStockAlert) || 10
+        lowStockAlert: parseInt(formData.lowStockAlert) || 10,
+        taxRate: parseFloat(formData.taxRate),
       });
       
       toast.success(t('editProduct.updated'));
@@ -244,6 +247,24 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>معدل TVA / Taux TVA</Label>
+            <Select
+              value={formData.taxRate}
+              onValueChange={(value) => setFormData({ ...formData, taxRate: value })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">0% (معفى / Exonéré)</SelectItem>
+                <SelectItem value="0.07">7%</SelectItem>
+                <SelectItem value="0.13">13%</SelectItem>
+                <SelectItem value="0.19">19% (المعدل العام)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

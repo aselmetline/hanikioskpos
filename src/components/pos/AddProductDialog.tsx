@@ -21,6 +21,7 @@ interface AddProductDialogProps {
     stock: number;
     unit: string;
     lowStockAlert: number;
+    taxRate?: number;
   }) => Promise<unknown>;
 }
 
@@ -36,7 +37,8 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
     barcode: '',
     stock: '',
     unit: 'قطعة',
-    lowStockAlert: '10'
+    lowStockAlert: '10',
+    taxRate: '0.19',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,11 +65,12 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
         barcode: formData.barcode.trim() || undefined,
         stock: parseInt(formData.stock) || 0,
         unit: formData.unit,
-        lowStockAlert: parseInt(formData.lowStockAlert) || 10
+        lowStockAlert: parseInt(formData.lowStockAlert) || 10,
+        taxRate: parseFloat(formData.taxRate),
       });
-      
+
       toast.success('تم إضافة المنتج بنجاح');
-      
+
       // Reset form
       setFormData({
         name: '',
@@ -78,7 +81,8 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
         barcode: '',
         stock: '',
         unit: 'قطعة',
-        lowStockAlert: '10'
+        lowStockAlert: '10',
+        taxRate: '0.19',
       });
       
       onOpenChange(false);
@@ -258,6 +262,25 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* VAT rate (Tunisia) */}
+          <div className="space-y-2">
+            <Label>معدل TVA / Taux TVA</Label>
+            <Select
+              value={formData.taxRate}
+              onValueChange={(value) => setFormData({ ...formData, taxRate: value })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">0% (معفى / Exonéré)</SelectItem>
+                <SelectItem value="0.07">7%</SelectItem>
+                <SelectItem value="0.13">13%</SelectItem>
+                <SelectItem value="0.19">19% (المعدل العام)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Low Stock Alert */}

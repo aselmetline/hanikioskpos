@@ -10,6 +10,8 @@ export interface Product {
   stock: number;
   unit: string;
   lowStockAlert: number;
+  /** VAT rate as decimal (0, 0.07, 0.13, 0.19). Defaults to 0.19 (Tunisia) */
+  taxRate?: number;
 }
 
 export interface CartItem {
@@ -53,6 +55,9 @@ export interface Sale {
   paymentMethod: 'cash' | 'credit';
   customerId?: string;
   createdAt: Date;
+  invoiceNumber?: number | null;
+  fiscalStamp?: number;
+  taxBreakdown?: Record<string, { base: number; tax: number }>;
 }
 
 export interface DailyReport {

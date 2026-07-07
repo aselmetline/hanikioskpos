@@ -31,9 +31,16 @@ interface ReceiptPrinterProps {
   storeAddress?: string;
   commercialRegister?: string;
   logo?: string | null;
+  matriculeFiscal?: string;
+  invoiceNumber?: number;
+  fiscalStamp?: number;
+  taxBreakdown?: Record<string, { base: number; tax: number }>;
 }
 
-function generateInvoiceNumber(saleId?: string): string {
+function formatInvoiceNumber(invoiceNumber?: number, saleId?: string): string {
+  if (invoiceNumber != null) {
+    return `${format(new Date(), 'yyyy')}-${String(invoiceNumber).padStart(6, '0')}`;
+  }
   if (!saleId) return '---';
   const datePart = format(new Date(), 'yyyyMMdd');
   const shortId = saleId.substring(0, 6).toUpperCase();
@@ -59,11 +66,15 @@ export function ReceiptPrinter({
   storeAddress,
   commercialRegister,
   logo,
+  matriculeFiscal,
+  invoiceNumber,
+  fiscalStamp = 0,
+  taxBreakdown,
 }: ReceiptPrinterProps) {
   const { t, language, dir } = useLanguage();
   const receiptRef = useRef<HTMLDivElement>(null);
   const now = new Date();
-  const invoiceNumber = generateInvoiceNumber(saleId);
+  const displayInvoice = formatInvoiceNumber(invoiceNumber, saleId);
 
   const productLabel = (item: CartItem) =>
     language === 'fr' ? (item.product.name || item.product.nameAr) : (item.product.nameAr || item.product.name);
@@ -71,11 +82,11 @@ export function ReceiptPrinter({
   const handleExportPDF = useCallback(async () => {
     if (!receiptRef.current) return;
     try {
-      await exportElementToA4PDF(receiptRef.current, `${t('common.invoice')}-${invoiceNumber}.pdf`);
+      await exportElementToA4PDF(receiptRef.current, `${t('common.invoice')}-${displayInvoice}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     }
-  }, [invoiceNumber, t]);
+  }, [displayInvoice, t]);
 
   const handlePrint = () => {
     if (!receiptRef.current) return;
@@ -83,7 +94,7 @@ export function ReceiptPrinter({
     if (printWindow) {
       printWindow.document.write(`
         <!DOCTYPE html><html dir="${dir}"><head><meta charset="UTF-8">
-        <title>${t('common.receipt')} - ${invoiceNumber}</title>
+        <title>${t('common.receipt')} - ${displayInvoice}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
         <style>
           @page { size: A4; margin: 0; }
@@ -99,7 +110,7 @@ export function ReceiptPrinter({
   const handleShare = async () => {
     const receiptText = `
 ${language === 'fr' ? kioskNameFr : kioskName}
-${t('receipt.invoiceNumber')}: ${invoiceNumber}
+${t('receipt.invoiceNumber')}: ${displayInvoice}
 ${format(now, 'dd/MM/yyyy HH:mm')}
 ${'─'.repeat(20)}
 ${items.map(item => `${productLabel(item)} x${item.quantity} = ${(item.product.price * item.quantity).toFixed(3)}`).join('\n')}
@@ -112,7 +123,7 @@ ${t('receipt.thankYou')}
     `.trim();
 
     if (navigator.share) {
-      try { await navigator.share({ title: `${t('common.receipt')} ${invoiceNumber}`, text: receiptText }); } catch {}
+      try { await navigator.share({ title: `${t('common.receipt')} ${displayInvoice}`, text: receiptText }); } catch {}
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(receiptText)}`, '_blank');
     }
@@ -180,9 +191,18 @@ ${t('receipt.thankYou')}
                   <div style={{ fontSize: '12px', color: INK_LIGHT, lineHeight: 1.8, marginTop: '8px' }}>
                     {storeAddress && <p>📍 {storeAddress}</p>}
                     {storePhone && <p dir="ltr" style={{ direction: dir }}>📞 <span dir="ltr">{storePhone}</span></p>}
-                    {commercialRegister && (
-                      <p style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(10,20,40,0.1)', display: 'inline-block' }}>
-                        <span style={{ fontWeight: 600 }}>RC:</span> <span dir="ltr">{commercialRegister}</span>
+                    {(commercialRegister || matriculeFiscal) && (
+                      <p style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(10,20,40,0.1)' }}>
+                        {commercialRegister && (
+                          <span style={{ marginRight: '12px' }}>
+                            <span style={{ fontWeight: 600 }}>RC:</span> <span dir="ltr">{commercialRegister}</span>
+                          </span>
+                        )}
+                        {matriculeFiscal && (
+                          <span>
+                            <span style={{ fontWeight: 600 }}>MF:</span> <span dir="ltr">{matriculeFiscal}</span>
+                          </span>
+                        )}
                       </p>
                     )}
                   </div>
@@ -196,7 +216,7 @@ ${t('receipt.thankYou')}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 16px', fontSize: '12px' }}>
                   <span style={{ color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', alignSelf: 'center' }}>N° Facture</span>
-                  <span style={{ fontWeight: 700, fontSize: '15px' }}>{invoiceNumber}</span>
+                  <span style={{ fontWeight: 700, fontSize: '15px' }}>{displayInvoice}</span>
                   <span style={{ color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', alignSelf: 'center' }}>Date</span>
                   <span style={{ fontWeight: 600 }}>{format(now, 'dd MMM yyyy')}</span>
                   <span style={{ color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', alignSelf: 'center' }}>Heure</span>
@@ -264,15 +284,33 @@ ${t('receipt.thankYou')}
                     <span style={{ fontWeight: 600 }}>-{discount.toFixed(3)}</span>
                   </div>
                 )}
-                {taxEnabled && (
+                {taxEnabled && taxBreakdown && Object.keys(taxBreakdown).length > 0 ? (
+                  Object.entries(taxBreakdown)
+                    .filter(([, v]) => (v?.tax ?? 0) > 0.0005 || (v?.base ?? 0) > 0.0005)
+                    .sort()
+                    .map(([rate, v]) => (
+                      <div key={rate} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', fontSize: '12px' }}>
+                        <span style={{ color: INK_LIGHT }}>
+                          TVA {(Number(rate) * 100).toFixed(0)}% <span style={{ color: INK_FADED }}>(base {Number(v.base).toFixed(3)})</span>
+                        </span>
+                        <span style={{ fontWeight: 600 }}>{Number(v.tax).toFixed(3)}</span>
+                      </div>
+                    ))
+                ) : taxEnabled ? (
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', fontSize: '13px' }}>
                     <span style={{ color: INK_LIGHT }}>TVA ({(taxRate * 100).toFixed(0)}%)</span>
                     <span style={{ fontWeight: 600 }}>{tax.toFixed(3)}</span>
                   </div>
+                ) : null}
+                {fiscalStamp > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', fontSize: '13px' }}>
+                    <span style={{ color: INK_LIGHT }}>Timbre fiscal / الطابع الجبائي</span>
+                    <span style={{ fontWeight: 600 }}>{fiscalStamp.toFixed(3)}</span>
+                  </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', marginTop: '8px', background: INK, color: 'white', borderLeft: `4px solid ${GOLD}` }}>
                   <div>
-                    <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', opacity: 0.8, marginBottom: '2px' }}>Net à Payer</p>
+                    <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', opacity: 0.8, marginBottom: '2px' }}>Net à Payer TTC</p>
                     <p style={{ fontSize: '12px', opacity: 0.9 }}>المبلغ الجملي</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
