@@ -162,6 +162,7 @@ const Index = () => {
             total={cart.total}
             itemCount={cart.itemCount}
             globalDiscount={cart.globalDiscount}
+            taxBreakdown={cart.taxBreakdown}
             onSetDiscount={cart.setGlobalDiscount}
             onCheckout={handleCheckout}
             customers={customers.customers}

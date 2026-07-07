@@ -25,6 +25,7 @@ interface SellTabProps {
   total: number;
   itemCount: number;
   globalDiscount: number;
+  taxBreakdown?: Record<string, { base: number; tax: number }>;
   onSetDiscount: (discount: number) => void;
   onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<{ saleId: string; invoiceNumber?: number; fiscalStamp?: number; total?: number; taxBreakdown?: Record<string, { base: number; tax: number }> } | null>;
   customers: Customer[];
@@ -58,6 +59,7 @@ export function SellTab({
   total,
   itemCount,
   globalDiscount,
+  taxBreakdown,
   onSetDiscount,
   onCheckout,
   customers,
@@ -163,6 +165,7 @@ export function SellTab({
         onUpdateQuantity={onUpdateQuantity}
         onRemoveItem={onRemoveItem}
         onSetDiscount={onSetDiscount}
+        taxBreakdown={taxBreakdown}
         onCheckout={onCheckout}
         customers={customers}
         kioskName={kioskName}
