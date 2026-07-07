@@ -12,6 +12,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { exportSalesReport, exportExpensesReport } from '@/utils/excelUtils';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { VatReport } from './reports/VatReport';
 
 interface ReportsTabProps {
   sales: Sale[];
