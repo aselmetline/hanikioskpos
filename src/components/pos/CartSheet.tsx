@@ -328,14 +328,30 @@ export function CartSheet({
                   <span>-{pointsDiscount.toFixed(3)} {CURRENCY}</span>
                 </div>
               )}
-              {taxEnabled && (
+              {taxEnabled && taxBreakdown && Object.keys(taxBreakdown).length > 0 ? (
+                Object.entries(taxBreakdown)
+                  .filter(([, v]) => v.tax > 0.0005)
+                  .sort()
+                  .map(([rate, v]) => (
+                    <div key={rate} className="flex justify-between text-sm">
+                      <span>TVA {(Number(rate) * 100).toFixed(0)}% (base {v.base.toFixed(3)})</span>
+                      <span>{v.tax.toFixed(3)} {CURRENCY}</span>
+                    </div>
+                  ))
+              ) : taxEnabled ? (
                 <div className="flex justify-between text-sm">
                   <span>TVA {(taxRate * 100).toFixed(0)}%</span>
                   <span>{tax.toFixed(3)} {CURRENCY}</span>
                 </div>
+              ) : null}
+              {fiscalStampEnabled && (
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>الطابع الجبائي (نقدي)</span>
+                  <span>+{fiscalStampAmount.toFixed(3)} {CURRENCY}</span>
+                </div>
               )}
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
-                <span>{t('common.total')}</span>
+                <span>{t('common.total')} TTC</span>
                 <span className="text-success">{finalTotal.toFixed(3)} {CURRENCY}</span>
               </div>
             </div>
@@ -343,7 +359,7 @@ export function CartSheet({
           </>
         )}
       </div>
-      
+
       {/* Receipt Printer Dialog */}
       <ReceiptPrinter
         open={showReceipt}
@@ -363,6 +379,10 @@ export function CartSheet({
         storePhone={storePhone}
         storeAddress={storeAddress}
         commercialRegister={commercialRegister}
+        matriculeFiscal={matriculeFiscal}
+        invoiceNumber={lastInvoiceNumber}
+        fiscalStamp={lastTotals.fiscalStamp}
+        taxBreakdown={lastBreakdown}
       />
     </div>
   );
