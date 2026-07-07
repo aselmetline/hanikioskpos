@@ -30,7 +30,7 @@ export const useSales = () => {
       } else {
         const mappedSales: Sale[] = data.map(s => ({
           id: s.id,
-          items: (s.sale_items || []).map((item: { product_id: string | null; product_name: string; price: number; quantity: number; discount: number }) => ({
+          items: (s.sale_items || []).map((item: { product_id: string | null; product_name: string; price: number; quantity: number; discount: number; tax_rate?: number }) => ({
             product: {
               id: item.product_id || '',
               name: item.product_name,
@@ -39,7 +39,8 @@ export const useSales = () => {
               category: '',
               stock: 0,
               unit: '',
-              lowStockAlert: 0
+              lowStockAlert: 0,
+              taxRate: item.tax_rate != null ? Number(item.tax_rate) : 0.19,
             },
             quantity: item.quantity,
             discount: Number(item.discount)
@@ -50,7 +51,10 @@ export const useSales = () => {
           total: Number(s.total),
           paymentMethod: s.payment_method as 'cash' | 'credit',
           customerId: s.customer_id || undefined,
-          createdAt: new Date(s.created_at)
+          createdAt: new Date(s.created_at),
+          invoiceNumber: s.invoice_number ?? null,
+          fiscalStamp: s.fiscal_stamp != null ? Number(s.fiscal_stamp) : 0,
+          taxBreakdown: (s.tax_breakdown as Record<string, { base: number; tax: number }>) || undefined,
         }));
 
         setSales(mappedSales);
@@ -86,7 +90,7 @@ export const useSales = () => {
       autoAddToCashbox?: boolean;
       pointsPerDinar?: number;
     }
-  ): Promise<{ sale: Sale; pointsEarned: number } | null> => {
+  ): Promise<{ sale: Sale; pointsEarned: number; invoiceNumber?: number; fiscalStamp?: number; taxBreakdown?: Record<string, { base: number; tax: number }> } | null> => {
     if (!user || items.length === 0) return null;
 
     const payload = items.map(item => ({
@@ -95,6 +99,7 @@ export const useSales = () => {
       price: item.product.price,
       quantity: item.quantity,
       discount: item.discount || 0,
+      tax_rate: item.product.taxRate ?? 0.19,
     }));
 
     const { data, error } = await supabase.rpc('process_sale', {
@@ -121,7 +126,14 @@ export const useSales = () => {
       return null;
     }
 
-    const result = data as { sale_id: string; points_earned: number };
+    const result = data as {
+      sale_id: string;
+      points_earned: number;
+      total: number;
+      invoice_number?: number;
+      fiscal_stamp?: number;
+      tax_breakdown?: Record<string, { base: number; tax: number }>;
+    };
 
     const newSale: Sale = {
       id: result.sale_id,
@@ -129,14 +141,23 @@ export const useSales = () => {
       subtotal,
       tax,
       discount,
-      total,
+      total: result.total ?? total,
       paymentMethod,
       customerId: customer?.id,
       createdAt: new Date(),
+      invoiceNumber: result.invoice_number ?? null,
+      fiscalStamp: result.fiscal_stamp ?? 0,
+      taxBreakdown: result.tax_breakdown,
     };
 
     setSales(prev => [newSale, ...prev]);
-    return { sale: newSale, pointsEarned: result.points_earned };
+    return {
+      sale: newSale,
+      pointsEarned: result.points_earned,
+      invoiceNumber: result.invoice_number,
+      fiscalStamp: result.fiscal_stamp,
+      taxBreakdown: result.tax_breakdown,
+    };
   }, [user]);
 
   return {

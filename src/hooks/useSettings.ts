@@ -180,6 +180,9 @@ export function useSettings() {
         store_email: null,
         business_type: 'kiosk',
         store_notes: null,
+        matricule_fiscal: null,
+        fiscal_stamp_enabled: DEFAULT_SETTINGS.fiscalStampEnabled,
+        fiscal_stamp_amount: DEFAULT_SETTINGS.fiscalStampAmount,
       })
       .eq('user_id', user.id);
 
