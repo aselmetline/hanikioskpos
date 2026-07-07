@@ -26,7 +26,7 @@ interface SellTabProps {
   itemCount: number;
   globalDiscount: number;
   onSetDiscount: (discount: number) => void;
-  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<string | null>;
+  onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<{ saleId: string; invoiceNumber?: number; fiscalStamp?: number; total?: number; taxBreakdown?: Record<string, { base: number; tax: number }> } | null>;
   customers: Customer[];
   loading?: boolean;
   kioskName?: string;
