@@ -31,9 +31,16 @@ interface ReceiptPrinterProps {
   storeAddress?: string;
   commercialRegister?: string;
   logo?: string | null;
+  matriculeFiscal?: string;
+  invoiceNumber?: number;
+  fiscalStamp?: number;
+  taxBreakdown?: Record<string, { base: number; tax: number }>;
 }
 
-function generateInvoiceNumber(saleId?: string): string {
+function formatInvoiceNumber(invoiceNumber?: number, saleId?: string): string {
+  if (invoiceNumber != null) {
+    return `${format(new Date(), 'yyyy')}-${String(invoiceNumber).padStart(6, '0')}`;
+  }
   if (!saleId) return '---';
   const datePart = format(new Date(), 'yyyyMMdd');
   const shortId = saleId.substring(0, 6).toUpperCase();
@@ -59,11 +66,15 @@ export function ReceiptPrinter({
   storeAddress,
   commercialRegister,
   logo,
+  matriculeFiscal,
+  invoiceNumber,
+  fiscalStamp = 0,
+  taxBreakdown,
 }: ReceiptPrinterProps) {
   const { t, language, dir } = useLanguage();
   const receiptRef = useRef<HTMLDivElement>(null);
   const now = new Date();
-  const invoiceNumber = generateInvoiceNumber(saleId);
+  const displayInvoice = formatInvoiceNumber(invoiceNumber, saleId);
 
   const productLabel = (item: CartItem) =>
     language === 'fr' ? (item.product.name || item.product.nameAr) : (item.product.nameAr || item.product.name);
