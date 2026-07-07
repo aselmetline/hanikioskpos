@@ -6,3 +6,5 @@ export { ExpensesReport } from './ExpensesReport';
 export { CashBoxReport } from './CashBoxReport';
 export { StoreActivityReport } from './StoreActivityReport';
 export { SuppliersReport } from './SuppliersReport';
+export { VatReport } from './VatReport';
+
