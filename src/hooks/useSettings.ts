@@ -24,6 +24,9 @@ export interface AppSettings {
   storeEmail: string;
   businessType: string;
   storeNotes: string;
+  matriculeFiscal: string;
+  fiscalStampEnabled: boolean;
+  fiscalStampAmount: number;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -47,6 +50,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   storeEmail: '',
   businessType: 'kiosk',
   storeNotes: '',
+  matriculeFiscal: '',
+  fiscalStampEnabled: true,
+  fiscalStampAmount: 1.000,
 };
 
 export function useSettings() {
@@ -93,6 +99,9 @@ export function useSettings() {
           storeEmail: data.store_email || '',
           businessType: data.business_type || 'kiosk',
           storeNotes: data.store_notes || '',
+          matriculeFiscal: (data as any).matricule_fiscal || '',
+          fiscalStampEnabled: (data as any).fiscal_stamp_enabled ?? DEFAULT_SETTINGS.fiscalStampEnabled,
+          fiscalStampAmount: (data as any).fiscal_stamp_amount != null ? Number((data as any).fiscal_stamp_amount) : DEFAULT_SETTINGS.fiscalStampAmount,
         });
       }
       setLoading(false);
@@ -126,6 +135,9 @@ export function useSettings() {
     if (updates.storeEmail !== undefined) dbUpdates.store_email = updates.storeEmail;
     if (updates.businessType !== undefined) dbUpdates.business_type = updates.businessType;
     if (updates.storeNotes !== undefined) dbUpdates.store_notes = updates.storeNotes;
+    if (updates.matriculeFiscal !== undefined) dbUpdates.matricule_fiscal = updates.matriculeFiscal;
+    if (updates.fiscalStampEnabled !== undefined) dbUpdates.fiscal_stamp_enabled = updates.fiscalStampEnabled;
+    if (updates.fiscalStampAmount !== undefined) dbUpdates.fiscal_stamp_amount = updates.fiscalStampAmount;
 
     const { error } = await supabase
       .from('user_settings')

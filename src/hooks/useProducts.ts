@@ -41,7 +41,8 @@ export function useProducts() {
           image: p.image_url || undefined,
           stock: p.stock,
           unit: p.unit,
-          lowStockAlert: p.low_stock_alert
+          lowStockAlert: p.low_stock_alert,
+          taxRate: p.tax_rate != null ? Number(p.tax_rate) : 0.19,
         })));
       }
       setLoading(false);
@@ -92,7 +93,8 @@ export function useProducts() {
         image_url: product.image || null,
         stock: product.stock,
         unit: product.unit,
-        low_stock_alert: product.lowStockAlert
+        low_stock_alert: product.lowStockAlert,
+        tax_rate: product.taxRate ?? 0.19,
       })
       .select()
       .single();
@@ -114,7 +116,8 @@ export function useProducts() {
       image: data.image_url || undefined,
       stock: data.stock,
       unit: data.unit,
-      lowStockAlert: data.low_stock_alert
+      lowStockAlert: data.low_stock_alert,
+      taxRate: data.tax_rate != null ? Number(data.tax_rate) : 0.19,
     };
 
     setProducts(prev => [newProduct, ...prev]);
@@ -134,6 +137,8 @@ export function useProducts() {
     if (updates.stock !== undefined) dbUpdates.stock = updates.stock;
     if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
     if (updates.lowStockAlert !== undefined) dbUpdates.low_stock_alert = updates.lowStockAlert;
+    if (updates.taxRate !== undefined) dbUpdates.tax_rate = updates.taxRate;
+
 
     const { error } = await supabase
       .from('products')
