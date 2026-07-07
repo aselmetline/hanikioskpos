@@ -94,14 +94,18 @@ export function CartSheet({
 
   const handleCheckout = async (method: 'cash' | 'credit') => {
     const customer = customers.find(c => c.id === selectedCustomerId);
-    
-    // Save for receipt
-    setLastItems([...items]);
-    setLastTotals({ subtotal, tax, total: finalTotal, discount: globalDiscount + pointsDiscount });
     setLastPaymentMethod(method);
-    
-    const saleId = await onCheckout(method, customer, usePoints ? pointsToRedeem : 0);
-    setLastSaleId(saleId || undefined);
+
+    const result = await onCheckout(method, customer, usePoints ? pointsToRedeem : 0);
+
+    const stamp = result?.fiscalStamp ?? (fiscalStampEnabled && method === 'cash' ? fiscalStampAmount : 0);
+    const serverTotal = result?.total ?? (finalTotal + stamp);
+
+    setLastItems([...items]);
+    setLastTotals({ subtotal, tax, total: serverTotal, discount: globalDiscount + pointsDiscount, fiscalStamp: stamp });
+    setLastSaleId(result?.saleId || undefined);
+    setLastInvoiceNumber(result?.invoiceNumber);
+    setLastBreakdown(result?.taxBreakdown ?? taxBreakdown);
     setShowReceipt(true);
     setUsePoints(false);
     setPointsToRedeem(0);
