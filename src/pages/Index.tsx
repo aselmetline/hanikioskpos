@@ -172,6 +172,9 @@ const Index = () => {
             storePhone={settings.storePhone}
             storeAddress={[settings.storeAddressCity, settings.storeAddressArea, settings.storeAddressStreet].filter(Boolean).join('، ')}
             commercialRegister={settings.commercialRegister}
+            matriculeFiscal={settings.matriculeFiscal}
+            fiscalStampEnabled={settings.fiscalStampEnabled}
+            fiscalStampAmount={settings.fiscalStampAmount}
           />
         )}
 

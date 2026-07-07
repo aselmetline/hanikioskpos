@@ -38,6 +38,9 @@ interface SellTabProps {
   storePhone?: string;
   storeAddress?: string;
   commercialRegister?: string;
+  matriculeFiscal?: string;
+  fiscalStampEnabled?: boolean;
+  fiscalStampAmount?: number;
 }
 
 export function SellTab({
@@ -68,6 +71,9 @@ export function SellTab({
   storePhone,
   storeAddress,
   commercialRegister,
+  matriculeFiscal,
+  fiscalStampEnabled = true,
+  fiscalStampAmount = 1,
 }: SellTabProps) {
   const t = useT();
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -167,6 +173,9 @@ export function SellTab({
         storePhone={storePhone}
         storeAddress={storeAddress}
         commercialRegister={commercialRegister}
+        matriculeFiscal={matriculeFiscal}
+        fiscalStampEnabled={fiscalStampEnabled}
+        fiscalStampAmount={fiscalStampAmount}
       />
 
       {/* Barcode Scanner */}
