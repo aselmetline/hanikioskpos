@@ -82,11 +82,11 @@ export function ReceiptPrinter({
   const handleExportPDF = useCallback(async () => {
     if (!receiptRef.current) return;
     try {
-      await exportElementToA4PDF(receiptRef.current, `${t('common.invoice')}-${invoiceNumber}.pdf`);
+      await exportElementToA4PDF(receiptRef.current, `${t('common.invoice')}-${displayInvoice}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     }
-  }, [invoiceNumber, t]);
+  }, [displayInvoice, t]);
 
   const handlePrint = () => {
     if (!receiptRef.current) return;
@@ -94,7 +94,7 @@ export function ReceiptPrinter({
     if (printWindow) {
       printWindow.document.write(`
         <!DOCTYPE html><html dir="${dir}"><head><meta charset="UTF-8">
-        <title>${t('common.receipt')} - ${invoiceNumber}</title>
+        <title>${t('common.receipt')} - ${displayInvoice}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
         <style>
           @page { size: A4; margin: 0; }
@@ -110,7 +110,7 @@ export function ReceiptPrinter({
   const handleShare = async () => {
     const receiptText = `
 ${language === 'fr' ? kioskNameFr : kioskName}
-${t('receipt.invoiceNumber')}: ${invoiceNumber}
+${t('receipt.invoiceNumber')}: ${displayInvoice}
 ${format(now, 'dd/MM/yyyy HH:mm')}
 ${'─'.repeat(20)}
 ${items.map(item => `${productLabel(item)} x${item.quantity} = ${(item.product.price * item.quantity).toFixed(3)}`).join('\n')}
@@ -123,7 +123,7 @@ ${t('receipt.thankYou')}
     `.trim();
 
     if (navigator.share) {
-      try { await navigator.share({ title: `${t('common.receipt')} ${invoiceNumber}`, text: receiptText }); } catch {}
+      try { await navigator.share({ title: `${t('common.receipt')} ${displayInvoice}`, text: receiptText }); } catch {}
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(receiptText)}`, '_blank');
     }
@@ -207,7 +207,7 @@ ${t('receipt.thankYou')}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 16px', fontSize: '12px' }}>
                   <span style={{ color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', alignSelf: 'center' }}>N° Facture</span>
-                  <span style={{ fontWeight: 700, fontSize: '15px' }}>{invoiceNumber}</span>
+                  <span style={{ fontWeight: 700, fontSize: '15px' }}>{displayInvoice}</span>
                   <span style={{ color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', alignSelf: 'center' }}>Date</span>
                   <span style={{ fontWeight: 600 }}>{format(now, 'dd MMM yyyy')}</span>
                   <span style={{ color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', alignSelf: 'center' }}>Heure</span>
