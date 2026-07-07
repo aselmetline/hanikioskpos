@@ -209,6 +209,7 @@ export type Database = {
           name_ar: string
           price: number
           stock: number
+          tax_rate: number
           unit: string
           updated_at: string
           user_id: string
@@ -225,6 +226,7 @@ export type Database = {
           name_ar: string
           price?: number
           stock?: number
+          tax_rate?: number
           unit?: string
           updated_at?: string
           user_id: string
@@ -241,6 +243,7 @@ export type Database = {
           name_ar?: string
           price?: number
           stock?: number
+          tax_rate?: number
           unit?: string
           updated_at?: string
           user_id?: string
@@ -366,6 +369,7 @@ export type Database = {
           product_name: string
           quantity: number
           sale_id: string
+          tax_rate: number
           total: number
         }
         Insert: {
@@ -376,6 +380,7 @@ export type Database = {
           product_name: string
           quantity?: number
           sale_id: string
+          tax_rate?: number
           total?: number
         }
         Update: {
@@ -386,6 +391,7 @@ export type Database = {
           product_name?: string
           quantity?: number
           sale_id?: string
+          tax_rate?: number
           total?: number
         }
         Relationships: [
@@ -410,10 +416,13 @@ export type Database = {
           created_at: string
           customer_id: string | null
           discount: number
+          fiscal_stamp: number
           id: string
+          invoice_number: number | null
           payment_method: string
           subtotal: number
           tax: number
+          tax_breakdown: Json | null
           total: number
           user_id: string
         }
@@ -421,10 +430,13 @@ export type Database = {
           created_at?: string
           customer_id?: string | null
           discount?: number
+          fiscal_stamp?: number
           id?: string
+          invoice_number?: number | null
           payment_method?: string
           subtotal?: number
           tax?: number
+          tax_breakdown?: Json | null
           total?: number
           user_id: string
         }
@@ -432,10 +444,13 @@ export type Database = {
           created_at?: string
           customer_id?: string | null
           discount?: number
+          fiscal_stamp?: number
           id?: string
+          invoice_number?: number | null
           payment_method?: string
           subtotal?: number
           tax?: number
+          tax_breakdown?: Json | null
           total?: number
           user_id?: string
         }
@@ -494,11 +509,14 @@ export type Database = {
           commercial_register: string | null
           created_at: string
           currency: string | null
+          fiscal_stamp_amount: number
+          fiscal_stamp_enabled: boolean
           id: string
           kiosk_name: string | null
           kiosk_name_fr: string | null
           logo_url: string | null
           low_stock_threshold: number | null
+          matricule_fiscal: string | null
           points_per_dinar: number | null
           printer_enabled: boolean | null
           printer_ip: string | null
@@ -523,11 +541,14 @@ export type Database = {
           commercial_register?: string | null
           created_at?: string
           currency?: string | null
+          fiscal_stamp_amount?: number
+          fiscal_stamp_enabled?: boolean
           id?: string
           kiosk_name?: string | null
           kiosk_name_fr?: string | null
           logo_url?: string | null
           low_stock_threshold?: number | null
+          matricule_fiscal?: string | null
           points_per_dinar?: number | null
           printer_enabled?: boolean | null
           printer_ip?: string | null
@@ -552,11 +573,14 @@ export type Database = {
           commercial_register?: string | null
           created_at?: string
           currency?: string | null
+          fiscal_stamp_amount?: number
+          fiscal_stamp_enabled?: boolean
           id?: string
           kiosk_name?: string | null
           kiosk_name_fr?: string | null
           logo_url?: string | null
           low_stock_threshold?: number | null
+          matricule_fiscal?: string | null
           points_per_dinar?: number | null
           printer_enabled?: boolean | null
           printer_ip?: string | null
@@ -580,6 +604,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_vat_report: {
+        Args: { p_month: number; p_year: number }
+        Returns: Json
+      }
       process_sale: {
         Args: {
           p_auto_add_to_cashbox?: boolean
