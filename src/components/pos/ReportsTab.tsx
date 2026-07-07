@@ -361,6 +361,9 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
               )}
             </CardContent>
           </Card>
+
+          {/* Tunisian VAT monthly declaration */}
+          <VatReport sales={sales} />
         </div>
       </ScrollArea>
     </div>
