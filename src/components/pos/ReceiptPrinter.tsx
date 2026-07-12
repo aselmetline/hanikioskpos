@@ -140,9 +140,17 @@ ${t('receipt.thankYou')}
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Printer className="w-5 h-5 text-primary" />
-            {t('receipt.preview')}
+          <DialogTitle className="flex items-center justify-between gap-2 flex-wrap">
+            <span className="flex items-center gap-2">
+              <Printer className="w-5 h-5 text-primary" />
+              {t('receipt.preview')}
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-1 text-sm font-semibold text-primary" dir="ltr">
+              <span className="text-[10px] uppercase tracking-wider opacity-70">
+                {t('receipt.invoiceNumber')}
+              </span>
+              <span className="font-mono">{displayInvoice}</span>
+            </span>
           </DialogTitle>
         </DialogHeader>
 
