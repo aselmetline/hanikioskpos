@@ -158,6 +158,24 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_counters: {
+        Row: {
+          last_invoice_number: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_invoice_number?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_invoice_number?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       points_transactions: {
         Row: {
           created_at: string
@@ -608,6 +626,7 @@ export type Database = {
         Args: { p_month: number; p_year: number }
         Returns: Json
       }
+      next_invoice_number: { Args: { p_user_id: string }; Returns: number }
       process_sale: {
         Args: {
           p_auto_add_to_cashbox?: boolean
