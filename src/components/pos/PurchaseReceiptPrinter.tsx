@@ -188,9 +188,9 @@ ${t('receipt.total')}: ${total.toFixed(3)} TND
                   <h2 style={{ fontSize: '28px', fontWeight: 700, fontFamily: "'Playfair Display', serif", letterSpacing: '0.12em' }}>BON D'ACHAT</h2>
                   <h3 style={{ fontSize: '14px', fontWeight: 700, textAlign: 'center', letterSpacing: '0.15em' }}>فاتورة شراء</h3>
                 </div>
-                <div style={{ background: INK, color: 'white', borderLeft: `4px solid ${GOLD}`, padding: '10px 14px', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.15em', opacity: 0.75 }}>N° Facture / رقم الفاتورة</span>
-                  <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>{invoiceNumber}</span>
+                <div className="invoice-badge" style={{ background: INK, color: 'white', borderInlineStart: `4px solid ${GOLD}`, padding: '8px 12px', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '2px', textAlign: dir === 'rtl' ? 'right' : 'left', boxSizing: 'border-box', maxWidth: '100%', wordBreak: 'break-all' }}>
+                  <span style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.12em', opacity: 0.75 }}>N° Facture / رقم الفاتورة</span>
+                  <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '20px', fontWeight: 700, letterSpacing: '0.04em', lineHeight: 1.15 }}>{invoiceNumber}</span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 16px', fontSize: '12px' }}>
                   <span style={{ color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '10px', alignSelf: 'center' }}>Date</span>
