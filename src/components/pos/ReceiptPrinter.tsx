@@ -100,6 +100,11 @@ export function ReceiptPrinter({
           @page { size: A4; margin: 0; }
           * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           body { font-family: 'Cairo', sans-serif; direction: ${dir}; background: #FAFAF7; }
+          @media print and (max-width: 58mm) {
+            @page { size: 58mm auto; margin: 0; }
+            .invoice-badge { padding: 6px 8px !important; font-size: 10px; text-align: ${dir === 'rtl' ? 'right' : 'left'} !important; }
+            .invoice-badge > span:last-child { font-size: 14px !important; letter-spacing: 0 !important; }
+          }
         </style>
         </head><body>${receiptRef.current.outerHTML}<script>setTimeout(()=>{window.print();window.close();},300);</script></body></html>
       `);
