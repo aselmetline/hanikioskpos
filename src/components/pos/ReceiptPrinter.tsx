@@ -8,8 +8,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { exportElementToA4PDF } from '@/utils/pdfPaginate';
+import { FileText, Receipt as ReceiptIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ReceiptPrinterProps {
