@@ -8,8 +8,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { exportElementToA4PDF } from '@/utils/pdfPaginate';
+import { FileText, Receipt as ReceiptIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ReceiptPrinterProps {
@@ -73,6 +74,8 @@ export function ReceiptPrinter({
 }: ReceiptPrinterProps) {
   const { t, language, dir } = useLanguage();
   const receiptRef = useRef<HTMLDivElement>(null);
+  const [printSize, setPrintSize] = useState<'a4' | '58mm'>('a4');
+  const is58 = printSize === '58mm';
   const now = new Date();
   const displayInvoice = formatInvoiceNumber(invoiceNumber, saleId);
 
@@ -92,21 +95,27 @@ export function ReceiptPrinter({
     if (!receiptRef.current) return;
     const printWindow = window.open('', '_blank');
     if (printWindow) {
+      const pageRule = is58 ? '@page { size: 58mm auto; margin: 0; }' : '@page { size: A4; margin: 0; }';
       printWindow.document.write(`
         <!DOCTYPE html><html dir="${dir}"><head><meta charset="UTF-8">
         <title>${t('common.receipt')} - ${displayInvoice}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4; margin: 0; }
+          ${pageRule}
           * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           body { font-family: 'Cairo', sans-serif; direction: ${dir}; background: #FAFAF7; }
-          @media print and (max-width: 58mm) {
-            @page { size: 58mm auto; margin: 0; }
-            .invoice-badge { padding: 6px 8px !important; font-size: 10px; text-align: ${dir === 'rtl' ? 'right' : 'left'} !important; }
-            .invoice-badge > span:last-child { font-size: 14px !important; letter-spacing: 0 !important; }
-          }
+          .receipt-58mm { width: 58mm !important; min-height: 0 !important; box-shadow: none !important; transform: none !important; }
+          .receipt-58mm * { font-size: 10px !important; }
+          .receipt-58mm h1 { font-size: 13px !important; }
+          .receipt-58mm h2 { font-size: 14px !important; }
+          .receipt-58mm [data-receipt-body] { padding: 8px !important; min-height: 0 !important; }
+          .receipt-58mm [data-receipt-header] { flex-direction: column !important; gap: 8px !important; align-items: stretch !important; }
+          .receipt-58mm [data-receipt-totals] { flex-direction: column !important; align-items: stretch !important; gap: 8px !important; padding-top: 8px !important; }
+          .receipt-58mm [data-receipt-totals] > div { width: 100% !important; }
+          .receipt-58mm .invoice-badge { padding: 4px 6px !important; }
+          .receipt-58mm .invoice-badge > span:last-child { font-size: 12px !important; letter-spacing: 0 !important; }
         </style>
-        </head><body>${receiptRef.current.outerHTML}<script>setTimeout(()=>{window.print();window.close();},300);</script></body></html>
+        </head><body>${receiptRef.current.outerHTML}<script>setTimeout(()=>{window.print();window.close();},400);</script></body></html>
       `);
       printWindow.document.close();
     }
@@ -157,27 +166,47 @@ ${t('receipt.thankYou')}
               <span className="font-mono">{displayInvoice}</span>
             </span>
           </DialogTitle>
+          <div className="flex items-center gap-2 pt-2" dir="ltr">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Format</span>
+            <div className="inline-flex rounded-md border border-border overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setPrintSize('a4')}
+                className={`flex items-center gap-1 px-3 py-1 text-xs font-semibold transition-colors ${!is58 ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground hover:bg-muted'}`}
+              >
+                <FileText className="w-3.5 h-3.5" /> A4
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrintSize('58mm')}
+                className={`flex items-center gap-1 px-3 py-1 text-xs font-semibold transition-colors ${is58 ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground hover:bg-muted'}`}
+              >
+                <ReceiptIcon className="w-3.5 h-3.5" /> 58mm
+              </button>
+            </div>
+          </div>
         </DialogHeader>
 
         <div
           ref={receiptRef}
           dir={dir}
+          className={is58 ? 'receipt-58mm' : ''}
           style={{
             fontFamily: "'Cairo', sans-serif",
             background: PAPER,
             color: INK,
-            width: '210mm',
-            minHeight: '297mm',
+            width: is58 ? '58mm' : '210mm',
+            minHeight: is58 ? '0' : '297mm',
             margin: '0 auto',
             position: 'relative',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+            boxShadow: is58 ? '0 4px 12px rgba(0,0,0,0.08)' : '0 10px 30px rgba(0,0,0,0.08)',
             overflow: 'hidden',
-            transform: 'scale(0.7)',
+            transform: is58 ? 'none' : 'scale(0.7)',
             transformOrigin: 'top center',
           }}
         >
           {/* Watermark */}
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', opacity: 0.03 }}>
+          <div data-watermark style={{ position: 'absolute', inset: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', opacity: 0.03 }}>
             <div style={{ fontSize: '180px', fontWeight: 'bold', transform: 'rotate(-30deg)', lineHeight: 1, letterSpacing: '-0.05em' }}>HANI</div>
           </div>
 
@@ -185,9 +214,27 @@ ${t('receipt.thankYou')}
           <div style={{ height: '16px', background: INK }} />
           <div style={{ height: '4px', background: GOLD, marginTop: '4px' }} />
 
-          <div style={{ padding: '40px 56px', display: 'flex', flexDirection: 'column', minHeight: 'calc(297mm - 60px)' }}>
+          <style>{`
+            .receipt-58mm { width: 58mm !important; min-height: 0 !important; box-shadow: none !important; transform: none !important; }
+            .receipt-58mm h1 { font-size: 13px !important; }
+            .receipt-58mm h2 { font-size: 15px !important; letter-spacing: 0.05em !important; }
+            .receipt-58mm h3 { font-size: 10px !important; }
+            .receipt-58mm h4 { font-size: 9px !important; }
+            .receipt-58mm [data-receipt-body] { padding: 8px !important; min-height: 0 !important; }
+            .receipt-58mm [data-receipt-header] { flex-direction: column !important; gap: 8px !important; align-items: stretch !important; border-bottom-width: 1px !important; padding-bottom: 8px !important; margin-bottom: 10px !important; }
+            .receipt-58mm [data-receipt-header] > div { width: 100%; }
+            .receipt-58mm [data-receipt-totals] { flex-direction: column !important; align-items: stretch !important; gap: 8px !important; padding-top: 10px !important; }
+            .receipt-58mm [data-receipt-totals] > div { width: 100% !important; }
+            .receipt-58mm [data-receipt-customer] { grid-template-columns: 1fr !important; margin-bottom: 10px !important; }
+            .receipt-58mm [data-receipt-table-row] { grid-template-columns: 2fr 1fr 1.2fr !important; gap: 4px !important; padding: 6px 0 !important; font-size: 10px !important; }
+            .receipt-58mm [data-receipt-table-row] [data-col-price] { display: none !important; }
+            .receipt-58mm .invoice-badge { padding: 4px 6px !important; }
+            .receipt-58mm .invoice-badge > span:last-child { font-size: 12px !important; letter-spacing: 0 !important; }
+            .receipt-58mm [data-watermark] { display: none !important; }
+          `}</style>
+          <div data-receipt-body style={{ padding: '40px 56px', display: 'flex', flexDirection: 'column', minHeight: 'calc(297mm - 60px)' }}>
             {/* Header */}
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: `2px solid ${INK}`, paddingBottom: '24px', marginBottom: '32px' }}>
+            <header data-receipt-header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: `2px solid ${INK}`, paddingBottom: '24px', marginBottom: '32px' }}>
               <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
                 {logo && (
                   <div style={{ background: 'rgba(10,20,40,0.05)', border: `1px solid rgba(10,20,40,0.2)`, padding: '6px', flexShrink: 0 }}>
@@ -242,7 +289,7 @@ ${t('receipt.thankYou')}
 
             {/* Customer block */}
             {customer && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+              <div data-receipt-customer style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
                 <div style={{ background: '#F4F4F0', border: '1px solid rgba(10,20,40,0.15)', padding: '16px' }}>
                   <h4 style={{ fontSize: '10px', fontWeight: 700, color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
                     {t('receipt.customer')} / Client
@@ -256,18 +303,18 @@ ${t('receipt.thankYou')}
 
             {/* Products table */}
             <div style={{ marginBottom: '32px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', borderTop: `2px solid ${INK}`, borderBottom: `2px solid ${INK}`, padding: '12px 0', fontSize: '12px', fontWeight: 700 }}>
+              <div data-receipt-table-row style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', borderTop: `2px solid ${INK}`, borderBottom: `2px solid ${INK}`, padding: '12px 0', fontSize: '12px', fontWeight: 700 }}>
                 <div>{t('receipt.product')} <span style={{ color: INK_FADED, fontWeight: 400 }}>/ Désignation</span></div>
                 <div style={{ textAlign: 'center' }}>{t('receipt.qty')} <span style={{ color: INK_FADED, fontWeight: 400 }}>/ Qté</span></div>
-                <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">P.U (TND)</div>
+                <div data-col-price style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">P.U (TND)</div>
                 <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">Total (TND)</div>
               </div>
               <div style={{ fontSize: '13px' }}>
                 {items.map((item, idx) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', padding: '14px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', alignItems: 'center' }}>
+                  <div key={idx} data-receipt-table-row style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', padding: '14px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', alignItems: 'center' }}>
                     <div style={{ fontWeight: 600 }}>{productLabel(item)}</div>
                     <div style={{ textAlign: 'center', fontWeight: 600 }}>{item.quantity}</div>
-                    <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">{item.product.price.toFixed(3)}</div>
+                    <div data-col-price style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">{item.product.price.toFixed(3)}</div>
                     <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left', fontWeight: 600 }} dir="ltr">{(item.product.price * item.quantity).toFixed(3)}</div>
                   </div>
                 ))}
@@ -275,7 +322,7 @@ ${t('receipt.thankYou')}
             </div>
 
             {/* Totals + payment */}
-            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(10,20,40,0.2)', paddingTop: '32px', gap: '24px' }}>
+            <div data-receipt-totals style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(10,20,40,0.2)', paddingTop: '32px', gap: '24px' }}>
               <div style={{ width: '240px' }}>
                 <p style={{ fontSize: '10px', fontWeight: 700, color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
                   {t('receipt.paymentMethod')} / Paiement
