@@ -74,6 +74,8 @@ export function ReceiptPrinter({
 }: ReceiptPrinterProps) {
   const { t, language, dir } = useLanguage();
   const receiptRef = useRef<HTMLDivElement>(null);
+  const [printSize, setPrintSize] = useState<'a4' | '58mm'>('a4');
+  const is58 = printSize === '58mm';
   const now = new Date();
   const displayInvoice = formatInvoiceNumber(invoiceNumber, saleId);
 
