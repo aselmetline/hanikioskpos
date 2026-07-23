@@ -289,7 +289,7 @@ ${t('receipt.thankYou')}
 
             {/* Customer block */}
             {customer && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+              <div data-receipt-customer style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
                 <div style={{ background: '#F4F4F0', border: '1px solid rgba(10,20,40,0.15)', padding: '16px' }}>
                   <h4 style={{ fontSize: '10px', fontWeight: 700, color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
                     {t('receipt.customer')} / Client
@@ -303,18 +303,18 @@ ${t('receipt.thankYou')}
 
             {/* Products table */}
             <div style={{ marginBottom: '32px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', borderTop: `2px solid ${INK}`, borderBottom: `2px solid ${INK}`, padding: '12px 0', fontSize: '12px', fontWeight: 700 }}>
+              <div data-receipt-table-row style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', borderTop: `2px solid ${INK}`, borderBottom: `2px solid ${INK}`, padding: '12px 0', fontSize: '12px', fontWeight: 700 }}>
                 <div>{t('receipt.product')} <span style={{ color: INK_FADED, fontWeight: 400 }}>/ Désignation</span></div>
                 <div style={{ textAlign: 'center' }}>{t('receipt.qty')} <span style={{ color: INK_FADED, fontWeight: 400 }}>/ Qté</span></div>
-                <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">P.U (TND)</div>
+                <div data-col-price style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">P.U (TND)</div>
                 <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">Total (TND)</div>
               </div>
               <div style={{ fontSize: '13px' }}>
                 {items.map((item, idx) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', padding: '14px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', alignItems: 'center' }}>
+                  <div key={idx} data-receipt-table-row style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', padding: '14px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', alignItems: 'center' }}>
                     <div style={{ fontWeight: 600 }}>{productLabel(item)}</div>
                     <div style={{ textAlign: 'center', fontWeight: 600 }}>{item.quantity}</div>
-                    <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">{item.product.price.toFixed(3)}</div>
+                    <div data-col-price style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">{item.product.price.toFixed(3)}</div>
                     <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left', fontWeight: 600 }} dir="ltr">{(item.product.price * item.quantity).toFixed(3)}</div>
                   </div>
                 ))}
@@ -322,7 +322,7 @@ ${t('receipt.thankYou')}
             </div>
 
             {/* Totals + payment */}
-            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(10,20,40,0.2)', paddingTop: '32px', gap: '24px' }}>
+            <div data-receipt-totals style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(10,20,40,0.2)', paddingTop: '32px', gap: '24px' }}>
               <div style={{ width: '240px' }}>
                 <p style={{ fontSize: '10px', fontWeight: 700, color: INK_FADED, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
                   {t('receipt.paymentMethod')} / Paiement
