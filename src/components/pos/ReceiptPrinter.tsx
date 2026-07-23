@@ -166,22 +166,42 @@ ${t('receipt.thankYou')}
               <span className="font-mono">{displayInvoice}</span>
             </span>
           </DialogTitle>
+          <div className="flex items-center gap-2 pt-2" dir="ltr">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Format</span>
+            <div className="inline-flex rounded-md border border-border overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setPrintSize('a4')}
+                className={`flex items-center gap-1 px-3 py-1 text-xs font-semibold transition-colors ${!is58 ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground hover:bg-muted'}`}
+              >
+                <FileText className="w-3.5 h-3.5" /> A4
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrintSize('58mm')}
+                className={`flex items-center gap-1 px-3 py-1 text-xs font-semibold transition-colors ${is58 ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground hover:bg-muted'}`}
+              >
+                <ReceiptIcon className="w-3.5 h-3.5" /> 58mm
+              </button>
+            </div>
+          </div>
         </DialogHeader>
 
         <div
           ref={receiptRef}
           dir={dir}
+          className={is58 ? 'receipt-58mm' : ''}
           style={{
             fontFamily: "'Cairo', sans-serif",
             background: PAPER,
             color: INK,
-            width: '210mm',
-            minHeight: '297mm',
+            width: is58 ? '58mm' : '210mm',
+            minHeight: is58 ? '0' : '297mm',
             margin: '0 auto',
             position: 'relative',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+            boxShadow: is58 ? '0 4px 12px rgba(0,0,0,0.08)' : '0 10px 30px rgba(0,0,0,0.08)',
             overflow: 'hidden',
-            transform: 'scale(0.7)',
+            transform: is58 ? 'none' : 'scale(0.7)',
             transformOrigin: 'top center',
           }}
         >
