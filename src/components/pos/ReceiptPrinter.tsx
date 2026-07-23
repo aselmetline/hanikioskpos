@@ -214,9 +214,27 @@ ${t('receipt.thankYou')}
           <div style={{ height: '16px', background: INK }} />
           <div style={{ height: '4px', background: GOLD, marginTop: '4px' }} />
 
-          <div style={{ padding: '40px 56px', display: 'flex', flexDirection: 'column', minHeight: 'calc(297mm - 60px)' }}>
+          <style>{`
+            .receipt-58mm { width: 58mm !important; min-height: 0 !important; box-shadow: none !important; transform: none !important; }
+            .receipt-58mm h1 { font-size: 13px !important; }
+            .receipt-58mm h2 { font-size: 15px !important; letter-spacing: 0.05em !important; }
+            .receipt-58mm h3 { font-size: 10px !important; }
+            .receipt-58mm h4 { font-size: 9px !important; }
+            .receipt-58mm [data-receipt-body] { padding: 8px !important; min-height: 0 !important; }
+            .receipt-58mm [data-receipt-header] { flex-direction: column !important; gap: 8px !important; align-items: stretch !important; border-bottom-width: 1px !important; padding-bottom: 8px !important; margin-bottom: 10px !important; }
+            .receipt-58mm [data-receipt-header] > div { width: 100%; }
+            .receipt-58mm [data-receipt-totals] { flex-direction: column !important; align-items: stretch !important; gap: 8px !important; padding-top: 10px !important; }
+            .receipt-58mm [data-receipt-totals] > div { width: 100% !important; }
+            .receipt-58mm [data-receipt-customer] { grid-template-columns: 1fr !important; margin-bottom: 10px !important; }
+            .receipt-58mm [data-receipt-table-row] { grid-template-columns: 2fr 1fr 1.2fr !important; gap: 4px !important; padding: 6px 0 !important; font-size: 10px !important; }
+            .receipt-58mm [data-receipt-table-row] [data-col-price] { display: none !important; }
+            .receipt-58mm .invoice-badge { padding: 4px 6px !important; }
+            .receipt-58mm .invoice-badge > span:last-child { font-size: 12px !important; letter-spacing: 0 !important; }
+            .receipt-58mm [data-watermark] { display: none !important; }
+          `}</style>
+          <div data-receipt-body style={{ padding: '40px 56px', display: 'flex', flexDirection: 'column', minHeight: 'calc(297mm - 60px)' }}>
             {/* Header */}
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: `2px solid ${INK}`, paddingBottom: '24px', marginBottom: '32px' }}>
+            <header data-receipt-header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: `2px solid ${INK}`, paddingBottom: '24px', marginBottom: '32px' }}>
               <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
                 {logo && (
                   <div style={{ background: 'rgba(10,20,40,0.05)', border: `1px solid rgba(10,20,40,0.2)`, padding: '6px', flexShrink: 0 }}>
