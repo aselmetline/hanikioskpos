@@ -95,21 +95,27 @@ export function ReceiptPrinter({
     if (!receiptRef.current) return;
     const printWindow = window.open('', '_blank');
     if (printWindow) {
+      const pageRule = is58 ? '@page { size: 58mm auto; margin: 0; }' : '@page { size: A4; margin: 0; }';
       printWindow.document.write(`
         <!DOCTYPE html><html dir="${dir}"><head><meta charset="UTF-8">
         <title>${t('common.receipt')} - ${displayInvoice}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4; margin: 0; }
+          ${pageRule}
           * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           body { font-family: 'Cairo', sans-serif; direction: ${dir}; background: #FAFAF7; }
-          @media print and (max-width: 58mm) {
-            @page { size: 58mm auto; margin: 0; }
-            .invoice-badge { padding: 6px 8px !important; font-size: 10px; text-align: ${dir === 'rtl' ? 'right' : 'left'} !important; }
-            .invoice-badge > span:last-child { font-size: 14px !important; letter-spacing: 0 !important; }
-          }
+          .receipt-58mm { width: 58mm !important; min-height: 0 !important; box-shadow: none !important; transform: none !important; }
+          .receipt-58mm * { font-size: 10px !important; }
+          .receipt-58mm h1 { font-size: 13px !important; }
+          .receipt-58mm h2 { font-size: 14px !important; }
+          .receipt-58mm [data-receipt-body] { padding: 8px !important; min-height: 0 !important; }
+          .receipt-58mm [data-receipt-header] { flex-direction: column !important; gap: 8px !important; align-items: stretch !important; }
+          .receipt-58mm [data-receipt-totals] { flex-direction: column !important; align-items: stretch !important; gap: 8px !important; padding-top: 8px !important; }
+          .receipt-58mm [data-receipt-totals] > div { width: 100% !important; }
+          .receipt-58mm .invoice-badge { padding: 4px 6px !important; }
+          .receipt-58mm .invoice-badge > span:last-child { font-size: 12px !important; letter-spacing: 0 !important; }
         </style>
-        </head><body>${receiptRef.current.outerHTML}<script>setTimeout(()=>{window.print();window.close();},300);</script></body></html>
+        </head><body>${receiptRef.current.outerHTML}<script>setTimeout(()=>{window.print();window.close();},400);</script></body></html>
       `);
       printWindow.document.close();
     }
