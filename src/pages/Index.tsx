@@ -31,6 +31,7 @@ import { exportFullBackup, importFullBackup } from '@/utils/excelUtils';
 
 const Index = () => {
   const { user } = useAuth();
+  const { isDesktop } = useDisplayMode();
   const [activeTab, setActiveTab] = useState<TabType>('sell');
 
   const { settings, updateSettings, resetSettings } = useSettings();
