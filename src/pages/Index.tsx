@@ -134,18 +134,30 @@ const Index = () => {
           kioskName={settings.kioskName}
           kioskNameFr={settings.kioskNameFr}
           logo={settings.logo}
+          compact={isDesktop}
         />
-        <BottomNav
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          cartItemCount={cart.itemCount}
-        />
+        {!isDesktop && (
+          <BottomNav
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            cartItemCount={cart.itemCount}
+          />
+        )}
       </div>
 
       {/* Low Stock Notification */}
       <LowStockNotification products={products.lowStockProducts} />
       
-      <main className="flex-1 overflow-auto">
+      <div className="flex-1 flex">
+      {isDesktop && (
+        <SideNav
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          cartItemCount={cart.itemCount}
+        />
+      )}
+      <main className="flex-1 overflow-auto min-w-0">
+
         {activeTab === 'sell' && (
           <SellTab
             products={products.filteredProducts}
