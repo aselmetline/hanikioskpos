@@ -11,9 +11,10 @@ interface HeaderProps {
   kioskName?: string;
   kioskNameFr?: string;
   logo?: string | null;
+  compact?: boolean;
 }
 
-export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderProps) {
+export function Header({ lowStockCount, kioskName, kioskNameFr, logo, compact = false }: HeaderProps) {
   const { t, language } = useLanguage();
   const { signOut } = useAuth();
   const { isInstallable, install } = usePWAInstall();
