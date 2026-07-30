@@ -86,6 +86,15 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
             </button>
           )}
 
+          <button
+            onClick={toggleMode}
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors"
+            title={isDesktop ? (language === 'ar' ? 'وضع الجوال' : 'Mode mobile') : (language === 'ar' ? 'وضع المكتب' : 'Mode bureau')}
+            aria-label={isDesktop ? 'Mobile mode' : 'Desktop mode'}
+          >
+            {isDesktop ? <Smartphone className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
+          </button>
+
           <span className="text-sm font-medium">{formatTime(currentTime)}</span>
           {lowStockCount > 0 && (
             <div className="relative">
