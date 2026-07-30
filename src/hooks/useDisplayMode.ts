@@ -19,10 +19,18 @@ function applyMode(mode: DisplayMode) {
   document.documentElement.classList.toggle('force-desktop', mode === 'desktop');
 }
 
+export function detectDisplayMode(): DisplayMode {
+  const width = Math.max(window.innerWidth || 0, window.screen?.width || 0);
+  const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+  // شاشات عريضة بدون لمس ⇒ وضع المكتب
+  return width >= DESKTOP_WIDTH || (width >= 1024 && !coarsePointer) ? 'desktop' : 'mobile';
+}
+
 export function useDisplayMode() {
-  const [mode, setMode] = useState<DisplayMode>(
-    () => (localStorage.getItem(STORAGE_KEY) as DisplayMode) || 'mobile'
-  );
+  const [mode, setMode] = useState<DisplayMode>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY) as DisplayMode | null;
+    return stored === 'desktop' || stored === 'mobile' ? stored : detectDisplayMode();
+  });
 
   useEffect(() => {
     applyMode(mode);
