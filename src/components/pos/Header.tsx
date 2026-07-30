@@ -1,6 +1,7 @@
-import { Store, Wifi, WifiOff, Bell, LogOut, Download } from 'lucide-react';
+import { Store, Wifi, WifiOff, Bell, LogOut, Download, Monitor, Smartphone } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
