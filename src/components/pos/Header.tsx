@@ -11,9 +11,10 @@ interface HeaderProps {
   kioskName?: string;
   kioskNameFr?: string;
   logo?: string | null;
+  compact?: boolean;
 }
 
-export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderProps) {
+export function Header({ lowStockCount, kioskName, kioskNameFr, logo, compact = false }: HeaderProps) {
   const { t, language } = useLanguage();
   const { signOut } = useAuth();
   const { isInstallable, install } = usePWAInstall();
@@ -55,21 +56,22 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
   };
 
   return (
-    <header className="bg-primary text-primary-foreground px-4 py-3 safe-top">
+    <header className={`bg-primary text-primary-foreground px-4 safe-top ${compact ? 'py-1.5' : 'py-3'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {logo ? (
-            <img src={logo} alt={displayName} className="w-10 h-10 rounded-xl object-cover" />
+            <img src={logo} alt={displayName} className={`${compact ? 'w-7 h-7' : 'w-10 h-10'} rounded-xl object-cover`} />
           ) : (
-            <div className="w-10 h-10 bg-primary-foreground/20 rounded-xl flex items-center justify-center">
-              <Store className="w-6 h-6" />
+            <div className={`${compact ? 'w-7 h-7' : 'w-10 h-10'} bg-primary-foreground/20 rounded-xl flex items-center justify-center`}>
+              <Store className={compact ? 'w-4 h-4' : 'w-6 h-6'} />
             </div>
           )}
-          <div>
-            <h1 className="text-lg font-bold">{displayName}</h1>
+          <div className={compact ? 'flex items-baseline gap-2' : ''}>
+            <h1 className={compact ? 'text-sm font-bold' : 'text-lg font-bold'}>{displayName}</h1>
             <p className="text-xs text-primary-foreground/80">{displayNameSecondary}</p>
           </div>
         </div>
+
 
         <div className="flex items-center gap-3">
           {isInstallable && (

@@ -3,6 +3,8 @@ import { Header } from '@/components/pos/Header';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { BottomNav, TabType } from '@/components/pos/BottomNav';
+import { SideNav } from '@/components/pos/SideNav';
+import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { SellTab } from '@/components/pos/SellTab';
 import { InventoryTab } from '@/components/pos/InventoryTab';
 import { CustomersTab } from '@/components/pos/CustomersTab';
@@ -29,6 +31,7 @@ import { exportFullBackup, importFullBackup } from '@/utils/excelUtils';
 
 const Index = () => {
   const { user } = useAuth();
+  const { isDesktop } = useDisplayMode();
   const [activeTab, setActiveTab] = useState<TabType>('sell');
 
   const { settings, updateSettings, resetSettings } = useSettings();
@@ -134,18 +137,30 @@ const Index = () => {
           kioskName={settings.kioskName}
           kioskNameFr={settings.kioskNameFr}
           logo={settings.logo}
+          compact={isDesktop}
         />
-        <BottomNav
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          cartItemCount={cart.itemCount}
-        />
+        {!isDesktop && (
+          <BottomNav
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            cartItemCount={cart.itemCount}
+          />
+        )}
       </div>
 
       {/* Low Stock Notification */}
       <LowStockNotification products={products.lowStockProducts} />
       
-      <main className="flex-1 overflow-auto">
+      <div className="flex-1 flex">
+      {isDesktop && (
+        <SideNav
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          cartItemCount={cart.itemCount}
+        />
+      )}
+      <main className="flex-1 overflow-auto min-w-0">
+
         {activeTab === 'sell' && (
           <SellTab
             products={products.filteredProducts}
@@ -355,8 +370,10 @@ const Index = () => {
           />
         )}
       </main>
+      </div>
 
     </div>
+
   );
 };
 
