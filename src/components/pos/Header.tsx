@@ -1,6 +1,7 @@
-import { Store, Wifi, WifiOff, Bell, LogOut, Download } from 'lucide-react';
+import { Store, Wifi, WifiOff, Bell, LogOut, Download, Monitor, Smartphone } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
   const { t, language } = useLanguage();
   const { signOut } = useAuth();
   const { isInstallable, install } = usePWAInstall();
+  const { isDesktop, toggleMode } = useDisplayMode();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -83,6 +85,15 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
               <span>{t('common.install')}</span>
             </button>
           )}
+
+          <button
+            onClick={toggleMode}
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors"
+            title={isDesktop ? (language === 'ar' ? 'وضع الجوال' : 'Mode mobile') : (language === 'ar' ? 'وضع المكتب' : 'Mode bureau')}
+            aria-label={isDesktop ? 'Mobile mode' : 'Desktop mode'}
+          >
+            {isDesktop ? <Smartphone className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
+          </button>
 
           <span className="text-sm font-medium">{formatTime(currentTime)}</span>
           {lowStockCount > 0 && (
