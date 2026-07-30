@@ -17,6 +17,7 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo }: HeaderPr
   const { t, language } = useLanguage();
   const { signOut } = useAuth();
   const { isInstallable, install } = usePWAInstall();
+  const { isDesktop, toggleMode } = useDisplayMode();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentTime, setCurrentTime] = useState(new Date());
 
