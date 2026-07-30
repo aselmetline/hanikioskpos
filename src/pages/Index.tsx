@@ -3,6 +3,8 @@ import { Header } from '@/components/pos/Header';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { BottomNav, TabType } from '@/components/pos/BottomNav';
+import { SideNav } from '@/components/pos/SideNav';
+import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { SellTab } from '@/components/pos/SellTab';
 import { InventoryTab } from '@/components/pos/InventoryTab';
 import { CustomersTab } from '@/components/pos/CustomersTab';
@@ -367,8 +369,10 @@ const Index = () => {
           />
         )}
       </main>
+      </div>
 
     </div>
+
   );
 };
 
