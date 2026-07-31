@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+
 
 const queryClient = new QueryClient();
 
