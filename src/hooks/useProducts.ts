@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
+import { tx } from '@/i18n/t';
 
 export function useProducts() {
   const { user } = useAuth();
@@ -28,7 +29,7 @@ export function useProducts() {
 
       if (error) {
         console.error('Error fetching products:', error);
-        toast.error('خطأ في تحميل المنتجات');
+        toast.error(tx('errors.loadProducts'));
       } else {
         setProducts(data.map(p => ({
           id: p.id,
@@ -101,7 +102,7 @@ export function useProducts() {
 
     if (error) {
       console.error('Error adding product:', error);
-      toast.error('خطأ في إضافة المنتج');
+      toast.error(tx('errors.addProduct'));
       return null;
     }
 
@@ -147,7 +148,7 @@ export function useProducts() {
 
     if (error) {
       console.error('Error updating product:', error);
-      toast.error('خطأ في تحديث المنتج');
+      toast.error(tx('errors.updateProduct'));
       return;
     }
 
@@ -164,7 +165,7 @@ export function useProducts() {
 
     if (error) {
       console.error('Error deleting product:', error);
-      toast.error('خطأ في حذف المنتج');
+      toast.error(tx('errors.deleteProduct'));
       return;
     }
 

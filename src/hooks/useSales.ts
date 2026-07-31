@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
+import { tx } from '@/i18n/t';
 
 export const useSales = () => {
   const { user } = useAuth();
@@ -26,7 +27,7 @@ export const useSales = () => {
 
       if (error) {
         console.error('Error fetching sales:', error);
-        toast.error('خطأ في تحميل المبيعات');
+        toast.error(tx('errors.loadSales'));
       } else {
         const mappedSales: Sale[] = data.map(s => ({
           id: s.id,
@@ -119,9 +120,9 @@ export const useSales = () => {
       console.error('Error creating sale:', error);
       const msg = error.message || '';
       if (msg.includes('CREDIT_LIMIT_EXCEEDED')) {
-        toast.error('تم تجاوز الحد الائتماني المسموح لهذا العميل');
+        toast.error(tx('errors.creditLimitExceeded'));
       } else {
-        toast.error(msg || 'خطأ في تسجيل البيع');
+        toast.error(msg || tx('errors.recordSale'));
       }
       return null;
     }

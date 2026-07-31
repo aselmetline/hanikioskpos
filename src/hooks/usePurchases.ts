@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
+import { tx } from '@/i18n/t';
 
 export const usePurchases = () => {
   const { user } = useAuth();
@@ -27,7 +28,7 @@ export const usePurchases = () => {
 
       if (error) {
         console.error('Error fetching purchases:', error);
-        toast.error('خطأ في تحميل المشتريات');
+        toast.error(tx('errors.loadPurchases'));
       } else {
         const mappedPurchases: Purchase[] = data.map(p => {
           const items = p.purchase_items as Array<Record<string, unknown>> | null;
@@ -142,7 +143,7 @@ export const usePurchases = () => {
 
     if (purchaseError) {
       console.error('Error saving purchase:', purchaseError);
-      toast.error('خطأ في حفظ الفاتورة');
+      toast.error(tx('errors.savePurchase'));
       return null;
     }
 
@@ -172,7 +173,7 @@ export const usePurchases = () => {
     setInvoiceNumber((parseInt(invoiceNumber) + 1).toString());
     clearCurrentItems();
 
-    toast.success('تم حفظ فاتورة المشتريات');
+    toast.success(tx('errors.purchaseSaved'));
     return newPurchase;
   }, [user, currentItems, invoiceNumber, clearCurrentItems]);
 
@@ -182,11 +183,11 @@ export const usePurchases = () => {
     await supabase.from('purchase_items').delete().eq('purchase_id', id);
     const { error } = await supabase.from('purchases').delete().eq('id', id);
     if (error) {
-      toast.error('خطأ في حذف الفاتورة');
+      toast.error(tx('errors.deletePurchase'));
       return;
     }
     setPurchases(prev => prev.filter(p => p.id !== id));
-    toast.success('تم حذف فاتورة المشتريات');
+    toast.success(tx('errors.purchaseDeleted'));
   }, [user]);
 
   const updatePurchase = useCallback(async (
@@ -206,7 +207,7 @@ export const usePurchases = () => {
         total,
       })
       .eq('id', id);
-    if (upErr) { toast.error('خطأ في تحديث الفاتورة'); return false; }
+    if (upErr) { toast.error(tx('errors.updatePurchase')); return false; }
 
     await supabase.from('purchase_items').delete().eq('purchase_id', id);
     const rows = items.map(item => ({
@@ -218,7 +219,7 @@ export const usePurchases = () => {
       total: item.total,
     }));
     const { error: itemsErr } = await supabase.from('purchase_items').insert(rows);
-    if (itemsErr) { toast.error('خطأ في تحديث بنود الفاتورة'); return false; }
+    if (itemsErr) { toast.error(tx('errors.updatePurchaseItems')); return false; }
 
     setPurchases(prev => prev.map(p => p.id === id ? {
       ...p,
@@ -227,7 +228,7 @@ export const usePurchases = () => {
       items: [...items],
       total,
     } : p));
-    toast.success('تم تحديث الفاتورة');
+    toast.success(tx('errors.purchaseUpdated'));
     return true;
   }, [user]);
 

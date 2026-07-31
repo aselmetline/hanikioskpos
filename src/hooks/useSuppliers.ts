@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
+import { tx } from '@/i18n/t';
 
 export interface Supplier {
   id: string;
@@ -63,7 +64,7 @@ export const useSuppliers = () => {
       address: data.address || null,
       notes: data.notes || null,
     }).select().single();
-    if (error) { toast.error('خطأ في إضافة المورد'); return null; }
+    if (error) { toast.error(tx('errors.addSupplier')); return null; }
     const supplier: Supplier = {
       id: result.id, name: result.name, phone: result.phone || '',
       address: result.address || '', notes: result.notes || '',
@@ -81,7 +82,7 @@ export const useSuppliers = () => {
     if (updates.address !== undefined) dbUpdates.address = updates.address || null;
     if (updates.notes !== undefined) dbUpdates.notes = updates.notes || null;
     const { error } = await supabase.from('suppliers').update(dbUpdates).eq('id', id);
-    if (error) { toast.error('خطأ في تحديث المورد'); return; }
+    if (error) { toast.error(tx('errors.updateSupplier')); return; }
     setSuppliers(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
   }, [user]);
 
@@ -91,16 +92,16 @@ export const useSuppliers = () => {
     if (!supplier) return;
     const newBalance = supplier.debtBalance + amount;
     const { error } = await supabase.from('suppliers').update({ debt_balance: newBalance }).eq('id', id);
-    if (error) { toast.error('خطأ في تحديث الرصيد'); return; }
+    if (error) { toast.error(tx('errors.updateBalance')); return; }
     setSuppliers(prev => prev.map(s => s.id === id ? { ...s, debtBalance: newBalance } : s));
   }, [user, suppliers]);
 
   const deleteSupplier = useCallback(async (id: string) => {
     if (!user) return;
     const { error } = await supabase.from('suppliers').delete().eq('id', id);
-    if (error) { toast.error('خطأ في حذف المورد'); return; }
+    if (error) { toast.error(tx('errors.deleteSupplier')); return; }
     setSuppliers(prev => prev.filter(s => s.id !== id));
-    toast.success('تم حذف المورد');
+    toast.success(tx('errors.supplierDeleted'));
   }, [user]);
 
   const filteredSuppliers = suppliers.filter(s =>
