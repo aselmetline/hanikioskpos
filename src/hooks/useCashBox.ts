@@ -154,10 +154,24 @@ export const useCashBox = () => {
   }, [transactions]);
 
   const clearTransactions = useCallback(async () => {
-    // Note: This would delete all transactions from DB
-    // For now, just clear local state
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from('cash_box_transactions')
+      .delete()
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error clearing transactions:', error);
+      toast.error(tx('errors.clearTransactions'));
+      return false;
+    }
+
     setTransactions([]);
-  }, []);
+    toast.success(tx('errors.transactionsCleared'));
+    return true;
+  }, [user]);
+
 
   return {
     transactions,
