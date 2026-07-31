@@ -4,12 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
-import {
 import { tx } from '@/i18n/t';
+import {
   buildBaseCustomerId,
   generateUniqueCustomerId,
   type CustomerIdInput,
 } from '@/utils/customerId';
+
 
 const POINTS_PER_DINAR = 1;
 const POINTS_TO_DINAR_RATE = 100;
