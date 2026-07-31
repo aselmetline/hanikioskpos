@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
+import { tx } from '@/i18n/t';
 
 export const useExpenses = () => {
   const { user } = useAuth();
@@ -26,7 +27,7 @@ export const useExpenses = () => {
 
       if (error) {
         console.error('Error fetching expenses:', error);
-        toast.error('خطأ في تحميل المصروفات');
+        toast.error(tx('errors.loadExpenses'));
       } else {
         setExpenses(data.map(e => ({
           id: e.id,
@@ -77,7 +78,7 @@ export const useExpenses = () => {
 
     if (error) {
       console.error('Error adding expense:', error);
-      toast.error('خطأ في إضافة المصروف');
+      toast.error(tx('errors.addExpense'));
       return null;
     }
 
@@ -102,7 +103,7 @@ export const useExpenses = () => {
 
     if (error) {
       console.error('Error deleting expense:', error);
-      toast.error('خطأ في حذف المصروف');
+      toast.error(tx('errors.deleteExpense'));
       return;
     }
 

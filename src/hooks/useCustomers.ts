@@ -4,11 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
+import { tx } from '@/i18n/t';
 import {
   buildBaseCustomerId,
   generateUniqueCustomerId,
   type CustomerIdInput,
 } from '@/utils/customerId';
+
 
 const POINTS_PER_DINAR = 1;
 const POINTS_TO_DINAR_RATE = 100;
@@ -65,7 +67,7 @@ export function useCustomers() {
 
       if (error) {
         console.error('Error fetching customers:', error);
-        toast.error('خطأ في تحميل العملاء');
+        toast.error(tx('errors.loadCustomers'));
       } else {
         setCustomers(data.map(mapCustomer));
       }
@@ -135,7 +137,7 @@ export function useCustomers() {
         console.error('Error generating external_id:', e);
       }
     } else if (await isExternalIdTaken(externalId)) {
-      toast.error('معرّف العميل (Customer ID) مستخدم بالفعل');
+      toast.error(tx('errors.duplicateCustomerId'));
       return null;
     }
 
@@ -162,9 +164,9 @@ export function useCustomers() {
     if (error) {
       console.error('Error adding customer:', error);
       if ((error as any).code === '23505') {
-        toast.error('معرّف العميل (Customer ID) مستخدم بالفعل');
+        toast.error(tx('errors.duplicateCustomerId'));
       } else {
-        toast.error('خطأ في إضافة العميل');
+        toast.error(tx('errors.addCustomer'));
       }
       return null;
     }
@@ -250,9 +252,9 @@ export function useCustomers() {
     if (error) {
       console.error('Error updating customer:', error);
       if ((error as any).code === '23505') {
-        toast.error('معرّف العميل (Customer ID) مستخدم بالفعل');
+        toast.error(tx('errors.duplicateCustomerId'));
       } else {
-        toast.error('خطأ في تحديث العميل');
+        toast.error(tx('errors.updateCustomer'));
       }
       return false;
     }
@@ -271,7 +273,7 @@ export function useCustomers() {
     const { error } = await supabase.from('customers').delete().eq('id', id);
     if (error) {
       console.error('Error deleting customer:', error);
-      toast.error('خطأ في حذف العميل');
+      toast.error(tx('errors.deleteCustomer'));
       return false;
     }
     setCustomers(prev => prev.filter(c => c.id !== id));
@@ -294,7 +296,7 @@ export function useCustomers() {
     });
     if (error) {
       console.error('Error recording payment:', error);
-      toast.error(error.message || 'خطأ في تسجيل الدفعة');
+      toast.error(error.message || tx('errors.recordPayment'));
       return false;
     }
     return true;

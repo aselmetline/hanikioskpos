@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { tx } from '@/i18n/t';
 
 export interface AppSettings {
   kioskName: string;
@@ -146,12 +147,12 @@ export function useSettings() {
 
     if (error) {
       console.error('Error updating settings:', error);
-      toast.error('خطأ في تحديث الإعدادات');
+      toast.error(tx('errors.updateSettings'));
       return;
     }
 
     setSettings(prev => ({ ...prev, ...updates }));
-    toast.success('تم تحديث الإعدادات');
+    toast.success(tx('errors.settingsUpdated'));
   }, [user]);
 
   const resetSettings = useCallback(async () => {
@@ -188,12 +189,12 @@ export function useSettings() {
 
     if (error) {
       console.error('Error resetting settings:', error);
-      toast.error('خطأ في استعادة الإعدادات');
+      toast.error(tx('errors.resetSettings'));
       return;
     }
 
     setSettings(DEFAULT_SETTINGS);
-    toast.success('تم استعادة الإعدادات الافتراضية');
+    toast.success(tx('errors.settingsReset'));
   }, [user]);
 
   return {
