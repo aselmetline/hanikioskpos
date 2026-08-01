@@ -103,7 +103,7 @@ export const useSales = () => {
       tax_rate: item.product.taxRate ?? 0.19,
     }));
 
-    const { data, error } = await supabase.rpc('process_sale', {
+    const rpcArgs = {
       p_items: payload,
       p_subtotal: subtotal,
       p_tax: tax,
@@ -114,9 +114,47 @@ export const useSales = () => {
       p_points_to_redeem: options?.pointsToRedeem ?? 0,
       p_auto_add_to_cashbox: options?.autoAddToCashbox ?? false,
       p_points_per_dinar: options?.pointsPerDinar ?? 1,
-    });
+    };
+
+    // Offline path: queue the sale locally and confirm it to the cashier.
+    const queueOffline = () => {
+      const entry = enqueueSale(user.id, rpcArgs as never);
+      const offlineSale: Sale = {
+        id: entry.localId,
+        items: [...items],
+        subtotal,
+        tax,
+        discount,
+        total,
+        paymentMethod,
+        customerId: customer?.id,
+        createdAt: new Date(),
+        invoiceNumber: null,
+        fiscalStamp: 0,
+        pendingSync: true,
+      };
+      setSales(prev => [offlineSale, ...prev]);
+      toast.success(tx('offline.saleQueued'));
+      return {
+        sale: offlineSale,
+        pointsEarned: 0,
+        invoiceNumber: undefined,
+        fiscalStamp: undefined,
+        taxBreakdown: undefined,
+        offline: true,
+      };
+    };
+
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      return queueOffline();
+    }
+
+    const { data, error } = await supabase.rpc('process_sale', rpcArgs);
 
     if (error) {
+      if (isNetworkError(error)) {
+        return queueOffline();
+      }
       console.error('Error creating sale:', error);
       const msg = error.message || '';
       if (msg.includes('CREDIT_LIMIT_EXCEEDED')) {
