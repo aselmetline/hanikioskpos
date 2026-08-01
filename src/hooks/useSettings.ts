@@ -70,6 +70,9 @@ export function useSettings() {
 
     const fetchSettings = async () => {
       setLoading(true);
+      const cached = await loadCache<AppSettings>('settings', user.id);
+      if (cached?.data) setSettings(cached.data);
+
       const { data, error } = await supabase
         .from('user_settings')
         .select('*')
@@ -79,7 +82,7 @@ export function useSettings() {
       if (error) {
         console.error('Error fetching settings:', error);
       } else if (data) {
-        setSettings({
+        const mapped: AppSettings = {
           kioskName: data.kiosk_name || DEFAULT_SETTINGS.kioskName,
           kioskNameFr: data.kiosk_name_fr || DEFAULT_SETTINGS.kioskNameFr,
           logo: data.logo_url || null,
