@@ -59,22 +59,41 @@ export function useCustomers() {
       return;
     }
 
+    let cancelled = false;
+
     const fetchCustomers = async () => {
-      setLoading(true);
       const { data, error } = await fetchAllPaginated<any>(
         (from, to) => supabase.from('customers').select('*').order('created_at', { ascending: false }).range(from, to)
       );
+      if (cancelled) return;
 
       if (error) {
         console.error('Error fetching customers:', error);
-        toast.error(tx('errors.loadCustomers'));
+        const cached = await loadCache<any[]>('customers', user.id);
+        if (cancelled) return;
+        if (cached?.data?.length) {
+          setCustomers(cached.data.map(mapCustomer));
+        } else {
+          toast.error(tx('errors.loadCustomers'));
+        }
       } else {
         setCustomers(data.map(mapCustomer));
+        saveCache('customers', user.id, data);
       }
       setLoading(false);
     };
 
-    fetchCustomers();
+    const hydrate = async () => {
+      const cached = await loadCache<any[]>('customers', user.id);
+      if (!cancelled && cached?.data?.length) {
+        setCustomers(prev => (prev.length ? prev : cached.data.map(mapCustomer)));
+        setLoading(false);
+      }
+      await fetchCustomers();
+    };
+
+    setLoading(true);
+    hydrate();
 
     const channel = supabase
       .channel('customers-changes')
@@ -84,6 +103,7 @@ export function useCustomers() {
       .subscribe();
 
     return () => {
+      cancelled = true;
       supabase.removeChannel(channel);
     };
   }, [user]);
