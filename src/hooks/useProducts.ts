@@ -1,10 +1,16 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Product } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 import { tx } from '@/i18n/t';
+import {
+  loadCache,
+  saveCache,
+  OFFLINE_STOCK_EVENT,
+  type OfflineStockDelta,
+} from '@/lib/offlineCache';
 
 export function useProducts() {
   const { user } = useAuth();
@@ -12,8 +18,32 @@ export function useProducts() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [offlineData, setOfflineData] = useState(false);
+  const hydratedRef = useRef(false);
 
-  // Fetch products from Supabase
+  // Keep the offline cache in sync with whatever the sell screen is showing.
+  useEffect(() => {
+    if (!user || !hydratedRef.current) return;
+    saveCache('products', user.id, products);
+  }, [products, user]);
+
+  // Apply local stock deductions for sales queued while offline.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const deltas = (e as CustomEvent<OfflineStockDelta[]>).detail || [];
+      if (deltas.length === 0) return;
+      setProducts(prev =>
+        prev.map(p => {
+          const d = deltas.find(x => x.productId === p.id);
+          return d ? { ...p, stock: Math.max(0, p.stock - d.quantity) } : p;
+        }),
+      );
+    };
+    window.addEventListener(OFFLINE_STOCK_EVENT, handler);
+    return () => window.removeEventListener(OFFLINE_STOCK_EVENT, handler);
+  }, []);
+
+  // Fetch products from Supabase (with IndexedDB pre-load for offline use)
   useEffect(() => {
     if (!user) {
       setProducts([]);
@@ -21,16 +51,36 @@ export function useProducts() {
       return;
     }
 
+    let cancelled = false;
+    hydratedRef.current = false;
+
+    const hydrateFromCache = async () => {
+      const cached = await loadCache<Product[]>('products', user.id);
+      if (cancelled || !cached?.data?.length) return false;
+      setProducts(prev => (prev.length ? prev : cached.data));
+      setLoading(false);
+      return true;
+    };
+
     const fetchProducts = async () => {
-      setLoading(true);
       const { data, error } = await fetchAllPaginated<any>(
         (from, to) => supabase.from('products').select('*').order('created_at', { ascending: false }).range(from, to)
       );
+      if (cancelled) return;
 
       if (error) {
         console.error('Error fetching products:', error);
-        toast.error(tx('errors.loadProducts'));
+        const cached = await loadCache<Product[]>('products', user.id);
+        if (cancelled) return;
+        if (cached?.data?.length) {
+          setProducts(cached.data);
+          setOfflineData(true);
+        } else {
+          toast.error(tx('errors.loadProducts'));
+        }
       } else {
+        setOfflineData(false);
+        hydratedRef.current = true;
         setProducts(data.map(p => ({
           id: p.id,
           name: p.name,
@@ -49,7 +99,8 @@ export function useProducts() {
       setLoading(false);
     };
 
-    fetchProducts();
+    setLoading(true);
+    hydrateFromCache().then(() => fetchProducts());
 
     // Subscribe to realtime changes
     const channel = supabase
@@ -60,6 +111,7 @@ export function useProducts() {
       .subscribe();
 
     return () => {
+      cancelled = true;
       supabase.removeChannel(channel);
     };
   }, [user]);
