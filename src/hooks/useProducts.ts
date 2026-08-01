@@ -261,6 +261,7 @@ export function useProducts() {
     deleteProduct,
     updateStock,
     lowStockProducts,
+    offlineData,
     loading
   };
 }
