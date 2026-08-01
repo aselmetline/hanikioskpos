@@ -514,6 +514,15 @@ export const translations = {
     ecommerce: { ar: '🌐 متجر إلكتروني', fr: '🌐 E-commerce' },
     other: { ar: '📋 أخرى', fr: '📋 Autres' },
   },
+  // ===== Offline mode =====
+  offline: {
+    saleQueued: { ar: 'تم تسجيل البيع دون اتصال — سيُزامن تلقائيًا', fr: 'Vente enregistrée hors ligne — synchronisation automatique' },
+    pending: { ar: 'بانتظار المزامنة', fr: 'En attente de synchronisation' },
+    synced: { ar: 'تمت مزامنة المبيعات', fr: 'Ventes synchronisées' },
+    syncFailed: { ar: 'تعذّرت مزامنة بعض المبيعات', fr: 'Échec de synchronisation de certaines ventes' },
+    syncNow: { ar: 'مزامنة الآن', fr: 'Synchroniser' },
+    syncing: { ar: 'جاري المزامنة...', fr: 'Synchronisation...' },
+  },
   // ===== Errors / hook messages =====
   errors: {
     boundaryTitle: { ar: 'حدث خطأ غير متوقع', fr: "Une erreur inattendue s'est produite" },

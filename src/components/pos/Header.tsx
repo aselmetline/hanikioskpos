@@ -1,8 +1,9 @@
-import { Store, Wifi, WifiOff, Bell, LogOut, Download, Monitor, Smartphone } from 'lucide-react';
+import { Store, Wifi, WifiOff, Bell, LogOut, Download, Monitor, Smartphone, CloudUpload } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
@@ -19,6 +20,7 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo, compact = 
   const { signOut } = useAuth();
   const { isInstallable, install } = usePWAInstall();
   const { isDesktop, toggleMode } = useDisplayMode();
+  const { pendingCount, syncing, sync } = useOfflineSync();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -96,6 +98,18 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo, compact = 
           >
             {isDesktop ? <Smartphone className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
           </button>
+
+          {pendingCount > 0 && (
+            <button
+              onClick={() => sync()}
+              disabled={syncing}
+              className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/20 hover:bg-warning/30 transition-colors disabled:opacity-60"
+              title={syncing ? t('offline.syncing') : t('offline.syncNow')}
+            >
+              <CloudUpload className={`w-3 h-3 ${syncing ? 'animate-pulse' : ''}`} />
+              <span>{pendingCount}</span>
+            </button>
+          )}
 
           <span className="text-sm font-medium">{formatTime(currentTime)}</span>
           {lowStockCount > 0 && (
