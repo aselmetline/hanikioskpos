@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 import { tx } from '@/i18n/t';
 import { enqueueSale, isNetworkError } from '@/lib/offlineQueue';
+import { emitOfflineStockDeltas } from '@/lib/offlineCache';
 
 export const useSales = () => {
   const { user } = useAuth();
