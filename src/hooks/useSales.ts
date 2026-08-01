@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 import { tx } from '@/i18n/t';
 import { enqueueSale, isNetworkError } from '@/lib/offlineQueue';
+import { emitOfflineStockDeltas } from '@/lib/offlineCache';
 
 export const useSales = () => {
   const { user } = useAuth();
@@ -135,6 +136,12 @@ export const useSales = () => {
         pendingSync: true,
       };
       setSales(prev => [offlineSale, ...prev]);
+      // Reflect the sold quantities on the locally cached stock right away.
+      emitOfflineStockDeltas(
+        items
+          .filter(i => !!i.product?.id)
+          .map(i => ({ productId: i.product.id, quantity: i.quantity })),
+      );
       toast.success(tx('offline.saleQueued'));
       return {
         sale: offlineSale,

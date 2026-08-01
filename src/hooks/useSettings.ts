@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { tx } from '@/i18n/t';
+import { loadCache, saveCache } from '@/lib/offlineCache';
 
 export interface AppSettings {
   kioskName: string;
@@ -70,6 +71,9 @@ export function useSettings() {
 
     const fetchSettings = async () => {
       setLoading(true);
+      const cached = await loadCache<AppSettings>('settings', user.id);
+      if (cached?.data) setSettings(cached.data);
+
       const { data, error } = await supabase
         .from('user_settings')
         .select('*')
@@ -79,7 +83,7 @@ export function useSettings() {
       if (error) {
         console.error('Error fetching settings:', error);
       } else if (data) {
-        setSettings({
+        const mapped: AppSettings = {
           kioskName: data.kiosk_name || DEFAULT_SETTINGS.kioskName,
           kioskNameFr: data.kiosk_name_fr || DEFAULT_SETTINGS.kioskNameFr,
           logo: data.logo_url || null,
@@ -103,7 +107,9 @@ export function useSettings() {
           matriculeFiscal: (data as any).matricule_fiscal || '',
           fiscalStampEnabled: (data as any).fiscal_stamp_enabled ?? DEFAULT_SETTINGS.fiscalStampEnabled,
           fiscalStampAmount: (data as any).fiscal_stamp_amount != null ? Number((data as any).fiscal_stamp_amount) : DEFAULT_SETTINGS.fiscalStampAmount,
-        });
+        };
+        setSettings(mapped);
+        saveCache('settings', user.id, mapped);
       }
       setLoading(false);
     };
