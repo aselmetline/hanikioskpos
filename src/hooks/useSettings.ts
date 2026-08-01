@@ -106,7 +106,9 @@ export function useSettings() {
           matriculeFiscal: (data as any).matricule_fiscal || '',
           fiscalStampEnabled: (data as any).fiscal_stamp_enabled ?? DEFAULT_SETTINGS.fiscalStampEnabled,
           fiscalStampAmount: (data as any).fiscal_stamp_amount != null ? Number((data as any).fiscal_stamp_amount) : DEFAULT_SETTINGS.fiscalStampAmount,
-        });
+        };
+        setSettings(mapped);
+        saveCache('settings', user.id, mapped);
       }
       setLoading(false);
     };
