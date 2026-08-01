@@ -58,6 +58,8 @@ export interface Sale {
   invoiceNumber?: number | null;
   fiscalStamp?: number;
   taxBreakdown?: Record<string, { base: number; tax: number }>;
+  /** True when the sale was recorded offline and is awaiting sync. */
+  pendingSync?: boolean;
 }
 
 export interface DailyReport {
