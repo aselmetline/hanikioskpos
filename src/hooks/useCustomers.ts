@@ -97,6 +97,9 @@ export function useCustomers() {
     setLoading(true);
     hydrate();
 
+    // Smart cache policy: refresh when back online / visible / stale.
+    const unsubscribe = subscribeRevalidate(fetchCustomers);
+
     const channel = supabase
       .channel('customers-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, () => {
@@ -106,6 +109,7 @@ export function useCustomers() {
 
     return () => {
       cancelled = true;
+      unsubscribe();
       supabase.removeChannel(channel);
     };
   }, [user]);
