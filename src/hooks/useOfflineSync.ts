@@ -11,6 +11,7 @@ import {
   removeFromQueue,
   subscribeQueue,
 } from '@/lib/offlineQueue';
+import { triggerRevalidate } from '@/lib/cacheRevalidate';
 
 /**
  * Watches connectivity and replays sales that were recorded while offline.
@@ -56,7 +57,11 @@ export const useOfflineSync = () => {
     }
 
     setSyncing(false);
-    if (synced > 0) toast.success(`${tx('offline.synced')} (${synced})`);
+    if (synced > 0) {
+      toast.success(`${tx('offline.synced')} (${synced})`);
+      // Pull fresh server state (stock, points, balances) after replaying sales.
+      triggerRevalidate();
+    }
     if (failed > 0) toast.error(`${tx('offline.syncFailed')} (${failed})`);
   }, [user]);
 

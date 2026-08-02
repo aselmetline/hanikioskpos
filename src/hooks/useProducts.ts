@@ -11,6 +11,7 @@ import {
   OFFLINE_STOCK_EVENT,
   type OfflineStockDelta,
 } from '@/lib/offlineCache';
+import { subscribeRevalidate } from '@/lib/cacheRevalidate';
 
 export function useProducts() {
   const { user } = useAuth();
@@ -102,6 +103,9 @@ export function useProducts() {
     setLoading(true);
     hydrateFromCache().then(() => fetchProducts());
 
+    // Smart cache policy: refresh when back online / visible / stale.
+    const unsubscribe = subscribeRevalidate(fetchProducts);
+
     // Subscribe to realtime changes
     const channel = supabase
       .channel('products-changes')
@@ -112,6 +116,7 @@ export function useProducts() {
 
     return () => {
       cancelled = true;
+      unsubscribe();
       supabase.removeChannel(channel);
     };
   }, [user]);
