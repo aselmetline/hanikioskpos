@@ -116,6 +116,10 @@ export function useSettings() {
     };
 
     fetchSettings();
+
+    // Smart cache policy: refresh when back online / visible / stale.
+    const unsubscribe = subscribeRevalidate(fetchSettings);
+    return () => unsubscribe();
   }, [user]);
 
   const updateSettings = useCallback(async (updates: Partial<AppSettings>) => {
