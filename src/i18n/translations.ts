@@ -522,6 +522,11 @@ export const translations = {
     syncFailed: { ar: 'تعذّرت مزامنة بعض المبيعات', fr: 'Échec de synchronisation de certaines ventes' },
     syncNow: { ar: 'مزامنة الآن', fr: 'Synchroniser' },
     syncing: { ar: 'جاري المزامنة...', fr: 'Synchronisation...' },
+    editQueued: { ar: 'تم حفظ التعديل محليًا — سيُزامن عند عودة الاتصال', fr: 'Modification enregistrée hors ligne — synchronisation à la reconnexion' },
+    editsSynced: { ar: 'تمت مزامنة تعديلات المنتجات', fr: 'Modifications des produits synchronisées' },
+    editsFailed: { ar: 'تعذّرت مزامنة بعض التعديلات', fr: 'Échec de synchronisation de certaines modifications' },
+    conflictsResolved: { ar: 'تم حل تعارضات مع أجهزة أخرى', fr: 'Conflits résolus avec d’autres appareils' },
+    conflictServerWins: { ar: 'اعتُمدت قيمة الخادم لأن جهازًا آخر عدّلها لاحقًا', fr: 'Valeur du serveur conservée : modifiée plus récemment ailleurs' },
   },
   // ===== Errors / hook messages =====
   errors: {

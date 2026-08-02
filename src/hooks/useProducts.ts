@@ -12,6 +12,29 @@ import {
   type OfflineStockDelta,
 } from '@/lib/offlineCache';
 import { subscribeRevalidate } from '@/lib/cacheRevalidate';
+import { enqueueMutation } from '@/lib/offlineMutations';
+import { isNetworkError } from '@/lib/offlineQueue';
+
+/** Captures the pre-edit values of the columns being changed (conflict baseline). */
+function snapshotBase(product: Product, dbUpdates: Record<string, unknown>) {
+  const map: Record<string, unknown> = {
+    name: product.name,
+    name_ar: product.nameAr,
+    price: product.price,
+    cost: product.cost ?? 0,
+    category: product.category,
+    barcode: product.barcode ?? null,
+    image_url: product.image ?? null,
+    stock: product.stock,
+    unit: product.unit,
+    low_stock_alert: product.lowStockAlert,
+    tax_rate: product.taxRate ?? 0.19,
+  };
+  const base: Record<string, unknown> = {};
+  Object.keys(dbUpdates).forEach(k => { base[k] = map[k]; });
+  base.stock = product.stock;
+  return base;
+}
 
 export function useProducts() {
   const { user } = useAuth();
@@ -21,6 +44,8 @@ export function useProducts() {
   const [loading, setLoading] = useState(true);
   const [offlineData, setOfflineData] = useState(false);
   const hydratedRef = useRef(false);
+  const productsRef = useRef<Product[]>([]);
+  productsRef.current = products;
 
   // Keep the offline cache in sync with whatever the sell screen is showing.
   useEffect(() => {
@@ -198,42 +223,101 @@ export function useProducts() {
     if (updates.taxRate !== undefined) dbUpdates.tax_rate = updates.taxRate;
 
 
+    const current = productsRef.current.find(p => p.id === id);
+    const base = current ? snapshotBase(current, dbUpdates) : {};
+    const stockDelta =
+      updates.stock !== undefined && current ? updates.stock - current.stock : 0;
+
+    const applyLocally = () =>
+      setProducts(prev => prev.map(p => (p.id === id ? { ...p, ...updates } : p)));
+
+    if (typeof navigator !== 'undefined' && !navigator.onLine && user) {
+      enqueueMutation({ userId: user.id, productId: id, kind: 'update', fields: dbUpdates, base, stockDelta });
+      applyLocally();
+      toast.info(tx('offline.editQueued'));
+      return;
+    }
+
     const { error } = await supabase
       .from('products')
       .update(dbUpdates)
       .eq('id', id);
 
     if (error) {
+      if (isNetworkError(error) && user) {
+        enqueueMutation({ userId: user.id, productId: id, kind: 'update', fields: dbUpdates, base, stockDelta });
+        applyLocally();
+        toast.info(tx('offline.editQueued'));
+        return;
+      }
       console.error('Error updating product:', error);
       toast.error(tx('errors.updateProduct'));
       return;
     }
 
-    setProducts(prev => prev.map(p => 
-      p.id === id ? { ...p, ...updates } : p
-    ));
-  }, []);
+    applyLocally();
+  }, [user]);
 
   const deleteProduct = useCallback(async (id: string) => {
+    const removeLocally = () => setProducts(prev => prev.filter(p => p.id !== id));
+
+    if (typeof navigator !== 'undefined' && !navigator.onLine && user) {
+      enqueueMutation({ userId: user.id, productId: id, kind: 'delete' });
+      removeLocally();
+      toast.info(tx('offline.editQueued'));
+      return;
+    }
+
     const { error } = await supabase
       .from('products')
       .delete()
       .eq('id', id);
 
     if (error) {
+      if (isNetworkError(error) && user) {
+        enqueueMutation({ userId: user.id, productId: id, kind: 'delete' });
+        removeLocally();
+        toast.info(tx('offline.editQueued'));
+        return;
+      }
       console.error('Error deleting product:', error);
       toast.error(tx('errors.deleteProduct'));
       return;
     }
 
-    setProducts(prev => prev.filter(p => p.id !== id));
-  }, []);
+    removeLocally();
+  }, [user]);
 
   const updateStock = useCallback(async (id: string, quantity: number, isAddition: boolean = false) => {
     const product = products.find(p => p.id === id);
     if (!product) return;
 
     const newStock = isAddition ? product.stock + quantity : Math.max(0, product.stock - quantity);
+    const stockDelta = newStock - product.stock;
+
+    const applyLocally = () =>
+      setProducts(prev => prev.map(p => (p.id === id ? { ...p, stock: newStock } : p)));
+
+    const queueOffline = () => {
+      if (!user) return;
+      // Stock is queued as a *delta* so concurrent changes from other devices
+      // are merged instead of overwritten at sync time.
+      enqueueMutation({
+        userId: user.id,
+        productId: id,
+        kind: 'stock',
+        fields: { stock: newStock },
+        base: { stock: product.stock },
+        stockDelta,
+      });
+      applyLocally();
+      toast.info(tx('offline.editQueued'));
+    };
+
+    if (typeof navigator !== 'undefined' && !navigator.onLine && user) {
+      queueOffline();
+      return;
+    }
 
     const { error } = await supabase
       .from('products')
@@ -241,14 +325,16 @@ export function useProducts() {
       .eq('id', id);
 
     if (error) {
+      if (isNetworkError(error) && user) {
+        queueOffline();
+        return;
+      }
       console.error('Error updating stock:', error);
       return;
     }
 
-    setProducts(prev => prev.map(p =>
-      p.id === id ? { ...p, stock: newStock } : p
-    ));
-  }, [products]);
+    applyLocally();
+  }, [products, user]);
 
   const lowStockProducts = useMemo(() => {
     return products.filter(p => p.stock <= p.lowStockAlert && p.lowStockAlert > 0);
