@@ -11,6 +11,7 @@ import {
   removeFromQueue,
   subscribeQueue,
 } from '@/lib/offlineQueue';
+import { triggerRevalidate } from '@/lib/cacheRevalidate';
 
 /**
  * Watches connectivity and replays sales that were recorded while offline.
