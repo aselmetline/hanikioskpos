@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { tx } from '@/i18n/t';
+import { readMutations } from '@/lib/offlineMutations';
 import {
   PendingSale,
   isNetworkError,
@@ -12,6 +13,8 @@ import {
   subscribeQueue,
 } from '@/lib/offlineQueue';
 import { triggerRevalidate } from '@/lib/cacheRevalidate';
+import { subscribeMutations, type PendingMutation } from '@/lib/offlineMutations';
+import { syncProductMutations } from '@/lib/offlineMutationSync';
 
 /**
  * Watches connectivity and replays sales that were recorded while offline.
@@ -24,14 +27,18 @@ export const useOfflineSync = () => {
   );
   const [syncing, setSyncing] = useState(false);
 
+  const [pendingMutations, setPendingMutations] = useState<PendingMutation[]>([]);
+
   useEffect(() => subscribeQueue(setPending), []);
+  useEffect(() => subscribeMutations(setPendingMutations), []);
 
   const sync = useCallback(async () => {
     if (!user) return;
     if (typeof navigator !== 'undefined' && !navigator.onLine) return;
 
     const queue = readQueue().filter((s) => s.userId === user.id);
-    if (queue.length === 0) return;
+    const mutations = readMutations().filter((m) => m.userId === user.id);
+    if (queue.length === 0 && mutations.length === 0) return;
 
     setSyncing(true);
     let synced = 0;
@@ -56,13 +63,30 @@ export const useOfflineSync = () => {
       synced++;
     }
 
+    // Replay product/stock edits made offline, merging with other devices' changes.
+    const mutationResult = await syncProductMutations(user.id);
+
     setSyncing(false);
     if (synced > 0) {
       toast.success(`${tx('offline.synced')} (${synced})`);
-      // Pull fresh server state (stock, points, balances) after replaying sales.
-      triggerRevalidate();
     }
     if (failed > 0) toast.error(`${tx('offline.syncFailed')} (${failed})`);
+    if (mutationResult.applied > 0) {
+      toast.success(`${tx('offline.editsSynced')} (${mutationResult.applied})`);
+    }
+    if (mutationResult.failed > 0) {
+      toast.error(`${tx('offline.editsFailed')} (${mutationResult.failed})`);
+    }
+    if (mutationResult.conflicts.length > 0) {
+      const serverWins = mutationResult.conflicts.filter((c) => c.winner === 'server').length;
+      toast.warning(`${tx('offline.conflictsResolved')} (${mutationResult.conflicts.length})`, {
+        description: serverWins > 0 ? tx('offline.conflictServerWins') : undefined,
+      });
+    }
+    if (synced > 0 || mutationResult.applied > 0 || mutationResult.conflicts.length > 0) {
+      // Pull fresh server state (stock, points, balances) after replaying.
+      triggerRevalidate();
+    }
   }, [user]);
 
   useEffect(() => {
@@ -89,7 +113,9 @@ export const useOfflineSync = () => {
   }, [sync]);
 
   return {
-    pendingCount: pending.filter((s) => !user || s.userId === user.id).length,
+    pendingCount:
+      pending.filter((s) => !user || s.userId === user.id).length +
+      pendingMutations.filter((m) => !user || m.userId === user.id).length,
     pendingSales: pending,
     isOnline,
     syncing,
