@@ -11,6 +11,7 @@ import {
   OFFLINE_STOCK_EVENT,
   type OfflineStockDelta,
 } from '@/lib/offlineCache';
+import { subscribeRevalidate } from '@/lib/cacheRevalidate';
 
 export function useProducts() {
   const { user } = useAuth();
