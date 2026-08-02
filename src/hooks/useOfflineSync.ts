@@ -56,7 +56,11 @@ export const useOfflineSync = () => {
     }
 
     setSyncing(false);
-    if (synced > 0) toast.success(`${tx('offline.synced')} (${synced})`);
+    if (synced > 0) {
+      toast.success(`${tx('offline.synced')} (${synced})`);
+      // Pull fresh server state (stock, points, balances) after replaying sales.
+      triggerRevalidate();
+    }
     if (failed > 0) toast.error(`${tx('offline.syncFailed')} (${failed})`);
   }, [user]);
 
