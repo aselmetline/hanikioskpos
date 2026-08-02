@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { fetchAllPaginated } from '@/lib/supabaseHelpers';
 import { tx } from '@/i18n/t';
 import { loadCache, saveCache } from '@/lib/offlineCache';
+import { subscribeRevalidate } from '@/lib/cacheRevalidate';
 import {
   buildBaseCustomerId,
   generateUniqueCustomerId,
