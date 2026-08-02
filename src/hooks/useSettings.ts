@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { tx } from '@/i18n/t';
 import { loadCache, saveCache } from '@/lib/offlineCache';
+import { subscribeRevalidate } from '@/lib/cacheRevalidate';
 
 export interface AppSettings {
   kioskName: string;
