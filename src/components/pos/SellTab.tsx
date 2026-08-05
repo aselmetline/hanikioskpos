@@ -8,7 +8,8 @@ import { CartSheet } from './CartSheet';
 import { LoadingState } from './LoadingState';
 import { BarcodeScanner } from './BarcodeScanner';
 import { useT } from '@/contexts/LanguageContext';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { toast } from 'sonner';
 
 interface SellTabProps {
   products: Product[];
