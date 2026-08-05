@@ -21,24 +21,35 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
   const [error, setError] = useState<string | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Guards against the camera emitting the same code many times per second.
+  const handledRef = useRef(false);
+  const lastScanRef = useRef<{ code: string; at: number } | null>(null);
+  const startingRef = useRef(false);
 
   useEffect(() => {
-    if (open && !isScanning) {
+    if (open) {
+      handledRef.current = false;
+      lastScanRef.current = null;
       startScanner();
+    } else {
+      stopScanner();
     }
 
     return () => {
       stopScanner();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const startScanner = async () => {
+    if (startingRef.current || scannerRef.current) return;
+    startingRef.current = true;
     try {
       setError(null);
-      
+
       // Wait for the container to be ready
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       if (!containerRef.current) return;
 
       const scanner = new Html5Qrcode('barcode-reader');
@@ -52,7 +63,17 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
           aspectRatio: 1.777,
         },
         (decodedText) => {
-          onScan(decodedText);
+          const code = decodedText.trim();
+          if (!code) return;
+          // Only accept the first successful read per dialog session,
+          // plus a 1.5s cooldown for the same code as a second guard.
+          const now = Date.now();
+          const last = lastScanRef.current;
+          if (handledRef.current) return;
+          if (last && last.code === code && now - last.at < 1500) return;
+          handledRef.current = true;
+          lastScanRef.current = { code, at: now };
+          onScan(code);
           stopScanner();
           onOpenChange(false);
         },
@@ -66,18 +87,21 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
       console.error('Error starting scanner:', err);
       setError(err.message || 'فشل في تشغيل الكاميرا');
       setIsScanning(false);
+    } finally {
+      startingRef.current = false;
     }
   };
 
   const stopScanner = async () => {
-    if (scannerRef.current && isScanning) {
-      try {
-        await scannerRef.current.stop();
-        scannerRef.current = null;
-        setIsScanning(false);
-      } catch (err) {
-        console.error('Error stopping scanner:', err);
-      }
+    const scanner = scannerRef.current;
+    scannerRef.current = null;
+    setIsScanning(false);
+    if (!scanner) return;
+    try {
+      await scanner.stop();
+      scanner.clear();
+    } catch (err) {
+      // Scanner may already be stopped; ignore.
     }
   };
 
@@ -85,6 +109,7 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
     stopScanner();
     onOpenChange(false);
   };
+
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>

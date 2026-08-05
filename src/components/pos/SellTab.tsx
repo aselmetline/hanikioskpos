@@ -8,7 +8,8 @@ import { CartSheet } from './CartSheet';
 import { LoadingState } from './LoadingState';
 import { BarcodeScanner } from './BarcodeScanner';
 import { useT } from '@/contexts/LanguageContext';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { toast } from 'sonner';
 
 interface SellTabProps {
   products: Product[];
@@ -81,15 +82,26 @@ export function SellTab({
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
 
+  const lastHandledRef = useRef<{ code: string; at: number } | null>(null);
+
   const handleBarcodeScan = (barcode: string) => {
-    const product = allProducts.find(p => p.barcode === barcode);
+    const code = barcode.trim();
+    if (!code) return;
+    // Ignore duplicate deliveries of the same barcode within 1.5s.
+    const now = Date.now();
+    const last = lastHandledRef.current;
+    if (last && last.code === code && now - last.at < 1500) return;
+    lastHandledRef.current = { code, at: now };
+
+    const product = allProducts.find(p => p.barcode === code);
     if (product) {
       onAddToCart(product);
+      toast.success(`${t('sell.productAddedToCart')}: ${product.nameAr || product.name}`);
     } else {
-      // Show toast or alert
-      console.log('Product not found:', barcode);
+      toast.error(t('sell.productNotFound'));
     }
   };
+
 
   return (
     <div className="flex flex-col h-full">
