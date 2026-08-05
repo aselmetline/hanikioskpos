@@ -135,6 +135,8 @@ export const translations = {
     noProducts: { ar: 'لا توجد منتجات', fr: 'Aucun produit' },
     outOfStock: { ar: 'نفذ المخزون', fr: 'Rupture de stock' },
     scanBarcode: { ar: 'مسح الباركود', fr: 'Scanner code-barres' },
+    productNotFound: { ar: 'لم يتم العثور على منتج بهذا الباركود', fr: 'Aucun produit avec ce code-barres' },
+    productAddedToCart: { ar: 'تمت إضافة المنتج للسلة', fr: 'Produit ajouté au panier' },
   },
 
   // ===== Inventory =====
