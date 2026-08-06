@@ -87,11 +87,12 @@ export function SellTab({
   const handleBarcodeScan = (barcode: string) => {
     const code = barcode.trim();
     if (!code) return;
-    // Ignore duplicate deliveries of the same barcode within 1.5s.
+    // Ignore duplicate deliveries of the same barcode within 3s.
     const now = Date.now();
     const last = lastHandledRef.current;
-    if (last && last.code === code && now - last.at < 1500) return;
+    if (last && last.code === code && now - last.at < 3000) return;
     lastHandledRef.current = { code, at: now };
+
 
     const product = allProducts.find(p => p.barcode === code);
     if (product) {
