@@ -432,7 +432,6 @@ export const translations = {
     period: { ar: 'الفترة', fr: 'Période' },
     vsPrevious: { ar: 'مقارنة بالفترة السابقة', fr: 'vs période précédente' },
     avgTicket: { ar: 'متوسط الفاتورة', fr: 'Panier moyen' },
-    invoicesCount: { ar: 'عدد الفواتير', fr: 'Nombre de factures' },
     topProducts: { ar: 'أفضل المنتجات مبيعًا', fr: 'Meilleures ventes' },
     peakHours: { ar: 'ساعات الذروة', fr: 'Heures de pointe' },
     salesVsCosts: { ar: 'المبيعات مقابل التكاليف', fr: 'Ventes vs coûts' },
