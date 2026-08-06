@@ -65,22 +65,28 @@ export function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeScannerPro
         (decodedText) => {
           const code = decodedText.trim();
           if (!code) return;
-          // Only accept the first successful read per dialog session,
-          // plus a 1.5s cooldown for the same code as a second guard.
-          const now = Date.now();
-          const last = lastScanRef.current;
+          // Accept only the first successful read per dialog session.
           if (handledRef.current) return;
-          if (last && last.code === code && now - last.at < 1500) return;
           handledRef.current = true;
-          lastScanRef.current = { code, at: now };
-          onScan(code);
+          lastScanRef.current = { code, at: Date.now() };
+
+          // Pause the camera SYNCHRONOUSLY so no further callbacks can fire
+          // while the async stop/teardown is in flight.
+          try {
+            scanner.pause(true);
+          } catch {
+            // Scanner may already be paused/stopped; ignore.
+          }
+
           stopScanner();
           onOpenChange(false);
+          onScan(code);
         },
         () => {
           // QR code scanning error (ignored - normal when no code in view)
         }
       );
+
 
       setIsScanning(true);
     } catch (err: any) {
