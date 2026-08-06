@@ -2,5 +2,6 @@
 export type { ExcelProduct, ProgressCallback } from './excel/types';
 export { exportProductsToExcel, parseExcelProducts, downloadSampleTemplate } from './excel/productExcel';
 export { exportSalesReport, exportExpensesReport } from './excel/reportExcel';
+export { exportFullReport } from './excel/fullReportExcel';
 export { exportFullBackup } from './excel/backupExport';
 export { importFullBackup } from './excel/backupImport';
