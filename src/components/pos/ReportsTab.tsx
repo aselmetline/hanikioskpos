@@ -204,10 +204,54 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
     toast.success(t('reportsX.expensesExported'));
   };
 
+  const summaryMessage = () =>
+    `📊 ${t('reportsX.pnlTitle')} - ${periodLabel}\n\n📅 ${format(today, 'dd/MM/yyyy')}\n\n💰 ${t('reportsX.sales')}: ${c.totalSales.toFixed(3)} ${CURRENCY}\n🧾 ${t('reportsX.invoicesCount')}: ${c.count}\n🎫 ${t('reportsX.avgTicket')}: ${c.avgTicket.toFixed(3)} ${CURRENCY}\n🛒 ${t('reportsX.purchases')}: ${c.totalPurchases.toFixed(3)} ${CURRENCY}\n📋 ${t('reportsX.expenses')}: ${c.totalExpenses.toFixed(3)} ${CURRENCY}\n\n${c.netProfit >= 0 ? '✅' : '❌'} ${t('reportsX.netProfit')}: ${c.netProfit.toFixed(3)} ${CURRENCY}\n📈 ${t('reportsX.profitMargin')}: ${profitMargin.toFixed(1)}%`;
+
   const handleShareWhatsApp = () => {
-    const message = `📊 ${t('reportsX.pnlTitle')} - ${periodLabel}\n\n📅 ${format(today, 'dd/MM/yyyy')}\n\n💰 ${t('reportsX.sales')}: ${c.totalSales.toFixed(3)} ${CURRENCY}\n🧾 ${t('reportsX.invoicesCount')}: ${c.count}\n🎫 ${t('reportsX.avgTicket')}: ${c.avgTicket.toFixed(3)} ${CURRENCY}\n🛒 ${t('reportsX.purchases')}: ${c.totalPurchases.toFixed(3)} ${CURRENCY}\n📋 ${t('reportsX.expenses')}: ${c.totalExpenses.toFixed(3)} ${CURRENCY}\n\n${c.netProfit >= 0 ? '✅' : '❌'} ${t('reportsX.netProfit')}: ${c.netProfit.toFixed(3)} ${CURRENCY}\n📈 ${t('reportsX.profitMargin')}: ${profitMargin.toFixed(1)}%`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(summaryMessage())}`, '_blank');
   };
+
+  const hasData = cur.sales.length > 0 || cur.purchases.length > 0 || cur.expenses.length > 0;
+
+  const pdfInput = () => ({
+    periodLabel,
+    rangeLabel: `${format(start, 'dd/MM/yyyy')} — ${format(end, 'dd/MM/yyyy')}`,
+    language: (language === 'ar' ? 'ar' : 'fr') as 'ar' | 'fr',
+    sales: cur.sales,
+    purchases: cur.purchases,
+    expenses: cur.expenses,
+  });
+
+  const handleExportPdf = async () => {
+    if (!hasData) { toast.error(t('reportsX.noDataExport')); return; }
+    setPdfBusy(true);
+    const id = toast.loading(t('reportsX.pdfGenerating'));
+    try {
+      await exportFullReportPdf(pdfInput());
+      toast.success(t('reportsX.pdfExported'), { id });
+    } catch {
+      toast.error(t('reportsX.pdfFailed'), { id });
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
+  const handleSharePdf = async () => {
+    if (!hasData) { toast.error(t('reportsX.noDataExport')); return; }
+    setPdfBusy(true);
+    const id = toast.loading(t('reportsX.pdfGenerating'));
+    try {
+      const result = await shareFullReportPdf(pdfInput(), summaryMessage());
+      if (result === 'shared') toast.success(t('reportsX.pdfShared'), { id });
+      else if (result === 'downloaded') toast.success(t('reportsX.pdfDownloadedShare'), { id });
+      else toast.dismiss(id);
+    } catch {
+      toast.error(t('reportsX.pdfFailed'), { id });
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
 
   const periods: { key: PeriodKey; label: string }[] = [
     { key: 'today', label: t('reportsX.today') },
