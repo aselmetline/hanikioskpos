@@ -58,6 +58,8 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
   const [period, setPeriod] = useState<PeriodKey>('today');
   const [customFrom, setCustomFrom] = useState<Date>(subDays(new Date(), 6));
   const [customTo, setCustomTo] = useState<Date>(new Date());
+  const [pdfBusy, setPdfBusy] = useState(false);
+
 
   const today = new Date();
 
