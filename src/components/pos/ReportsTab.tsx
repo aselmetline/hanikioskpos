@@ -274,9 +274,12 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
             {format(start, 'dd/MM/yyyy')} — {format(end, 'dd/MM/yyyy')}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 justify-end">
           <button onClick={handleExportFull} className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center" title={t('reportsX.exportFull')}>
             <FileSpreadsheet className="w-5 h-5 text-primary-foreground" />
+          </button>
+          <button onClick={handleExportPdf} disabled={pdfBusy} className="w-10 h-10 bg-destructive rounded-xl flex items-center justify-center disabled:opacity-60" title={t('reportsX.exportPdf')}>
+            {pdfBusy ? <Loader2 className="w-5 h-5 text-destructive-foreground animate-spin" /> : <FileText className="w-5 h-5 text-destructive-foreground" />}
           </button>
           <button onClick={handleExportSalesExcel} className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center" title={t('reportsX.exportSales')}>
             <Receipt className="w-5 h-5 text-secondary-foreground" />
@@ -284,10 +287,14 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
           <button onClick={handleExportExpensesExcel} className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center" title={t('reportsX.exportExpenses')}>
             <ShoppingBag className="w-5 h-5 text-secondary-foreground" />
           </button>
-          <button onClick={handleShareWhatsApp} className="w-10 h-10 bg-success rounded-xl flex items-center justify-center" title={t('common.share')}>
+          <button onClick={handleSharePdf} disabled={pdfBusy} className="h-10 px-3 bg-success rounded-xl flex items-center gap-1.5 text-xs font-semibold text-success-foreground disabled:opacity-60" title={t('reportsX.sharePdfWhatsApp')}>
+            <Share2 className="w-4 h-4" /> PDF
+          </button>
+          <button onClick={handleShareWhatsApp} className="w-10 h-10 bg-success/80 rounded-xl flex items-center justify-center" title={t('common.share')}>
             <Share2 className="w-5 h-5 text-success-foreground" />
           </button>
         </div>
+
       </div>
 
       {/* Flexible period selector */}
