@@ -6,12 +6,15 @@ import { useT } from '@/contexts/LanguageContext';
 interface ProductCardProps {
   product: Product;
   onAdd: (product: Product) => void;
+  /** Quantity of this product already in the cart */
+  inCart?: number;
 }
 
-export function ProductCard({ product, onAdd }: ProductCardProps) {
+export function ProductCard({ product, onAdd, inCart = 0 }: ProductCardProps) {
   const t = useT();
+  const remaining = Math.max(0, product.stock - inCart);
   const isLowStock = product.stock <= product.lowStockAlert && product.lowStockAlert > 0;
-  const isOutOfStock = product.stock === 0;
+  const isOutOfStock = remaining === 0;
 
   return (
     <button
@@ -38,9 +41,15 @@ export function ProductCard({ product, onAdd }: ProductCardProps) {
                   ? 'bg-warning/10 text-warning' 
                   : 'bg-success/10 text-success'
             }`}>
-              {isOutOfStock ? t('sell.outOfStock') : `${product.stock} ${product.unit}`}
+              {isOutOfStock ? t('sell.outOfStock') : `${t('sell.remaining')}: ${remaining} ${product.unit}`}
             </div>
           </div>
+
+          {inCart > 0 && (
+            <div className="mt-2 text-xs font-bold text-primary">
+              {t('sell.inCart')}: {inCart}
+            </div>
+          )}
         </div>
         
         {!isOutOfStock && (
