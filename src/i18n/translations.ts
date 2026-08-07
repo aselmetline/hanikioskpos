@@ -137,6 +137,10 @@ export const translations = {
     scanBarcode: { ar: 'مسح الباركود', fr: 'Scanner code-barres' },
     productNotFound: { ar: 'لم يتم العثور على منتج بهذا الباركود', fr: 'Aucun produit avec ce code-barres' },
     productAddedToCart: { ar: 'تمت إضافة المنتج للسلة', fr: 'Produit ajouté au panier' },
+    inCart: { ar: 'في السلة', fr: 'Dans le panier' },
+    remaining: { ar: 'المتبقي', fr: 'Restant' },
+    maxStockReached: { ar: 'الكمية تجاوزت المخزون المتاح', fr: 'Quantité supérieure au stock disponible' },
+    quantity: { ar: 'الكمية', fr: 'Quantité' },
   },
 
   // ===== Inventory =====

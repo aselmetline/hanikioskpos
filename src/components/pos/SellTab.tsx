@@ -137,6 +137,7 @@ export function SellTab({
                   key={product.id}
                   product={product}
                   onAdd={onAddToCart}
+                  inCart={cartItems.find(i => i.product.id === product.id)?.quantity ?? 0}
                 />
               ))}
             </div>
