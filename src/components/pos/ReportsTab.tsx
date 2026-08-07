@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   BarChart3, TrendingUp, TrendingDown, Banknote, CreditCard, Share2, ShoppingBag, Receipt,
-  ArrowUpRight, ArrowDownRight, FileSpreadsheet, Calendar as CalendarIcon, Clock, Package, Percent
+  ArrowUpRight, ArrowDownRight, FileSpreadsheet, Calendar as CalendarIcon, Clock, Package, Percent,
+  FileText, Loader2
 } from 'lucide-react';
+
 import { Sale, Purchase, Expense, EXPENSE_CATEGORIES } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,7 +25,9 @@ import {
 } from 'recharts';
 import { exportSalesReport, exportExpensesReport } from '@/utils/excelUtils';
 import { exportFullReport } from '@/utils/excel/fullReportExcel';
+import { exportFullReportPdf, shareFullReportPdf } from '@/utils/pdf/fullReportPdf';
 import { toast } from 'sonner';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { VatReport } from './reports/VatReport';
 
@@ -54,6 +58,8 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
   const [period, setPeriod] = useState<PeriodKey>('today');
   const [customFrom, setCustomFrom] = useState<Date>(subDays(new Date(), 6));
   const [customTo, setCustomTo] = useState<Date>(new Date());
+  const [pdfBusy, setPdfBusy] = useState(false);
+
 
   const today = new Date();
 
@@ -200,10 +206,54 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
     toast.success(t('reportsX.expensesExported'));
   };
 
+  const summaryMessage = () =>
+    `📊 ${t('reportsX.pnlTitle')} - ${periodLabel}\n\n📅 ${format(today, 'dd/MM/yyyy')}\n\n💰 ${t('reportsX.sales')}: ${c.totalSales.toFixed(3)} ${CURRENCY}\n🧾 ${t('reportsX.invoicesCount')}: ${c.count}\n🎫 ${t('reportsX.avgTicket')}: ${c.avgTicket.toFixed(3)} ${CURRENCY}\n🛒 ${t('reportsX.purchases')}: ${c.totalPurchases.toFixed(3)} ${CURRENCY}\n📋 ${t('reportsX.expenses')}: ${c.totalExpenses.toFixed(3)} ${CURRENCY}\n\n${c.netProfit >= 0 ? '✅' : '❌'} ${t('reportsX.netProfit')}: ${c.netProfit.toFixed(3)} ${CURRENCY}\n📈 ${t('reportsX.profitMargin')}: ${profitMargin.toFixed(1)}%`;
+
   const handleShareWhatsApp = () => {
-    const message = `📊 ${t('reportsX.pnlTitle')} - ${periodLabel}\n\n📅 ${format(today, 'dd/MM/yyyy')}\n\n💰 ${t('reportsX.sales')}: ${c.totalSales.toFixed(3)} ${CURRENCY}\n🧾 ${t('reportsX.invoicesCount')}: ${c.count}\n🎫 ${t('reportsX.avgTicket')}: ${c.avgTicket.toFixed(3)} ${CURRENCY}\n🛒 ${t('reportsX.purchases')}: ${c.totalPurchases.toFixed(3)} ${CURRENCY}\n📋 ${t('reportsX.expenses')}: ${c.totalExpenses.toFixed(3)} ${CURRENCY}\n\n${c.netProfit >= 0 ? '✅' : '❌'} ${t('reportsX.netProfit')}: ${c.netProfit.toFixed(3)} ${CURRENCY}\n📈 ${t('reportsX.profitMargin')}: ${profitMargin.toFixed(1)}%`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(summaryMessage())}`, '_blank');
   };
+
+  const hasData = cur.sales.length > 0 || cur.purchases.length > 0 || cur.expenses.length > 0;
+
+  const pdfInput = () => ({
+    periodLabel,
+    rangeLabel: `${format(start, 'dd/MM/yyyy')} — ${format(end, 'dd/MM/yyyy')}`,
+    language: (language === 'ar' ? 'ar' : 'fr') as 'ar' | 'fr',
+    sales: cur.sales,
+    purchases: cur.purchases,
+    expenses: cur.expenses,
+  });
+
+  const handleExportPdf = async () => {
+    if (!hasData) { toast.error(t('reportsX.noDataExport')); return; }
+    setPdfBusy(true);
+    const id = toast.loading(t('reportsX.pdfGenerating'));
+    try {
+      await exportFullReportPdf(pdfInput());
+      toast.success(t('reportsX.pdfExported'), { id });
+    } catch {
+      toast.error(t('reportsX.pdfFailed'), { id });
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
+  const handleSharePdf = async () => {
+    if (!hasData) { toast.error(t('reportsX.noDataExport')); return; }
+    setPdfBusy(true);
+    const id = toast.loading(t('reportsX.pdfGenerating'));
+    try {
+      const result = await shareFullReportPdf(pdfInput(), summaryMessage());
+      if (result === 'shared') toast.success(t('reportsX.pdfShared'), { id });
+      else if (result === 'downloaded') toast.success(t('reportsX.pdfDownloadedShare'), { id });
+      else toast.dismiss(id);
+    } catch {
+      toast.error(t('reportsX.pdfFailed'), { id });
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
 
   const periods: { key: PeriodKey; label: string }[] = [
     { key: 'today', label: t('reportsX.today') },
@@ -224,9 +274,12 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
             {format(start, 'dd/MM/yyyy')} — {format(end, 'dd/MM/yyyy')}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 justify-end">
           <button onClick={handleExportFull} className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center" title={t('reportsX.exportFull')}>
             <FileSpreadsheet className="w-5 h-5 text-primary-foreground" />
+          </button>
+          <button onClick={handleExportPdf} disabled={pdfBusy} className="w-10 h-10 bg-destructive rounded-xl flex items-center justify-center disabled:opacity-60" title={t('reportsX.exportPdf')}>
+            {pdfBusy ? <Loader2 className="w-5 h-5 text-destructive-foreground animate-spin" /> : <FileText className="w-5 h-5 text-destructive-foreground" />}
           </button>
           <button onClick={handleExportSalesExcel} className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center" title={t('reportsX.exportSales')}>
             <Receipt className="w-5 h-5 text-secondary-foreground" />
@@ -234,10 +287,14 @@ export function ReportsTab({ sales, purchases, expenses }: ReportsTabProps) {
           <button onClick={handleExportExpensesExcel} className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center" title={t('reportsX.exportExpenses')}>
             <ShoppingBag className="w-5 h-5 text-secondary-foreground" />
           </button>
-          <button onClick={handleShareWhatsApp} className="w-10 h-10 bg-success rounded-xl flex items-center justify-center" title={t('common.share')}>
+          <button onClick={handleSharePdf} disabled={pdfBusy} className="h-10 px-3 bg-success rounded-xl flex items-center gap-1.5 text-xs font-semibold text-success-foreground disabled:opacity-60" title={t('reportsX.sharePdfWhatsApp')}>
+            <Share2 className="w-4 h-4" /> PDF
+          </button>
+          <button onClick={handleShareWhatsApp} className="w-10 h-10 bg-success/80 rounded-xl flex items-center justify-center" title={t('common.share')}>
             <Share2 className="w-5 h-5 text-success-foreground" />
           </button>
         </div>
+
       </div>
 
       {/* Flexible period selector */}

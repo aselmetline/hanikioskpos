@@ -12,10 +12,11 @@ import jsPDF from 'jspdf';
 export async function exportElementToA4PDF(
   element: HTMLElement,
   fileName: string,
-  options?: { background?: string; scale?: number }
-) {
+  options?: { background?: string; scale?: number; returnBlob?: boolean }
+): Promise<Blob | void> {
   const scale = options?.scale ?? 2;
   const background = options?.background ?? '#FAFAF7';
+
 
   const canvas = await html2canvas(element, {
     scale,
@@ -55,5 +56,7 @@ export async function exportElementToA4PDF(
     pdf.addImage(imgData, 'PNG', 0, 0, pageWmm, imgHmm);
   }
 
+  if (options?.returnBlob) return pdf.output('blob');
   pdf.save(fileName);
+
 }
