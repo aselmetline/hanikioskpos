@@ -56,5 +56,7 @@ export async function exportElementToA4PDF(
     pdf.addImage(imgData, 'PNG', 0, 0, pageWmm, imgHmm);
   }
 
+  if (options?.returnBlob) return pdf.output('blob');
   pdf.save(fileName);
+
 }
