@@ -25,7 +25,9 @@ import {
 } from 'recharts';
 import { exportSalesReport, exportExpensesReport } from '@/utils/excelUtils';
 import { exportFullReport } from '@/utils/excel/fullReportExcel';
+import { exportFullReportPdf, shareFullReportPdf } from '@/utils/pdf/fullReportPdf';
 import { toast } from 'sonner';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { VatReport } from './reports/VatReport';
 
