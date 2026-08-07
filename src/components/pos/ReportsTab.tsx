@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   BarChart3, TrendingUp, TrendingDown, Banknote, CreditCard, Share2, ShoppingBag, Receipt,
-  ArrowUpRight, ArrowDownRight, FileSpreadsheet, Calendar as CalendarIcon, Clock, Package, Percent
+  ArrowUpRight, ArrowDownRight, FileSpreadsheet, Calendar as CalendarIcon, Clock, Package, Percent,
+  FileText, Loader2
 } from 'lucide-react';
+
 import { Sale, Purchase, Expense, EXPENSE_CATEGORIES } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
