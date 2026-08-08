@@ -60,7 +60,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
       toast.error(t('editProduct.nameRequired'));
       return;
     }
-    if (!formData.price || parseFloat(formData.price) <= 0) {
+    if (!isOpenPrice && (!formData.price || parseFloat(formData.price) <= 0)) {
       toast.error(t('editProduct.invalidPrice'));
       return;
     }
@@ -70,15 +70,17 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
       onUpdateProduct(product.id, {
         name: formData.name.trim() || formData.nameAr.trim(),
         nameAr: formData.nameAr.trim(),
-        price: parseFloat(formData.price),
+        price: isOpenPrice ? 0 : parseFloat(formData.price),
         cost: formData.cost ? parseFloat(formData.cost) : undefined,
         category: formData.category,
         barcode: formData.barcode.trim() || undefined,
-        stock: parseInt(formData.stock) || 0,
-        unit: formData.unit,
-        lowStockAlert: parseInt(formData.lowStockAlert) || 10,
+        stock: isOpenPrice ? 999999 : (parseInt(formData.stock) || 0),
+        unit: isOpenPrice ? 'دينار' : formData.unit,
+        lowStockAlert: isOpenPrice ? 0 : (parseInt(formData.lowStockAlert) || 10),
         taxRate: parseFloat(formData.taxRate),
+        isOpenPrice,
       });
+
       
       toast.success(t('editProduct.updated'));
       onOpenChange(false);
