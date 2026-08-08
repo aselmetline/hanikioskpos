@@ -222,6 +222,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          is_open_price: boolean
           low_stock_alert: number
           name: string
           name_ar: string
@@ -239,6 +240,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_open_price?: boolean
           low_stock_alert?: number
           name: string
           name_ar: string
@@ -256,6 +258,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_open_price?: boolean
           low_stock_alert?: number
           name?: string
           name_ar?: string
