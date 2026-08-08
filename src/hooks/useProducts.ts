@@ -204,6 +204,7 @@ export function useProducts() {
       unit: data.unit,
       lowStockAlert: data.low_stock_alert,
       taxRate: data.tax_rate != null ? Number(data.tax_rate) : 0.19,
+      isOpenPrice: !!data.is_open_price,
     };
 
     setProducts(prev => [newProduct, ...prev]);
@@ -224,6 +225,7 @@ export function useProducts() {
     if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
     if (updates.lowStockAlert !== undefined) dbUpdates.low_stock_alert = updates.lowStockAlert;
     if (updates.taxRate !== undefined) dbUpdates.tax_rate = updates.taxRate;
+    if (updates.isOpenPrice !== undefined) dbUpdates.is_open_price = updates.isOpenPrice;
 
 
     const current = productsRef.current.find(p => p.id === id);
