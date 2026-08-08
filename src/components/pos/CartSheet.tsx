@@ -194,52 +194,59 @@ export function CartSheet({
                 <div className="flex-1 min-w-0">
                   <h4 className="font-bold truncate">{item.product.nameAr}</h4>
                   <p className="text-sm text-muted-foreground">
-                    {item.product.price.toFixed(3)} × {item.quantity}
+                    {item.product.isOpenPrice
+                      ? `${t('sell.openPrice')} — ${item.product.price.toFixed(3)} ${CURRENCY}`
+                      : `${item.product.price.toFixed(3)} × ${item.quantity}`}
                   </p>
-                  <p className={`text-xs font-bold ${
-                    item.product.stock - item.quantity <= 0 ? 'text-destructive' : 'text-muted-foreground'
-                  }`}>
-                    {t('sell.remaining')}: {Math.max(0, item.product.stock - item.quantity)} {item.product.unit}
-                  </p>
+                  {!item.product.isOpenPrice && (
+                    <p className={`text-xs font-bold ${
+                      item.product.stock - item.quantity <= 0 ? 'text-destructive' : 'text-muted-foreground'
+                    }`}>
+                      {t('sell.remaining')}: {Math.max(0, item.product.stock - item.quantity)} {item.product.unit}
+                    </p>
+                  )}
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
-                    className="pos-quantity-btn bg-muted text-foreground"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    max={item.product.stock}
-                    value={item.quantity}
-                    onChange={(e) => {
-                      const raw = parseInt(e.target.value, 10);
-                      if (Number.isNaN(raw)) return;
-                      const qty = Math.max(1, Math.min(raw, item.product.stock || raw));
-                      onUpdateQuantity(item.product.id, qty);
-                    }}
-                    onFocus={(e) => e.currentTarget.select()}
-                    aria-label={t('sell.quantity')}
-                    className="w-14 h-9 text-center font-bold rounded-lg border border-border bg-background"
-                  />
-                  <button
-                    onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
-                    disabled={item.quantity >= item.product.stock}
-                    className="pos-quantity-btn bg-primary text-primary-foreground disabled:opacity-40"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
+                {!item.product.isOpenPrice && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
+                      className="pos-quantity-btn bg-muted text-foreground"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={item.product.stock}
+                      value={item.quantity}
+                      onChange={(e) => {
+                        const raw = parseInt(e.target.value, 10);
+                        if (Number.isNaN(raw)) return;
+                        const qty = Math.max(1, Math.min(raw, item.product.stock || raw));
+                        onUpdateQuantity(item.product.id, qty);
+                      }}
+                      onFocus={(e) => e.currentTarget.select()}
+                      aria-label={t('sell.quantity')}
+                      className="w-14 h-9 text-center font-bold rounded-lg border border-border bg-background"
+                    />
+                    <button
+                      onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
+                      disabled={item.quantity >= item.product.stock}
+                      className="pos-quantity-btn bg-primary text-primary-foreground disabled:opacity-40"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
                 
                 <div className="text-left min-w-[80px]">
                   <p className="font-bold text-success">
                     {(item.product.price * item.quantity).toFixed(3)}
                   </p>
                 </div>
+
                 
                 <button
                   onClick={() => onRemoveItem(item.product.id)}

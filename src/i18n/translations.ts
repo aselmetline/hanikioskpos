@@ -141,6 +141,11 @@ export const translations = {
     remaining: { ar: 'المتبقي', fr: 'Restant' },
     maxStockReached: { ar: 'الكمية تجاوزت المخزون المتاح', fr: 'Quantité supérieure au stock disponible' },
     quantity: { ar: 'الكمية', fr: 'Quantité' },
+    openPrice: { ar: 'مبلغ حر', fr: 'Montant libre' },
+    enterAmount: { ar: 'أدخل المبلغ بالدينار', fr: 'Saisir le montant en dinars' },
+    amount: { ar: 'المبلغ', fr: 'Montant' },
+    invalidAmount: { ar: 'المبلغ غير صالح', fr: 'Montant invalide' },
+    addAmount: { ar: 'إضافة المبلغ', fr: 'Ajouter le montant' },
   },
 
   // ===== Inventory =====

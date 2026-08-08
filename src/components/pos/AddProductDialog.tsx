@@ -3,6 +3,7 @@ import { X, Package, Barcode, DollarSign, Hash, AlertTriangle } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { categories } from '@/data/sampleData';
 import { toast } from 'sonner';
@@ -22,12 +23,14 @@ interface AddProductDialogProps {
     unit: string;
     lowStockAlert: number;
     taxRate?: number;
+    isOpenPrice?: boolean;
   }) => Promise<unknown>;
 }
 
 export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProductDialogProps) {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const [isOpenPrice, setIsOpenPrice] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     nameAr: '',
@@ -41,6 +44,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
     taxRate: '0.19',
   });
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -49,7 +53,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
       toast.error(t('inventory.productName'));
       return;
     }
-    if (!formData.price || parseFloat(formData.price) <= 0) {
+    if (!isOpenPrice && (!formData.price || parseFloat(formData.price) <= 0)) {
       toast.error(t('inventory.sellPrice'));
       return;
     }
@@ -59,19 +63,21 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
       await onAddProduct({
         name: formData.name.trim() || formData.nameAr.trim(),
         nameAr: formData.nameAr.trim(),
-        price: parseFloat(formData.price),
+        price: isOpenPrice ? 0 : parseFloat(formData.price),
         cost: formData.cost ? parseFloat(formData.cost) : undefined,
         category: formData.category,
         barcode: formData.barcode.trim() || undefined,
-        stock: parseInt(formData.stock) || 0,
-        unit: formData.unit,
-        lowStockAlert: parseInt(formData.lowStockAlert) || 10,
+        stock: isOpenPrice ? 999999 : (parseInt(formData.stock) || 0),
+        unit: isOpenPrice ? 'دينار' : formData.unit,
+        lowStockAlert: isOpenPrice ? 0 : (parseInt(formData.lowStockAlert) || 10),
         taxRate: parseFloat(formData.taxRate),
+        isOpenPrice,
       });
 
       toast.success('تم إضافة المنتج بنجاح');
 
       // Reset form
+      setIsOpenPrice(false);
       setFormData({
         name: '',
         nameAr: '',
@@ -84,6 +90,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
         lowStockAlert: '10',
         taxRate: '0.19',
       });
+
       
       onOpenChange(false);
     } catch (error) {
@@ -151,25 +158,38 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
             />
           </div>
 
+          {/* Open-price product toggle */}
+          <div className="flex items-center justify-between rounded-xl border border-border p-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="isOpenPrice">منتج بمبلغ حر / Montant libre</Label>
+              <p className="text-xs text-muted-foreground">
+                يُدخل البائع المبلغ بالدينار عند البيع (تعبئة رصيد، فواتير، خدمات)
+              </p>
+            </div>
+            <Switch id="isOpenPrice" checked={isOpenPrice} onCheckedChange={setIsOpenPrice} />
+          </div>
+
           {/* Price & Cost Row */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="price" className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                <span>{t('inventory.sellPrice')}</span>
-                <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.001"
-                min="0"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                placeholder="0.000"
-                dir="ltr"
-              />
-            </div>
+            {!isOpenPrice && (
+              <div className="space-y-2">
+                <Label htmlFor="price" className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  <span>{t('inventory.sellPrice')}</span>
+                  <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.001"
+                  min="0"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  placeholder="0.000"
+                  dir="ltr"
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="cost" className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
@@ -187,6 +207,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
               />
             </div>
           </div>
+
 
           {/* Category */}
           <div className="space-y-2">
@@ -227,7 +248,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
           </div>
 
           {/* Stock & Unit Row */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid grid-cols-2 gap-3 ${isOpenPrice ? 'hidden' : ''}`}>
             <div className="space-y-2">
               <Label htmlFor="stock" className="flex items-center gap-2">
                 <Hash className="w-4 h-4" />
@@ -284,7 +305,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
           </div>
 
           {/* Low Stock Alert */}
-          <div className="space-y-2">
+          <div className={`space-y-2 ${isOpenPrice ? 'hidden' : ''}`}>
             <Label htmlFor="lowStockAlert" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-warning" />
               <span>{t('inventory.lowStock')}</span>

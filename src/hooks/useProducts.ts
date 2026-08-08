@@ -29,6 +29,7 @@ function snapshotBase(product: Product, dbUpdates: Record<string, unknown>) {
     unit: product.unit,
     low_stock_alert: product.lowStockAlert,
     tax_rate: product.taxRate ?? 0.19,
+    is_open_price: product.isOpenPrice ?? false,
   };
   const base: Record<string, unknown> = {};
   Object.keys(dbUpdates).forEach(k => { base[k] = map[k]; });
@@ -120,6 +121,7 @@ export function useProducts() {
           unit: p.unit,
           lowStockAlert: p.low_stock_alert,
           taxRate: p.tax_rate != null ? Number(p.tax_rate) : 0.19,
+          isOpenPrice: !!p.is_open_price,
         })));
       }
       setLoading(false);
@@ -178,6 +180,7 @@ export function useProducts() {
         unit: product.unit,
         low_stock_alert: product.lowStockAlert,
         tax_rate: product.taxRate ?? 0.19,
+        is_open_price: product.isOpenPrice ?? false,
       })
       .select()
       .single();
@@ -201,6 +204,7 @@ export function useProducts() {
       unit: data.unit,
       lowStockAlert: data.low_stock_alert,
       taxRate: data.tax_rate != null ? Number(data.tax_rate) : 0.19,
+      isOpenPrice: !!data.is_open_price,
     };
 
     setProducts(prev => [newProduct, ...prev]);
@@ -221,6 +225,7 @@ export function useProducts() {
     if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
     if (updates.lowStockAlert !== undefined) dbUpdates.low_stock_alert = updates.lowStockAlert;
     if (updates.taxRate !== undefined) dbUpdates.tax_rate = updates.taxRate;
+    if (updates.isOpenPrice !== undefined) dbUpdates.is_open_price = updates.isOpenPrice;
 
 
     const current = productsRef.current.find(p => p.id === id);

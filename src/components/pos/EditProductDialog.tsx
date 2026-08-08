@@ -3,6 +3,7 @@ import { X, Package, Barcode, DollarSign, Hash, AlertTriangle } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { categories } from '@/data/sampleData';
 import { Product } from '@/types/pos';
@@ -19,6 +20,7 @@ interface EditProductDialogProps {
 export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct }: EditProductDialogProps) {
   const { t, dir, language } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const [isOpenPrice, setIsOpenPrice] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     nameAr: '',
@@ -34,6 +36,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
 
   useEffect(() => {
     if (product) {
+      setIsOpenPrice(!!product.isOpenPrice);
       setFormData({
         name: product.name || '',
         nameAr: product.nameAr || '',
@@ -49,6 +52,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
     }
   }, [product]);
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product) return;
@@ -57,7 +61,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
       toast.error(t('editProduct.nameRequired'));
       return;
     }
-    if (!formData.price || parseFloat(formData.price) <= 0) {
+    if (!isOpenPrice && (!formData.price || parseFloat(formData.price) <= 0)) {
       toast.error(t('editProduct.invalidPrice'));
       return;
     }
@@ -67,15 +71,17 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
       onUpdateProduct(product.id, {
         name: formData.name.trim() || formData.nameAr.trim(),
         nameAr: formData.nameAr.trim(),
-        price: parseFloat(formData.price),
+        price: isOpenPrice ? 0 : parseFloat(formData.price),
         cost: formData.cost ? parseFloat(formData.cost) : undefined,
         category: formData.category,
         barcode: formData.barcode.trim() || undefined,
-        stock: parseInt(formData.stock) || 0,
-        unit: formData.unit,
-        lowStockAlert: parseInt(formData.lowStockAlert) || 10,
+        stock: isOpenPrice ? 999999 : (parseInt(formData.stock) || 0),
+        unit: isOpenPrice ? 'دينار' : formData.unit,
+        lowStockAlert: isOpenPrice ? 0 : (parseInt(formData.lowStockAlert) || 10),
         taxRate: parseFloat(formData.taxRate),
+        isOpenPrice,
       });
+
       
       toast.success(t('editProduct.updated'));
       onOpenChange(false);
@@ -144,7 +150,17 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex items-center justify-between rounded-xl border border-border p-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="editIsOpenPrice">منتج بمبلغ حر / Montant libre</Label>
+              <p className="text-xs text-muted-foreground">
+                يُدخل البائع المبلغ بالدينار عند البيع
+              </p>
+            </div>
+            <Switch id="editIsOpenPrice" checked={isOpenPrice} onCheckedChange={setIsOpenPrice} />
+          </div>
+
+          <div className={`grid grid-cols-2 gap-3 ${isOpenPrice ? 'hidden' : ''}`}>
             <div className="space-y-2">
               <Label htmlFor="editPrice" className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
@@ -215,7 +231,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid grid-cols-2 gap-3 ${isOpenPrice ? 'hidden' : ''}`}>
             <div className="space-y-2">
               <Label htmlFor="editStock" className="flex items-center gap-2">
                 <Hash className="w-4 h-4" />
@@ -267,7 +283,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className={`space-y-2 ${isOpenPrice ? 'hidden' : ''}`}>
             <Label htmlFor="editLowStockAlert" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-warning" />
               <span>{t('editProduct.lowStockAlert')}</span>
