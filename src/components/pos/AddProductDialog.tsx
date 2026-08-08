@@ -52,7 +52,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
       toast.error(t('inventory.productName'));
       return;
     }
-    if (!formData.price || parseFloat(formData.price) <= 0) {
+    if (!isOpenPrice && (!formData.price || parseFloat(formData.price) <= 0)) {
       toast.error(t('inventory.sellPrice'));
       return;
     }
@@ -62,19 +62,21 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
       await onAddProduct({
         name: formData.name.trim() || formData.nameAr.trim(),
         nameAr: formData.nameAr.trim(),
-        price: parseFloat(formData.price),
+        price: isOpenPrice ? 0 : parseFloat(formData.price),
         cost: formData.cost ? parseFloat(formData.cost) : undefined,
         category: formData.category,
         barcode: formData.barcode.trim() || undefined,
-        stock: parseInt(formData.stock) || 0,
-        unit: formData.unit,
-        lowStockAlert: parseInt(formData.lowStockAlert) || 10,
+        stock: isOpenPrice ? 999999 : (parseInt(formData.stock) || 0),
+        unit: isOpenPrice ? 'دينار' : formData.unit,
+        lowStockAlert: isOpenPrice ? 0 : (parseInt(formData.lowStockAlert) || 10),
         taxRate: parseFloat(formData.taxRate),
+        isOpenPrice,
       });
 
       toast.success('تم إضافة المنتج بنجاح');
 
       // Reset form
+      setIsOpenPrice(false);
       setFormData({
         name: '',
         nameAr: '',
@@ -87,6 +89,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
         lowStockAlert: '10',
         taxRate: '0.19',
       });
+
       
       onOpenChange(false);
     } catch (error) {
