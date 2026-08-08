@@ -81,8 +81,27 @@ export function SellTab({
   const t = useT();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [openPriceProduct, setOpenPriceProduct] = useState<Product | null>(null);
 
   const lastHandledRef = useRef<{ code: string; at: number } | null>(null);
+
+  // Open-price products ask for the amount in TND before entering the cart.
+  const handleProductSelect = (product: Product) => {
+    if (product.isOpenPrice) {
+      setOpenPriceProduct(product);
+      return;
+    }
+    onAddToCart(product);
+  };
+
+  const handleOpenPriceConfirm = (amount: number) => {
+    if (!openPriceProduct) return;
+    const existing = cartItems.find(i => i.product.id === openPriceProduct.id);
+    const newAmount = (existing ? existing.product.price : 0) + amount;
+    if (existing) onRemoveItem(openPriceProduct.id);
+    onAddToCart({ ...openPriceProduct, price: newAmount });
+    setOpenPriceProduct(null);
+  };
 
   const handleBarcodeScan = (barcode: string) => {
     const code = barcode.trim();
@@ -96,12 +115,17 @@ export function SellTab({
 
     const product = allProducts.find(p => p.barcode === code);
     if (product) {
+      if (product.isOpenPrice) {
+        setOpenPriceProduct(product);
+        return;
+      }
       onAddToCart(product);
       toast.success(`${t('sell.productAddedToCart')}: ${product.nameAr || product.name}`);
     } else {
       toast.error(t('sell.productNotFound'));
     }
   };
+
 
 
   return (
