@@ -248,7 +248,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
           </div>
 
           {/* Stock & Unit Row */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid grid-cols-2 gap-3 ${isOpenPrice ? 'hidden' : ''}`}>
             <div className="space-y-2">
               <Label htmlFor="stock" className="flex items-center gap-2">
                 <Hash className="w-4 h-4" />
@@ -305,7 +305,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
           </div>
 
           {/* Low Stock Alert */}
-          <div className="space-y-2">
+          <div className={`space-y-2 ${isOpenPrice ? 'hidden' : ''}`}>
             <Label htmlFor="lowStockAlert" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-warning" />
               <span>{t('inventory.lowStock')}</span>
