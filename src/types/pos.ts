@@ -12,6 +12,9 @@ export interface Product {
   lowStockAlert: number;
   /** VAT rate as decimal (0, 0.07, 0.13, 0.19). Defaults to 0.19 (Tunisia) */
   taxRate?: number;
+  /** Open-price product: cashier types the amount in TND at sale time */
+  isOpenPrice?: boolean;
+
 }
 
 export interface CartItem {
