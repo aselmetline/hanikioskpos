@@ -29,6 +29,7 @@ function snapshotBase(product: Product, dbUpdates: Record<string, unknown>) {
     unit: product.unit,
     low_stock_alert: product.lowStockAlert,
     tax_rate: product.taxRate ?? 0.19,
+    is_open_price: product.isOpenPrice ?? false,
   };
   const base: Record<string, unknown> = {};
   Object.keys(dbUpdates).forEach(k => { base[k] = map[k]; });
@@ -120,6 +121,7 @@ export function useProducts() {
           unit: p.unit,
           lowStockAlert: p.low_stock_alert,
           taxRate: p.tax_rate != null ? Number(p.tax_rate) : 0.19,
+          isOpenPrice: !!p.is_open_price,
         })));
       }
       setLoading(false);
@@ -178,6 +180,7 @@ export function useProducts() {
         unit: product.unit,
         low_stock_alert: product.lowStockAlert,
         tax_rate: product.taxRate ?? 0.19,
+        is_open_price: product.isOpenPrice ?? false,
       })
       .select()
       .single();
