@@ -12,9 +12,10 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onAdd, inCart = 0 }: ProductCardProps) {
   const t = useT();
+  const isOpenPrice = !!product.isOpenPrice;
   const remaining = Math.max(0, product.stock - inCart);
-  const isLowStock = product.stock <= product.lowStockAlert && product.lowStockAlert > 0;
-  const isOutOfStock = remaining === 0;
+  const isLowStock = !isOpenPrice && product.stock <= product.lowStockAlert && product.lowStockAlert > 0;
+  const isOutOfStock = !isOpenPrice && remaining === 0;
 
   return (
     <button
@@ -31,19 +32,24 @@ export function ProductCard({ product, onAdd, inCart = 0 }: ProductCardProps) {
           
           <div className="mt-2 flex items-center justify-between">
             <span className="pos-price text-lg">
-              {product.price.toFixed(3)} {CURRENCY}
+              {isOpenPrice ? `— ${CURRENCY}` : `${product.price.toFixed(3)} ${CURRENCY}`}
             </span>
             
             <div className={`pos-badge ${
-              isOutOfStock 
-                ? 'bg-destructive/10 text-destructive' 
-                : isLowStock 
-                  ? 'bg-warning/10 text-warning' 
-                  : 'bg-success/10 text-success'
+              isOpenPrice
+                ? 'bg-primary/10 text-primary'
+                : isOutOfStock 
+                  ? 'bg-destructive/10 text-destructive' 
+                  : isLowStock 
+                    ? 'bg-warning/10 text-warning' 
+                    : 'bg-success/10 text-success'
             }`}>
-              {isOutOfStock ? t('sell.outOfStock') : `${t('sell.remaining')}: ${remaining} ${product.unit}`}
+              {isOpenPrice
+                ? t('sell.openPrice')
+                : isOutOfStock ? t('sell.outOfStock') : `${t('sell.remaining')}: ${remaining} ${product.unit}`}
             </div>
           </div>
+
 
           {inCart > 0 && (
             <div className="mt-2 text-xs font-bold text-primary">
