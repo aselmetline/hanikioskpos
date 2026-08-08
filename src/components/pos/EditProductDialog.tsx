@@ -19,6 +19,7 @@ interface EditProductDialogProps {
 export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct }: EditProductDialogProps) {
   const { t, dir, language } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const [isOpenPrice, setIsOpenPrice] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     nameAr: '',
@@ -34,6 +35,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
 
   useEffect(() => {
     if (product) {
+      setIsOpenPrice(!!product.isOpenPrice);
       setFormData({
         name: product.name || '',
         nameAr: product.nameAr || '',
@@ -48,6 +50,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
       });
     }
   }, [product]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
