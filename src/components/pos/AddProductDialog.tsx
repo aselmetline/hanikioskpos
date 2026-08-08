@@ -22,12 +22,14 @@ interface AddProductDialogProps {
     unit: string;
     lowStockAlert: number;
     taxRate?: number;
+    isOpenPrice?: boolean;
   }) => Promise<unknown>;
 }
 
 export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProductDialogProps) {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const [isOpenPrice, setIsOpenPrice] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     nameAr: '',
@@ -40,6 +42,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
     lowStockAlert: '10',
     taxRate: '0.19',
   });
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
