@@ -7,6 +7,7 @@ import { ProductCard } from './ProductCard';
 import { CartSheet } from './CartSheet';
 import { LoadingState } from './LoadingState';
 import { BarcodeScanner } from './BarcodeScanner';
+import { OpenAmountDialog } from './OpenAmountDialog';
 import { useT } from '@/contexts/LanguageContext';
 import { useState, useRef } from 'react';
 import { toast } from 'sonner';
@@ -160,7 +161,7 @@ export function SellTab({
                 <ProductCard
                   key={product.id}
                   product={product}
-                  onAdd={onAddToCart}
+                  onAdd={handleProductSelect}
                   inCart={cartItems.find(i => i.product.id === product.id)?.quantity ?? 0}
                 />
               ))}
@@ -224,6 +225,14 @@ export function SellTab({
         open={isScannerOpen}
         onOpenChange={setIsScannerOpen}
         onScan={handleBarcodeScan}
+      />
+
+      {/* Open-price amount entry */}
+      <OpenAmountDialog
+        open={!!openPriceProduct}
+        product={openPriceProduct}
+        onOpenChange={(o) => !o && setOpenPriceProduct(null)}
+        onConfirm={handleOpenPriceConfirm}
       />
     </div>
   );
