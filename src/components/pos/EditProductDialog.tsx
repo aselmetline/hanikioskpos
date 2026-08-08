@@ -3,6 +3,7 @@ import { X, Package, Barcode, DollarSign, Hash, AlertTriangle } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { categories } from '@/data/sampleData';
 import { Product } from '@/types/pos';
@@ -149,7 +150,17 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex items-center justify-between rounded-xl border border-border p-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="editIsOpenPrice">منتج بمبلغ حر / Montant libre</Label>
+              <p className="text-xs text-muted-foreground">
+                يُدخل البائع المبلغ بالدينار عند البيع
+              </p>
+            </div>
+            <Switch id="editIsOpenPrice" checked={isOpenPrice} onCheckedChange={setIsOpenPrice} />
+          </div>
+
+          <div className={`grid grid-cols-2 gap-3 ${isOpenPrice ? 'hidden' : ''}`}>
             <div className="space-y-2">
               <Label htmlFor="editPrice" className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
@@ -220,7 +231,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid grid-cols-2 gap-3 ${isOpenPrice ? 'hidden' : ''}`}>
             <div className="space-y-2">
               <Label htmlFor="editStock" className="flex items-center gap-2">
                 <Hash className="w-4 h-4" />
@@ -272,7 +283,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className={`space-y-2 ${isOpenPrice ? 'hidden' : ''}`}>
             <Label htmlFor="editLowStockAlert" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-warning" />
               <span>{t('editProduct.lowStockAlert')}</span>
