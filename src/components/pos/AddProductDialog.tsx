@@ -157,25 +157,38 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
             />
           </div>
 
+          {/* Open-price product toggle */}
+          <div className="flex items-center justify-between rounded-xl border border-border p-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="isOpenPrice">منتج بمبلغ حر / Montant libre</Label>
+              <p className="text-xs text-muted-foreground">
+                يُدخل البائع المبلغ بالدينار عند البيع (تعبئة رصيد، فواتير، خدمات)
+              </p>
+            </div>
+            <Switch id="isOpenPrice" checked={isOpenPrice} onCheckedChange={setIsOpenPrice} />
+          </div>
+
           {/* Price & Cost Row */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="price" className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                <span>{t('inventory.sellPrice')}</span>
-                <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.001"
-                min="0"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                placeholder="0.000"
-                dir="ltr"
-              />
-            </div>
+            {!isOpenPrice && (
+              <div className="space-y-2">
+                <Label htmlFor="price" className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  <span>{t('inventory.sellPrice')}</span>
+                  <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.001"
+                  min="0"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  placeholder="0.000"
+                  dir="ltr"
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="cost" className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
@@ -193,6 +206,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
               />
             </div>
           </div>
+
 
           {/* Category */}
           <div className="space-y-2">
