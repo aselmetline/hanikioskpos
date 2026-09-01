@@ -1,9 +1,9 @@
-import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck } from 'lucide-react';
+import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useT } from '@/contexts/LanguageContext';
 
-export type TabType = 'sell' | 'inventory' | 'purchases' | 'expenses' | 'customers' | 'suppliers' | 'reports' | 'queries' | 'cashbox' | 'settings';
+export type TabType = 'sell' | 'inventory' | 'purchases' | 'expenses' | 'customers' | 'suppliers' | 'reports' | 'queries' | 'transfers' | 'cashbox' | 'settings';
 interface BottomNavProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
@@ -20,6 +20,7 @@ export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavPr
     { id: 'cashbox' as TabType, icon: Wallet, label: t('nav.cashbox') },
     { id: 'customers' as TabType, icon: Users, label: t('nav.customers') },
     { id: 'suppliers' as TabType, icon: Truck, label: t('nav.suppliers') },
+    { id: 'transfers' as TabType, icon: ArrowLeftRight, label: t('nav.transfers') },
     { id: 'reports' as TabType, icon: BarChart3, label: t('nav.reports') },
     { id: 'queries' as TabType, icon: FileSearch, label: t('nav.queries') },
     { id: 'settings' as TabType, icon: Settings, label: t('nav.settings') },
