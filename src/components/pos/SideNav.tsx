@@ -1,4 +1,4 @@
-import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck } from 'lucide-react';
+import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useT } from '@/contexts/LanguageContext';
 import type { TabType } from './BottomNav';
@@ -19,6 +19,7 @@ export function SideNav({ activeTab, onTabChange, cartItemCount }: SideNavProps)
     { id: 'cashbox' as TabType, icon: Wallet, label: t('nav.cashbox') },
     { id: 'customers' as TabType, icon: Users, label: t('nav.customers') },
     { id: 'suppliers' as TabType, icon: Truck, label: t('nav.suppliers') },
+    { id: 'transfers' as TabType, icon: ArrowLeftRight, label: t('nav.transfers') },
     { id: 'reports' as TabType, icon: BarChart3, label: t('nav.reports') },
     { id: 'queries' as TabType, icon: FileSearch, label: t('nav.queries') },
     { id: 'settings' as TabType, icon: Settings, label: t('nav.settings') },

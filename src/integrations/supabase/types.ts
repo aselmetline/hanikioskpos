@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -154,6 +154,57 @@ export type Database = {
           description?: string | null
           expense_date?: string
           id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      internal_transfers: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          remainder_value: number
+          source_product_id: string | null
+          source_product_name: string
+          source_quantity: number
+          source_total_value: number
+          source_unit_value: number
+          target_product_id: string | null
+          target_product_name: string
+          target_quantity: number
+          target_unit_price: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          remainder_value?: number
+          source_product_id?: string | null
+          source_product_name?: string
+          source_quantity?: number
+          source_total_value?: number
+          source_unit_value?: number
+          target_product_id?: string | null
+          target_product_name?: string
+          target_quantity?: number
+          target_unit_price?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          remainder_value?: number
+          source_product_id?: string | null
+          source_product_name?: string
+          source_quantity?: number
+          source_total_value?: number
+          source_unit_value?: number
+          target_product_id?: string | null
+          target_product_name?: string
+          target_quantity?: number
+          target_unit_price?: number
           user_id?: string
         }
         Relationships: []
@@ -630,6 +681,15 @@ export type Database = {
         Returns: Json
       }
       next_invoice_number: { Args: { p_user_id: string }; Returns: number }
+      process_internal_transfer: {
+        Args: {
+          p_notes?: string
+          p_source_product_id: string
+          p_source_quantity: number
+          p_target_product_id: string
+        }
+        Returns: Json
+      }
       process_sale: {
         Args: {
           p_auto_add_to_cashbox?: boolean
