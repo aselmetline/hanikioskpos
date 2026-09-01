@@ -14,6 +14,7 @@ import CashBoxTab from '@/components/pos/CashBoxTab';
 import PurchasesTab from '@/components/pos/PurchasesTab';
 import ExpensesTab from '@/components/pos/ExpensesTab';
 import { QueriesTab } from '@/components/pos/QueriesTab';
+import { TransfersTab } from '@/components/pos/TransfersTab';
 import { SuppliersTab } from '@/components/pos/SuppliersTab';
 import { LowStockNotification } from '@/components/pos/LowStockNotification';
 import { useCart } from '@/hooks/useCart';
@@ -24,6 +25,7 @@ import { useCashBox } from '@/hooks/useCashBox';
 import { usePurchases } from '@/hooks/usePurchases';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useSales } from '@/hooks/useSales';
+import { useInternalTransfers } from '@/hooks/useInternalTransfers';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { Customer, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types/pos';
 import { toast } from 'sonner';
@@ -43,6 +45,7 @@ const Index = () => {
   const expensesHook = useExpenses();
   const salesHook = useSales();
   const suppliersHook = useSuppliers();
+  const transfersHook = useInternalTransfers();
 
   const handleCheckout = async (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => {
     if (cart.items.length === 0) return null;
@@ -235,6 +238,15 @@ const Index = () => {
             storePhone={settings.storePhone}
             storeAddress={[settings.storeAddressCity, settings.storeAddressArea, settings.storeAddressStreet].filter(Boolean).join('، ')}
             commercialRegister={settings.commercialRegister}
+          />
+        )}
+
+        {activeTab === 'transfers' && (
+          <TransfersTab
+            products={products.products}
+            transfers={transfersHook.transfers}
+            loading={transfersHook.loading}
+            onTransfer={transfersHook.createTransfer}
           />
         )}
 
