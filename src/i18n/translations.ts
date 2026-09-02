@@ -121,6 +121,24 @@ export const translations = {
     failed: { ar: 'فشل التحويل الداخلي', fr: 'Échec du transfert interne' },
     history: { ar: 'سجل التحويلات الداخلية', fr: 'Journal des transferts internes' },
     noHistory: { ar: 'لا توجد تحويلات بعد', fr: 'Aucun transfert pour le moment' },
+    calcOpen: { ar: 'حساب تحويلات', fr: 'Calculateur de transferts' },
+    calcTitle: { ar: 'حساب تحويلات داخلية تلقائي', fr: 'Calcul automatique des transferts internes' },
+    calcSubtitle: {
+      ar: 'اختر المنتج المصدر والكمية، وسيتم حساب الكميات الممكنة لكل منتج هدف تلقائياً',
+      fr: 'Choisissez le produit source et la quantité : les quantités possibles sont calculées automatiquement',
+    },
+    basis: { ar: 'أساس التقييم', fr: 'Base de valorisation' },
+    basisCost: { ar: 'سعر الشراء المخزّن', fr: 'Prix d’achat enregistré' },
+    basisMarket: { ar: 'سعر السوق (البيع)', fr: 'Prix du marché (vente)' },
+    basisNote: {
+      ar: 'ملاحظة: التنفيذ الفعلي يتم دائماً بسعر الشراء المخزّن.',
+      fr: 'Note : l’exécution réelle utilise toujours le prix d’achat enregistré.',
+    },
+    noCost: { ar: 'لا يوجد سعر شراء — تم استعمال سعر البيع', fr: 'Pas de prix d’achat — prix de vente utilisé' },
+    candidates: { ar: 'المنتجات الهدف الممكنة', fr: 'Produits cibles possibles' },
+    noCandidates: { ar: 'لا توجد نتائج قابلة للتحويل', fr: 'Aucun résultat convertible' },
+    apply: { ar: 'اعتماد', fr: 'Appliquer' },
+    searchTarget: { ar: 'بحث عن منتج هدف...', fr: 'Rechercher un produit cible...' },
   },
 
   // ===== Auth =====
