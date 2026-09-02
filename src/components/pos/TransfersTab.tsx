@@ -87,12 +87,18 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
 
   return (
     <div className="p-4 pb-28 space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center gap-2">
-        <ArrowLeftRight className="w-5 h-5 text-primary" />
-        <div>
-          <h2 className="text-lg font-bold">{t('transfers.title')}</h2>
-          <p className="text-xs text-muted-foreground">{t('transfers.subtitle')}</p>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <ArrowLeftRight className="w-5 h-5 text-primary" />
+          <div>
+            <h2 className="text-lg font-bold">{t('transfers.title')}</h2>
+            <p className="text-xs text-muted-foreground">{t('transfers.subtitle')}</p>
+          </div>
         </div>
+        <Button variant="outline" size="sm" onClick={() => setCalcOpen(true)}>
+          <Calculator className="w-4 h-4 me-2" />
+          {t('transfers.calcOpen')}
+        </Button>
       </div>
 
       {/* Form */}
@@ -105,7 +111,7 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
               <SelectContent className="max-h-72">
                 {products.map(p => (
                   <SelectItem key={p.id} value={p.id}>
-                    {(p.nameAr || p.name)} — {fmt(p.price)} ({t('transfers.available')}: {p.stock})
+                    {(p.nameAr || p.name)} — {fmt(costOf(p))} ({t('transfers.available')}: {p.stock})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -117,14 +123,15 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
             <Select value={targetId} onValueChange={setTargetId}>
               <SelectTrigger><SelectValue placeholder={t('transfers.selectProduct')} /></SelectTrigger>
               <SelectContent className="max-h-72">
-                {products.filter(p => p.id !== sourceId && p.price > 0).map(p => (
+                {products.filter(p => p.id !== sourceId && costOf(p) > 0).map(p => (
                   <SelectItem key={p.id} value={p.id}>
-                    {(p.nameAr || p.name)} — {fmt(p.price)}
+                    {(p.nameAr || p.name)} — {fmt(costOf(p))}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
 
           <div className="space-y-1.5">
             <Label>{t('transfers.quantity')}</Label>
