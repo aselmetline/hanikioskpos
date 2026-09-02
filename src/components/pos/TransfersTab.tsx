@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeftRight, Repeat, History, Coins } from 'lucide-react';
+import { ArrowLeftRight, Repeat, History, Coins, Calculator } from 'lucide-react';
 import { Product } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ import {
 import { useT } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import type { InternalTransfer } from '@/hooks/useInternalTransfers';
+import { TransfersCalculatorDialog } from './TransfersCalculatorDialog';
 
 interface TransfersTabProps {
   products: Product[];
@@ -41,6 +42,9 @@ interface TransfersTabProps {
 
 const fmt = (n: number) => `${n.toFixed(3)} ${CURRENCY}`;
 
+/** Internal transfers are valued at the stored purchase cost (falls back to price). */
+const costOf = (p: Product) => (p.cost && p.cost > 0 ? p.cost : p.price || 0);
+
 export function TransfersTab({ products, transfers, loading = false, onTransfer }: TransfersTabProps) {
   const t = useT();
   const [sourceId, setSourceId] = useState<string>('');
@@ -48,20 +52,23 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
   const [quantity, setQuantity] = useState<string>('1');
   const [notes, setNotes] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [calcOpen, setCalcOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const source = products.find(p => p.id === sourceId);
   const target = products.find(p => p.id === targetId);
   const qty = Math.floor(Number(quantity) || 0);
+  const sourceUnit = source ? costOf(source) : 0;
+  const targetUnit = target ? costOf(target) : 0;
 
-  // Dinar-based valuation: source value -> target units at target unit price.
+  // Dinar-based valuation: source value -> target units at target purchase cost.
   const preview = useMemo(() => {
-    if (!source || !target || qty <= 0 || target.price <= 0) return null;
-    const totalValue = Number((source.price * qty).toFixed(3));
-    const targetQty = Math.floor(totalValue / target.price);
-    const remainder = Number((totalValue - targetQty * target.price).toFixed(3));
+    if (!source || !target || qty <= 0 || targetUnit <= 0) return null;
+    const totalValue = Number((sourceUnit * qty).toFixed(3));
+    const targetQty = Math.floor(totalValue / targetUnit);
+    const remainder = Number((totalValue - targetQty * targetUnit).toFixed(3));
     return { totalValue, targetQty, remainder };
-  }, [source, target, qty]);
+  }, [source, target, qty, sourceUnit, targetUnit]);
 
   const canPreview =
     !!source && !!target && sourceId !== targetId && qty > 0 && qty <= (source?.stock ?? 0) && !!preview && preview.targetQty > 0;
@@ -81,12 +88,18 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
 
   return (
     <div className="p-4 pb-28 space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-center gap-2">
-        <ArrowLeftRight className="w-5 h-5 text-primary" />
-        <div>
-          <h2 className="text-lg font-bold">{t('transfers.title')}</h2>
-          <p className="text-xs text-muted-foreground">{t('transfers.subtitle')}</p>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <ArrowLeftRight className="w-5 h-5 text-primary" />
+          <div>
+            <h2 className="text-lg font-bold">{t('transfers.title')}</h2>
+            <p className="text-xs text-muted-foreground">{t('transfers.subtitle')}</p>
+          </div>
         </div>
+        <Button variant="outline" size="sm" onClick={() => setCalcOpen(true)}>
+          <Calculator className="w-4 h-4 me-2" />
+          {t('transfers.calcOpen')}
+        </Button>
       </div>
 
       {/* Form */}
@@ -99,7 +112,7 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
               <SelectContent className="max-h-72">
                 {products.map(p => (
                   <SelectItem key={p.id} value={p.id}>
-                    {(p.nameAr || p.name)} — {fmt(p.price)} ({t('transfers.available')}: {p.stock})
+                    {(p.nameAr || p.name)} — {fmt(costOf(p))} ({t('transfers.available')}: {p.stock})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -111,14 +124,15 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
             <Select value={targetId} onValueChange={setTargetId}>
               <SelectTrigger><SelectValue placeholder={t('transfers.selectProduct')} /></SelectTrigger>
               <SelectContent className="max-h-72">
-                {products.filter(p => p.id !== sourceId && p.price > 0).map(p => (
+                {products.filter(p => p.id !== sourceId && costOf(p) > 0).map(p => (
                   <SelectItem key={p.id} value={p.id}>
-                    {(p.nameAr || p.name)} — {fmt(p.price)}
+                    {(p.nameAr || p.name)} — {fmt(costOf(p))}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
 
           <div className="space-y-1.5">
             <Label>{t('transfers.quantity')}</Label>
@@ -155,10 +169,10 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
             </div>
             <Row label={t('transfers.source')} value={source.nameAr || source.name} />
             <Row label={t('transfers.quantity')} value={String(qty)} />
-            <Row label={t('transfers.sourceUnitValue')} value={fmt(source.price)} />
+            <Row label={t('transfers.sourceUnitValue')} value={fmt(sourceUnit)} />
             <Row label={t('transfers.sourceValue')} value={fmt(preview.totalValue)} bold />
             <Row label={t('transfers.target')} value={target.nameAr || target.name} />
-            <Row label={t('transfers.targetUnitPrice')} value={fmt(target.price)} />
+            <Row label={t('transfers.targetUnitPrice')} value={fmt(targetUnit)} />
             <Row label={t('transfers.resultQuantity')} value={String(preview.targetQty)} bold />
             <Row label={t('transfers.remainder')} value={fmt(preview.remainder)} />
             {preview.targetQty === 0 && (
@@ -229,6 +243,19 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <TransfersCalculatorDialog
+        open={calcOpen}
+        onOpenChange={setCalcOpen}
+        products={products}
+        defaultSourceId={sourceId}
+        defaultQuantity={qty || 1}
+        onApply={(sId, q, tId) => {
+          setSourceId(sId);
+          setQuantity(String(q));
+          setTargetId(tId);
+        }}
+      />
     </div>
   );
 }
