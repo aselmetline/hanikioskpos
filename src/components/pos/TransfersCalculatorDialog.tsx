@@ -152,7 +152,7 @@ export function TransfersCalculatorDialog({
                 <span className="font-bold text-primary">{fmt(totalValue)}</span>
               </div>
               {srcMissingCost && (
-                <p className="text-xs text-warning-foreground">{t('transfers.noCost')}</p>
+                <p className="text-xs text-warning">{t('transfers.noCost')}</p>
               )}
               {qty > source.stock && (
                 <p className="text-xs text-destructive">{t('transfers.insufficientStock')}</p>

@@ -41,6 +41,9 @@ interface TransfersTabProps {
 
 const fmt = (n: number) => `${n.toFixed(3)} ${CURRENCY}`;
 
+/** Internal transfers are valued at the stored purchase cost (falls back to price). */
+const costOf = (p: Product) => (p.cost && p.cost > 0 ? p.cost : p.price || 0);
+
 export function TransfersTab({ products, transfers, loading = false, onTransfer }: TransfersTabProps) {
   const t = useT();
   const [sourceId, setSourceId] = useState<string>('');
@@ -48,20 +51,23 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
   const [quantity, setQuantity] = useState<string>('1');
   const [notes, setNotes] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [calcOpen, setCalcOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const source = products.find(p => p.id === sourceId);
   const target = products.find(p => p.id === targetId);
   const qty = Math.floor(Number(quantity) || 0);
+  const sourceUnit = source ? costOf(source) : 0;
+  const targetUnit = target ? costOf(target) : 0;
 
-  // Dinar-based valuation: source value -> target units at target unit price.
+  // Dinar-based valuation: source value -> target units at target purchase cost.
   const preview = useMemo(() => {
-    if (!source || !target || qty <= 0 || target.price <= 0) return null;
-    const totalValue = Number((source.price * qty).toFixed(3));
-    const targetQty = Math.floor(totalValue / target.price);
-    const remainder = Number((totalValue - targetQty * target.price).toFixed(3));
+    if (!source || !target || qty <= 0 || targetUnit <= 0) return null;
+    const totalValue = Number((sourceUnit * qty).toFixed(3));
+    const targetQty = Math.floor(totalValue / targetUnit);
+    const remainder = Number((totalValue - targetQty * targetUnit).toFixed(3));
     return { totalValue, targetQty, remainder };
-  }, [source, target, qty]);
+  }, [source, target, qty, sourceUnit, targetUnit]);
 
   const canPreview =
     !!source && !!target && sourceId !== targetId && qty > 0 && qty <= (source?.stock ?? 0) && !!preview && preview.targetQty > 0;
