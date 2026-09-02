@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeftRight, Repeat, History, Coins } from 'lucide-react';
+import { ArrowLeftRight, Repeat, History, Coins, Calculator } from 'lucide-react';
 import { Product } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { Button } from '@/components/ui/button';
