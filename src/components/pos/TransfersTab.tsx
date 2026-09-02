@@ -26,6 +26,7 @@ import {
 import { useT } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import type { InternalTransfer } from '@/hooks/useInternalTransfers';
+import { TransfersCalculatorDialog } from './TransfersCalculatorDialog';
 
 interface TransfersTabProps {
   products: Product[];
@@ -168,10 +169,10 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
             </div>
             <Row label={t('transfers.source')} value={source.nameAr || source.name} />
             <Row label={t('transfers.quantity')} value={String(qty)} />
-            <Row label={t('transfers.sourceUnitValue')} value={fmt(source.price)} />
+            <Row label={t('transfers.sourceUnitValue')} value={fmt(sourceUnit)} />
             <Row label={t('transfers.sourceValue')} value={fmt(preview.totalValue)} bold />
             <Row label={t('transfers.target')} value={target.nameAr || target.name} />
-            <Row label={t('transfers.targetUnitPrice')} value={fmt(target.price)} />
+            <Row label={t('transfers.targetUnitPrice')} value={fmt(targetUnit)} />
             <Row label={t('transfers.resultQuantity')} value={String(preview.targetQty)} bold />
             <Row label={t('transfers.remainder')} value={fmt(preview.remainder)} />
             {preview.targetQty === 0 && (
@@ -242,6 +243,19 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <TransfersCalculatorDialog
+        open={calcOpen}
+        onOpenChange={setCalcOpen}
+        products={products}
+        defaultSourceId={sourceId}
+        defaultQuantity={qty || 1}
+        onApply={(sId, q, tId) => {
+          setSourceId(sId);
+          setQuantity(String(q));
+          setTargetId(tId);
+        }}
+      />
     </div>
   );
 }
