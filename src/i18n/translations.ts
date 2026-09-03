@@ -139,6 +139,11 @@ export const translations = {
     noCandidates: { ar: 'لا توجد نتائج قابلة للتحويل', fr: 'Aucun résultat convertible' },
     apply: { ar: 'اعتماد', fr: 'Appliquer' },
     searchTarget: { ar: 'بحث عن منتج هدف...', fr: 'Rechercher un produit cible...' },
+    productBalance: { ar: 'رصيد كل منتج من التحويلات', fr: 'Solde des transferts par produit' },
+    outQty: { ar: 'الكمية الصادرة', fr: 'Quantité sortie' },
+    inQty: { ar: 'الكمية الواردة', fr: 'Quantité entrée' },
+    netQty: { ar: 'الصافي', fr: 'Net' },
+    currentStock: { ar: 'المخزون الحالي', fr: 'Stock actuel' },
   },
 
   // ===== Auth =====
@@ -323,6 +328,7 @@ export const translations = {
     supplierDebts: { ar: 'ديون الموردين', fr: 'Dettes fournisseurs' },
     cashBox: { ar: 'الصندوق', fr: 'Caisse' },
     storeActivity: { ar: 'نشاط المتجر', fr: "Activité du magasin" },
+    transfers: { ar: 'التحويلات الداخلية', fr: 'Transferts internes' },
     totalRevenue: { ar: 'إجمالي الإيرادات', fr: 'Revenu total' },
     totalProfit: { ar: 'إجمالي الربح', fr: 'Bénéfice total' },
     salesCount: { ar: 'عدد المبيعات', fr: 'Nombre de ventes' },
