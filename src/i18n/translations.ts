@@ -344,7 +344,20 @@ export const translations = {
   queries: {
     title: { ar: 'الاستعلامات', fr: 'Requêtes' },
     searchPlaceholder: { ar: 'بحث في جميع البيانات...', fr: 'Rechercher dans toutes les données...' },
+    searchReports: { ar: 'ابحث عن تقرير...', fr: 'Rechercher un rapport...' },
+    noResults: { ar: 'لا توجد نتائج مطابقة', fr: 'Aucun résultat correspondant' },
+    favorites: { ar: 'المفضلة', fr: 'Favoris' },
+    today: { ar: 'اليوم', fr: "Aujourd'hui" },
+    yesterday: { ar: 'أمس', fr: 'Hier' },
+    last7: { ar: 'آخر 7 أيام', fr: '7 derniers jours' },
+    thisMonth: { ar: 'هذا الشهر', fr: 'Ce mois' },
+    lastMonth: { ar: 'الشهر الماضي', fr: 'Mois dernier' },
+    thisYear: { ar: 'هذه السنة', fr: 'Cette année' },
+    custom: { ar: 'مخصص', fr: 'Personnalisé' },
+    quickStats: { ar: 'ملخص الفترة', fr: 'Résumé de la période' },
+    reportsCount: { ar: 'تقرير متاح', fr: 'rapports disponibles' },
   },
+
 
   // ===== Settings =====
   settings: {
