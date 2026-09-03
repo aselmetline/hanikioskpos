@@ -328,6 +328,7 @@ export const translations = {
     supplierDebts: { ar: 'ديون الموردين', fr: 'Dettes fournisseurs' },
     cashBox: { ar: 'الصندوق', fr: 'Caisse' },
     storeActivity: { ar: 'نشاط المتجر', fr: "Activité du magasin" },
+    transfers: { ar: 'التحويلات الداخلية', fr: 'Transferts internes' },
     totalRevenue: { ar: 'إجمالي الإيرادات', fr: 'Revenu total' },
     totalProfit: { ar: 'إجمالي الربح', fr: 'Bénéfice total' },
     salesCount: { ar: 'عدد المبيعات', fr: 'Nombre de ventes' },

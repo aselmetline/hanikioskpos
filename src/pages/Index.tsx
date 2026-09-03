@@ -296,6 +296,8 @@ const Index = () => {
             customers={customers.customers}
             cashBoxBalance={cashBox.balance}
             suppliers={suppliersHook.suppliers}
+            transfers={transfersHook.transfers}
+            products={products.products}
           />
         )}
 

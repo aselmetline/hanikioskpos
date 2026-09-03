@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { Sale, Purchase, Expense, CashBoxTransaction, Customer } from '@/types/pos';
+import { Sale, Purchase, Expense, CashBoxTransaction, Customer, Product } from '@/types/pos';
 import { Supplier } from '@/hooks/useSuppliers';
+import type { InternalTransfer } from '@/hooks/useInternalTransfers';
 import {
   SalesReport,
   ProfitsReport,
@@ -17,7 +18,8 @@ import {
   ExpensesReport,
   CashBoxReport,
   StoreActivityReport,
-  SuppliersReport
+  SuppliersReport,
+  TransfersReport
 } from './reports';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -40,6 +42,8 @@ interface QueriesTabProps {
   customers?: Customer[];
   cashBoxBalance?: number;
   suppliers?: Supplier[];
+  transfers?: InternalTransfer[];
+  products?: Product[];
 }
 
 export function QueriesTab({ 
@@ -49,7 +53,9 @@ export function QueriesTab({
   transactions = [],
   customers = [],
   cashBoxBalance = 0,
-  suppliers = []
+  suppliers = [],
+  transfers = [],
+  products = []
 }: QueriesTabProps) {
   const { t } = useLanguage();
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
@@ -99,6 +105,13 @@ export function QueriesTab({
       title: t('cashbox.title'),
       items: [
         { id: 'cashbox-activity', label: t('reports.cashBox') },
+      ],
+    },
+    {
+      id: 'transfers',
+      title: t('reports.transfers'),
+      items: [
+        { id: 'transfers-report', label: t('reports.transfers') },
       ],
     },
     {
@@ -187,6 +200,15 @@ export function QueriesTab({
           <CashBoxReport
             transactions={transactions}
             balance={cashBoxBalance}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+          />
+        );
+      case 'transfers-report':
+        return (
+          <TransfersReport
+            transfers={transfers}
+            products={products}
             dateFrom={dateFrom}
             dateTo={dateTo}
           />

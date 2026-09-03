@@ -8,3 +8,4 @@ export { StoreActivityReport } from './StoreActivityReport';
 export { SuppliersReport } from './SuppliersReport';
 export { VatReport } from './VatReport';
 
+export { TransfersReport } from './TransfersReport';
