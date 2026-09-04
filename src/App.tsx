@@ -93,8 +93,11 @@ const App = () => (
           <LanguageProvider>
             <AuthProvider>
               <ErrorBoundary>
-                <AppRoutes />
+                <BootSplash>
+                  <AppRoutes />
+                </BootSplash>
               </ErrorBoundary>
+
             </AuthProvider>
           </LanguageProvider>
         </BrowserRouter>
