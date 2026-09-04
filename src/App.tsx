@@ -8,24 +8,34 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { SplashScreen } from "@/components/SplashScreen";
+import { useEffect, useState } from "react";
 
 
 const queryClient = new QueryClient();
+
+function BootSplash({ children }: { children: React.ReactNode }) {
+  const [booting, setBooting] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setBooting(false), 1600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <>
+      {booting && <SplashScreen />}
+      {children}
+    </>
+  );
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
-          <p className="text-muted-foreground">جاري التحميل...</p>
-        </div>
-      </div>
-    );
+    return <SplashScreen message="جاري التحميل..." />;
   }
 
   if (!user) {
@@ -39,14 +49,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
-          <p className="text-muted-foreground">جاري التحميل...</p>
-        </div>
-      </div>
-    );
+    return <SplashScreen message="جاري التحميل..." />;
   }
 
   if (user) {
@@ -55,6 +58,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+
 
 const AppRoutes = () => (
   <Routes>
@@ -89,8 +93,11 @@ const App = () => (
           <LanguageProvider>
             <AuthProvider>
               <ErrorBoundary>
-                <AppRoutes />
+                <BootSplash>
+                  <AppRoutes />
+                </BootSplash>
               </ErrorBoundary>
+
             </AuthProvider>
           </LanguageProvider>
         </BrowserRouter>

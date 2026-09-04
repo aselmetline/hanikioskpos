@@ -238,7 +238,13 @@
     animation: scale-in 0.2s ease-out;
   }
 
+  @keyframes splash-bar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+
   @keyframes slide-down {
+
     from {
       transform: translateY(-100%);
       opacity: 0;

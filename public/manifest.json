@@ -4,14 +4,25 @@
   "description": "نظام نقاط بيع سريع لكشك هاني",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F8FAFC",
+  "background_color": "#1E40AF",
   "theme_color": "#1E40AF",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64",
-      "type": "image/x-icon"
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "categories": ["business", "productivity"],
