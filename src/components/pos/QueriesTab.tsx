@@ -220,8 +220,9 @@ export function QueriesTab({
       .filter(p => inRange(new Date(p.invoiceDate ?? p.createdAt)))
       .reduce((sum, p) => sum + p.total, 0);
     const expensesTotal = expenses
-      .filter(e => inRange(new Date(e.expenseDate ?? e.createdAt)))
+      .filter(e => inRange(new Date(e.date ?? e.createdAt)))
       .reduce((sum, e) => sum + e.amount, 0);
+
     return { salesTotal, salesCount, purchasesTotal, expensesTotal };
   }, [sales, purchases, expenses, dateFrom, dateTo]);
 
