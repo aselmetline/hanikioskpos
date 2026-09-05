@@ -41,6 +41,7 @@ export const translations = {
     all: { ar: 'الكل', fr: 'Tout' },
     none: { ar: 'لا يوجد', fr: 'Aucun' },
     back: { ar: 'رجوع', fr: 'Retour' },
+    saved: { ar: 'تم الحفظ', fr: 'Enregistré' },
     next: { ar: 'التالي', fr: 'Suivant' },
     previous: { ar: 'السابق', fr: 'Précédent' },
     today: { ar: 'اليوم', fr: "Aujourd'hui" },
