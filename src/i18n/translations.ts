@@ -41,6 +41,7 @@ export const translations = {
     all: { ar: 'الكل', fr: 'Tout' },
     none: { ar: 'لا يوجد', fr: 'Aucun' },
     back: { ar: 'رجوع', fr: 'Retour' },
+    saved: { ar: 'تم الحفظ', fr: 'Enregistré' },
     next: { ar: 'التالي', fr: 'Suivant' },
     previous: { ar: 'السابق', fr: 'Précédent' },
     today: { ar: 'اليوم', fr: "Aujourd'hui" },
@@ -93,6 +94,21 @@ export const translations = {
     queries: { ar: 'استعلامات', fr: 'Requêtes' },
     transfers: { ar: 'تحويلات', fr: 'Transferts' },
     settings: { ar: 'إعدادات', fr: 'Paramètres' },
+    users: { ar: 'المستخدمون', fr: 'Utilisateurs' },
+  },
+
+  // ===== Users management =====
+  users: {
+    title: { ar: 'إدارة المستخدمين', fr: 'Gestion des utilisateurs' },
+    noAccess: { ar: 'هذه الصفحة متاحة للمدير فقط', fr: 'Page réservée à l’administrateur' },
+    empty: { ar: 'لا يوجد مستخدمون', fr: 'Aucun utilisateur' },
+    you: { ar: 'أنت', fr: 'Vous' },
+    cannotRemoveSelf: { ar: 'لا يمكنك إزالة صلاحية المدير عن نفسك', fr: 'Vous ne pouvez pas retirer votre propre rôle admin' },
+    role: {
+      admin: { ar: 'مدير', fr: 'Administrateur' },
+      manager: { ar: 'مشرف', fr: 'Superviseur' },
+      cashier: { ar: 'أمين صندوق', fr: 'Caissier' },
+    },
   },
 
   // ===== Internal transfers =====

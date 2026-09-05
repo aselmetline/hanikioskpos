@@ -1,6 +1,8 @@
-import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight } from 'lucide-react';
+import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight, UserCog } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useT } from '@/contexts/LanguageContext';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import type { TabType } from './BottomNav';
 
 interface SideNavProps {
@@ -11,6 +13,8 @@ interface SideNavProps {
 
 export function SideNav({ activeTab, onTabChange, cartItemCount }: SideNavProps) {
   const t = useT();
+  const { isAdmin } = useUserRoles();
+
   const tabs = [
     { id: 'sell' as TabType, icon: ShoppingCart, label: t('nav.sell') },
     { id: 'inventory' as TabType, icon: Package, label: t('nav.inventory') },
@@ -54,6 +58,15 @@ export function SideNav({ activeTab, onTabChange, cartItemCount }: SideNavProps)
             </button>
           );
         })}
+        {isAdmin && (
+          <Link
+            to="/users"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-start text-muted-foreground hover:bg-secondary"
+          >
+            <UserCog className="w-5 h-5" />
+            <span className="text-sm">{t('nav.users')}</span>
+          </Link>
+        )}
       </div>
     </nav>
   );

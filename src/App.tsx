@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import UsersPage from "./pages/Users";
 import NotFound from "./pages/NotFound";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SplashScreen } from "@/components/SplashScreen";
@@ -71,6 +72,14 @@ const AppRoutes = () => (
       }
     />
     <Route
+      path="/users"
+      element={
+        <ProtectedRoute>
+          <UsersPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
       path="/auth"
       element={
         <PublicRoute>
@@ -80,6 +89,7 @@ const AppRoutes = () => (
     />
     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
     <Route path="*" element={<NotFound />} />
+
   </Routes>
 );
 

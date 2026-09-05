@@ -1,7 +1,9 @@
-import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight } from 'lucide-react';
+import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight, UserCog } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useT } from '@/contexts/LanguageContext';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 export type TabType = 'sell' | 'inventory' | 'purchases' | 'expenses' | 'customers' | 'suppliers' | 'reports' | 'queries' | 'transfers' | 'cashbox' | 'settings';
 interface BottomNavProps {
@@ -12,6 +14,8 @@ interface BottomNavProps {
 
 export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavProps) {
   const t = useT();
+  const { isAdmin } = useUserRoles();
+
   const tabs = [
     { id: 'sell' as TabType, icon: ShoppingCart, label: t('nav.sell') },
     { id: 'inventory' as TabType, icon: Package, label: t('nav.inventory') },
@@ -62,6 +66,15 @@ export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavPr
               </button>
             );
           })}
+          {isAdmin && (
+            <Link
+              to="/users"
+              className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-200 min-w-[60px] flex-shrink-0 text-muted-foreground hover:bg-secondary active:scale-95"
+            >
+              <UserCog className="w-5 h-5" />
+              <span className="text-[10px] font-medium leading-tight">{t('nav.users')}</span>
+            </Link>
+          )}
         </div>
         <ScrollBar orientation="horizontal" className="h-1" />
       </ScrollArea>
