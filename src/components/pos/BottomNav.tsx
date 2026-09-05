@@ -1,7 +1,9 @@
-import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight } from 'lucide-react';
+import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight, UserCog } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useT } from '@/contexts/LanguageContext';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 export type TabType = 'sell' | 'inventory' | 'purchases' | 'expenses' | 'customers' | 'suppliers' | 'reports' | 'queries' | 'transfers' | 'cashbox' | 'settings';
 interface BottomNavProps {
