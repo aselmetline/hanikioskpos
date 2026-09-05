@@ -14,6 +14,8 @@ interface BottomNavProps {
 
 export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavProps) {
   const t = useT();
+  const { isAdmin } = useUserRoles();
+
   const tabs = [
     { id: 'sell' as TabType, icon: ShoppingCart, label: t('nav.sell') },
     { id: 'inventory' as TabType, icon: Package, label: t('nav.inventory') },
