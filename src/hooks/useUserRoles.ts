@@ -10,6 +10,16 @@ export interface ManagedUser {
   phone: string | null;
   createdAt: string;
   roles: AppRole[];
+  email?: string | null;
+  confirmed?: boolean;
+  lastSignInAt?: string | null;
+}
+
+export interface InviteInput {
+  email: string;
+  displayName: string;
+  phone?: string;
+  roles: AppRole[];
 }
 
 export function useUserRoles() {
@@ -43,12 +53,25 @@ export function useUserRoles() {
       supabase.from('user_roles').select('user_id, role'),
     ]);
 
+    let authInfo: Record<string, { email: string | null; confirmed: boolean; lastSignInAt: string | null }> = {};
+    try {
+      const { data: fnData } = await supabase.functions.invoke('admin-users', { body: { action: 'list' } });
+      for (const u of (fnData?.users ?? []) as Array<{ id: string; email: string | null; confirmed: boolean; lastSignInAt: string | null }>) {
+        authInfo[u.id] = { email: u.email, confirmed: u.confirmed, lastSignInAt: u.lastSignInAt };
+      }
+    } catch {
+      authInfo = {};
+    }
+
     const list: ManagedUser[] = (profiles ?? []).map((p) => ({
       userId: p.user_id,
       displayName: p.display_name,
       phone: p.phone,
       createdAt: p.created_at,
       roles: (roles ?? []).filter((r) => r.user_id === p.user_id).map((r) => r.role as AppRole),
+      email: authInfo[p.user_id]?.email ?? null,
+      confirmed: authInfo[p.user_id]?.confirmed ?? false,
+      lastSignInAt: authInfo[p.user_id]?.lastSignInAt ?? null,
     }));
     setUsers(list);
     setLoading(false);
@@ -70,5 +93,35 @@ export function useUserRoles() {
     return error;
   }, [fetchUsers]);
 
-  return { isAdmin, users, loading, addRole, removeRole, refresh: fetchUsers };
+  const inviteUser = useCallback(async (input: InviteInput) => {
+    const { data, error } = await supabase.functions.invoke('admin-users', {
+      body: {
+        action: 'invite',
+        email: input.email,
+        displayName: input.displayName,
+        phone: input.phone ?? null,
+        roles: input.roles,
+        redirectTo: `${window.location.origin}/auth`,
+      },
+    });
+    const message = (error?.message ?? (data as { error?: string } | null)?.error) || null;
+    if (!message) await fetchUsers();
+    return message;
+  }, [fetchUsers]);
+
+  const resendInvite = useCallback(async (email: string) => {
+    const { data, error } = await supabase.functions.invoke('admin-users', {
+      body: { action: 'resend', email, redirectTo: `${window.location.origin}/auth` },
+    });
+    return (error?.message ?? (data as { error?: string } | null)?.error) || null;
+  }, []);
+
+  const sendPasswordReset = useCallback(async (email: string) => {
+    const { data, error } = await supabase.functions.invoke('admin-users', {
+      body: { action: 'reset', email, redirectTo: `${window.location.origin}/auth` },
+    });
+    return (error?.message ?? (data as { error?: string } | null)?.error) || null;
+  }, []);
+
+  return { isAdmin, users, loading, addRole, removeRole, inviteUser, resendInvite, sendPasswordReset, refresh: fetchUsers };
 }
