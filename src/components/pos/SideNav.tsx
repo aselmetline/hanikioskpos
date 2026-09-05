@@ -13,6 +13,8 @@ interface SideNavProps {
 
 export function SideNav({ activeTab, onTabChange, cartItemCount }: SideNavProps) {
   const t = useT();
+  const { isAdmin } = useUserRoles();
+
   const tabs = [
     { id: 'sell' as TabType, icon: ShoppingCart, label: t('nav.sell') },
     { id: 'inventory' as TabType, icon: Package, label: t('nav.inventory') },
