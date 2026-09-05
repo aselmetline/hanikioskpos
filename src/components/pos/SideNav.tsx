@@ -1,6 +1,8 @@
-import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight } from 'lucide-react';
+import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight, UserCog } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useT } from '@/contexts/LanguageContext';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import type { TabType } from './BottomNav';
 
 interface SideNavProps {
