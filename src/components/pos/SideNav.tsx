@@ -59,6 +59,7 @@ export function SideNav({ activeTab, onTabChange, cartItemCount }: SideNavProps)
           );
         })}
         {isAdmin && (
+          <>
           <Link
             to="/admin"
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-start text-muted-foreground hover:bg-secondary"

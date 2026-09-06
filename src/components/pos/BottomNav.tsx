@@ -67,6 +67,7 @@ export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavPr
             );
           })}
           {isAdmin && (
+          <>
             <Link
               to="/admin"
               className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-200 min-w-[60px] flex-shrink-0 text-muted-foreground hover:bg-secondary active:scale-95"
@@ -81,6 +82,7 @@ export function BottomNav({ activeTab, onTabChange, cartItemCount }: BottomNavPr
               <UserCog className="w-5 h-5" />
               <span className="text-[10px] font-medium leading-tight">{t('nav.users')}</span>
             </Link>
+          </>
           )}
         </div>
         <ScrollBar orientation="horizontal" className="h-1" />
