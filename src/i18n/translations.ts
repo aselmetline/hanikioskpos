@@ -95,6 +95,7 @@ export const translations = {
     transfers: { ar: 'تحويلات', fr: 'Transferts' },
     settings: { ar: 'إعدادات', fr: 'Paramètres' },
     users: { ar: 'المستخدمون', fr: 'Utilisateurs' },
+    admin: { ar: 'المديرية', fr: 'Direction' },
   },
 
   // ===== Users management =====
@@ -119,6 +120,21 @@ export const translations = {
       admin: { ar: 'مدير', fr: 'Administrateur' },
       manager: { ar: 'مشرف', fr: 'Superviseur' },
       cashier: { ar: 'أمين صندوق', fr: 'Caissier' },
+    },
+  },
+
+  // ===== Admin console =====
+  admin: {
+    title: { ar: 'شاشة المديرية', fr: 'Console de direction' },
+    back: { ar: 'رجوع', fr: 'Retour' },
+    details: { ar: 'تفاصيل', fr: 'Détails' },
+    salesTotal: { ar: 'إجمالي المبيعات', fr: 'Total des ventes' },
+    searchPlaceholder: { ar: 'بحث في المستخدمين والمنتجات والتحويلات والمبيعات', fr: 'Rechercher utilisateurs, produits, transferts, ventes' },
+    tabs: {
+      users: { ar: 'المستخدمون', fr: 'Utilisateurs' },
+      products: { ar: 'المنتجات', fr: 'Produits' },
+      transfers: { ar: 'التحويلات', fr: 'Transferts' },
+      sales: { ar: 'المبيعات', fr: 'Ventes' },
     },
   },
 
