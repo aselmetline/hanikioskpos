@@ -249,7 +249,7 @@ export default function AdminPage() {
                   <div className="min-w-0">
                     <p className="font-semibold">#{s.invoiceNumber ?? '—'} · {fmt(s.total)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {dateFmt(s.createdAt)} · {s.items.length} · {t(`sell.${s.paymentMethod}`)}
+                      {dateFmt(s.createdAt)} · {s.items.length} · {t(`common.${s.paymentMethod}`)}
                     </p>
                   </div>
                   <Button size="sm" variant="outline" className="shrink-0" onClick={() => setSaleDetail(s)}>
