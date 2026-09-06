@@ -122,6 +122,21 @@ export const translations = {
     },
   },
 
+  // ===== Admin console =====
+  admin: {
+    title: { ar: 'شاشة المديرية', fr: 'Console de direction' },
+    back: { ar: 'رجوع', fr: 'Retour' },
+    details: { ar: 'تفاصيل', fr: 'Détails' },
+    salesTotal: { ar: 'إجمالي المبيعات', fr: 'Total des ventes' },
+    searchPlaceholder: { ar: 'بحث في المستخدمين والمنتجات والتحويلات والمبيعات', fr: 'Rechercher utilisateurs, produits, transferts, ventes' },
+    tabs: {
+      users: { ar: 'المستخدمون', fr: 'Utilisateurs' },
+      products: { ar: 'المنتجات', fr: 'Produits' },
+      transfers: { ar: 'التحويلات', fr: 'Transferts' },
+      sales: { ar: 'المبيعات', fr: 'Ventes' },
+    },
+  },
+
   // ===== Internal transfers =====
   transfers: {
     title: { ar: 'التحويل الداخلي بين المنتجات', fr: 'Transfert interne entre produits' },
