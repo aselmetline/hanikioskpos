@@ -95,6 +95,7 @@ export const translations = {
     transfers: { ar: 'تحويلات', fr: 'Transferts' },
     settings: { ar: 'إعدادات', fr: 'Paramètres' },
     users: { ar: 'المستخدمون', fr: 'Utilisateurs' },
+    admin: { ar: 'المديرية', fr: 'Direction' },
   },
 
   // ===== Users management =====
