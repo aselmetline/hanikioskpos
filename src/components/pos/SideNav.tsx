@@ -1,4 +1,4 @@
-import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight, UserCog } from 'lucide-react';
+import { ShoppingCart, Package, Users, BarChart3, Settings, Wallet, ShoppingBag, Receipt, FileSearch, Truck, ArrowLeftRight, UserCog, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useT } from '@/contexts/LanguageContext';
@@ -59,6 +59,13 @@ export function SideNav({ activeTab, onTabChange, cartItemCount }: SideNavProps)
           );
         })}
         {isAdmin && (
+          <Link
+            to="/admin"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-start text-muted-foreground hover:bg-secondary"
+          >
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="text-sm">{t('nav.admin')}</span>
+          </Link>
           <Link
             to="/users"
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-start text-muted-foreground hover:bg-secondary"
