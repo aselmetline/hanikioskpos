@@ -74,6 +74,7 @@ export function SideNav({ activeTab, onTabChange, cartItemCount }: SideNavProps)
             <UserCog className="w-5 h-5" />
             <span className="text-sm">{t('nav.users')}</span>
           </Link>
+          </>
         )}
       </div>
     </nav>
