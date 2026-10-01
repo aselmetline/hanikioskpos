@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_actions_log: {
+        Row: {
+          action_type: string
+          applied_at: string | null
+          created_at: string
+          id: string
+          input_prompt: string | null
+          ip_address: string | null
+          staged_data: Json | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          input_prompt?: string | null
+          ip_address?: string | null
+          staged_data?: Json | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          input_prompt?: string | null
+          ip_address?: string | null
+          staged_data?: Json | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cash_box_transactions: {
         Row: {
           amount: number
@@ -536,6 +572,42 @@ export type Database = {
           },
         ]
       }
+      staged_ai_ingestions: {
+        Row: {
+          committed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          idempotency_key: string
+          kind: string
+          payload: Json
+          status: string
+          user_id: string
+        }
+        Insert: {
+          committed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          idempotency_key: string
+          kind: string
+          payload: Json
+          status?: string
+          user_id: string
+        }
+        Update: {
+          committed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          idempotency_key?: string
+          kind?: string
+          payload?: Json
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -697,6 +769,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      commit_staged_ingestion: {
+        Args: {
+          p_idempotency_key: string
+          p_overrides?: Json
+          p_preview_id: string
+        }
+        Returns: Json
+      }
+      generate_unique_barcode: { Args: { _user_id: string }; Returns: string }
       get_vat_report: {
         Args: { p_month: number; p_year: number }
         Returns: Json
