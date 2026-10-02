@@ -1,4 +1,8 @@
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
 
@@ -258,9 +262,9 @@ Deno.serve(async (req) => {
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
     global: { headers: { Authorization: authHeader } },
   });
-  const { data: claims, error: claimsErr } = await sb.auth.getClaims(authHeader.replace("Bearer ", ""));
-  const userId = claims?.claims?.sub as string | undefined;
-  if (claimsErr || !userId) return json({ error: "Unauthorized" }, 401);
+  const { data: userData, error: userErr } = await sb.auth.getUser();
+  const userId = userData?.user?.id;
+  if (userErr || !userId) return json({ error: "Unauthorized" }, 401);
 
   const [{ data: isAdmin }, { data: isManager }] = await Promise.all([
     sb.rpc("has_role", { _user_id: userId, _role: "admin" }),
