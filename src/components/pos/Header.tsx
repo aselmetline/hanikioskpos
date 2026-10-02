@@ -1,10 +1,12 @@
-import { Store, Wifi, WifiOff, Bell, LogOut, Download, Monitor, Smartphone, CloudUpload } from 'lucide-react';
+import { Store, Wifi, WifiOff, Bell, LogOut, Download, Monitor, Smartphone, CloudUpload, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCopilotAccess } from '@/hooks/useCopilotAccess';
+import { CopilotSheet } from './copilot/CopilotSheet';
 import { toast } from 'sonner';
 
 interface HeaderProps {
@@ -23,6 +25,8 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo, compact = 
   const { pendingCount, syncing, sync } = useOfflineSync();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const canCopilot = useCopilotAccess();
+  const [copilotOpen, setCopilotOpen] = useState(false);
 
   const displayName = kioskName || t('header.appName');
   const displayNameSecondary = kioskNameFr || t('header.appNameSecondary');
@@ -76,6 +80,19 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo, compact = 
 
 
         <div className="flex items-center gap-3">
+          {canCopilot && (
+            <>
+              <button
+                onClick={() => setCopilotOpen(true)}
+                className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors"
+                title={language === 'ar' ? 'المساعد الذكي' : 'Assistant IA'}
+                aria-label="AI assistant"
+              >
+                <Sparkles className="w-4 h-4" />
+              </button>
+              <CopilotSheet open={copilotOpen} onOpenChange={setCopilotOpen} />
+            </>
+          )}
           {isInstallable && (
             <button
               onClick={async () => {
