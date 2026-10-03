@@ -85,7 +85,7 @@ export function Header({ lowStockCount, kioskName, kioskNameFr, logo, compact = 
               <button
                 onClick={() => setCopilotOpen(true)}
                 className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors"
-                title={language === 'ar' ? 'المساعد الذكي' : 'Assistant IA'}
+                title={t('copilot.open')}
                 aria-label="AI assistant"
               >
                 <Sparkles className="w-4 h-4" />
