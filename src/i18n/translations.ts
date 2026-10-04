@@ -212,6 +212,13 @@ export const translations = {
   // ===== Sell Tab =====
   sell: {
     title: { ar: 'البيع', fr: 'Vente' },
+    cashPayment: { ar: 'التحصيل النقدي', fr: 'Paiement espèces' },
+    amountDue: { ar: 'المبلغ المطلوب', fr: 'Montant à payer' },
+    amountReceived: { ar: 'المبلغ المقبوض', fr: 'Montant reçu' },
+    changeDue: { ar: 'الباقي للحريف', fr: 'Monnaie à rendre' },
+    missingAmount: { ar: 'المبلغ الناقص', fr: 'Montant manquant' },
+    exact: { ar: 'بالضبط', fr: 'Exact' },
+    confirmAndPrint: { ar: 'تأكيد وطباعة', fr: 'Valider et imprimer' },
     cart: { ar: 'السلة', fr: 'Panier' },
     emptyCart: { ar: 'السلة فارغة', fr: 'Panier vide' },
     addToCart: { ar: 'إضافة للسلة', fr: 'Ajouter au panier' },
