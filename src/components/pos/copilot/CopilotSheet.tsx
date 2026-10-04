@@ -3,12 +3,23 @@ import ReactMarkdown from 'react-markdown';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Sparkles, Trash2 } from 'lucide-react';
+import { Send, Loader2, Sparkles, Trash2, Camera } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { StagedIngestionCard, type StagedPreview } from './StagedIngestionCard';
 
-type Msg = { role: 'user' | 'assistant'; content: string; previews?: StagedPreview[] };
+type Msg = { role: 'user' | 'assistant'; content: string; previews?: StagedPreview[]; image?: string };
+
+async function compressImage(file: File): Promise<string> {
+  const url = URL.createObjectURL(file);
+  const img = await new Promise<HTMLImageElement>((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+  const scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+  c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+  URL.revokeObjectURL(url);
+  return c.toDataURL('image/jpeg', 0.82);
+}
 const STORE_KEY = 'copilot_chat';
 
 export function CopilotSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
@@ -19,20 +30,21 @@ export function CopilotSheet({ open, onOpenChange }: { open: boolean; onOpenChan
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
-  useEffect(() => { sessionStorage.setItem(STORE_KEY, JSON.stringify(messages.slice(-40))); }, [messages]);
+  useEffect(() => { try { sessionStorage.setItem(STORE_KEY, JSON.stringify(messages.slice(-40).map(({ image, ...m }) => m))); } catch { /* quota */ } }, [messages]);
 
   const suggestions = ['s1', 's2', 's3', 's4', 's5'].map((k) => t(`copilot.${k}`));
 
-  const send = async (text: string) => {
+  const send = async (text: string, image?: string) => {
     const content = text.trim().slice(0, 12000);
     if (!content || loading) return;
-    const next = [...messages, { role: 'user' as const, content }];
+    const next: Msg[] = [...messages, { role: 'user', content, image }];
     setMessages(next);
     setInput('');
     setLoading(true);
     const { data, error } = await supabase.functions.invoke('store-copilot', {
-      body: { messages: next.slice(-20).map(({ role, content }) => ({ role, content })) },
+      body: { messages: next.slice(-20).map(({ role, content }) => ({ role, content })), ...(image ? { image } : {}) },
     });
     setLoading(false);
     let errMsg: string | null = null;
@@ -43,6 +55,14 @@ export function CopilotSheet({ open, onOpenChange }: { open: boolean; onOpenChan
     setMessages([...next, errMsg
       ? { role: 'assistant', content: `⚠️ ${errMsg}` }
       : { role: 'assistant', content: data.reply, previews: data.previews }]);
+  };
+
+  const onPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = '';
+    if (!f) return;
+    const img = await compressImage(f);
+    send(input.trim() || t('copilot.scanPrompt'), img);
   };
 
   return (
@@ -69,7 +89,7 @@ export function CopilotSheet({ open, onOpenChange }: { open: boolean; onOpenChan
           {messages.map((m, i) => (
             <div key={i} className={m.role === 'user' ? 'flex justify-start' : 'space-y-2'}>
               <div className={`rounded-2xl px-3 py-2 text-sm max-w-[90%] ${m.role === 'user' ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-secondary text-secondary-foreground prose prose-sm max-w-none'}`}>
-                {m.role === 'user' ? m.content : <ReactMarkdown>{m.content}</ReactMarkdown>}
+                {m.role === 'user' ? <>{m.image && <img src={m.image} alt="" className="rounded-lg mb-1 max-h-40" />}{m.content}</> : <ReactMarkdown>{m.content}</ReactMarkdown>}
               </div>
               {m.previews?.map((p) => <StagedIngestionCard key={p.preview_id} preview={p} />)}
             </div>
@@ -78,6 +98,8 @@ export function CopilotSheet({ open, onOpenChange }: { open: boolean; onOpenChan
           <div ref={endRef} />
         </div>
         <form className="p-3 border-t border-border flex gap-2 items-end" onSubmit={(e) => { e.preventDefault(); send(input); }}>
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPhoto} />
+          <Button type="button" size="icon" variant="outline" disabled={loading} onClick={() => fileRef.current?.click()} aria-label={t('copilot.scan')} title={t('copilot.scan')}><Camera className="w-4 h-4" /></Button>
           <Textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder={t('copilot.placeholder')} rows={2} className="resize-none"
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); } }} />
           <Button type="submit" size="icon" disabled={loading || !input.trim()} aria-label={t('copilot.send')}><Send className="w-4 h-4 rtl:-scale-x-100" /></Button>
