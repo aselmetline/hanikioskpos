@@ -747,6 +747,8 @@ export const translations = {
     confirmAdd: { ar: 'تأكيد وإضافة للمخزون', fr: 'Confirmer et ajouter au stock' },
     added: { ar: 'تمت الإضافة للمخزون', fr: 'Ajouté au stock' },
     addedDone: { ar: 'تمت الإضافة ✓', fr: 'Ajouté ✓' },
+    scan: { ar: 'تصوير فاتورة المورد', fr: 'Photographier la facture fournisseur' },
+    scanPrompt: { ar: 'اقرأ فاتورة المورد هذه وجهّز معاينة البضاعة للمخزون', fr: 'Lis cette facture fournisseur et prépare un aperçu pour le stock' },
   },
 } as const;
 
