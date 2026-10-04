@@ -36,6 +36,8 @@ interface ReceiptPrinterProps {
   invoiceNumber?: number;
   fiscalStamp?: number;
   taxBreakdown?: Record<string, { base: number; tax: number }>;
+  amountPaid?: number;
+  changeDue?: number;
 }
 
 function formatInvoiceNumber(invoiceNumber?: number, saleId?: string): string {
@@ -71,6 +73,8 @@ export function ReceiptPrinter({
   invoiceNumber,
   fiscalStamp = 0,
   taxBreakdown,
+  amountPaid,
+  changeDue,
 }: ReceiptPrinterProps) {
   const { t, language, dir } = useLanguage();
   const receiptRef = useRef<HTMLDivElement>(null);
@@ -131,7 +135,7 @@ ${items.map(item => `${productLabel(item)} x${item.quantity} = ${(item.product.p
 ${'─'.repeat(20)}
 ${t('receipt.subtotal')}: ${subtotal.toFixed(3)} ${CURRENCY}
 ${discount > 0 ? `${t('receipt.discount')}: -${discount.toFixed(3)} ${CURRENCY}\n` : ''}${taxEnabled ? `${t('receipt.tax')} (${(taxRate * 100).toFixed(0)}%): ${tax.toFixed(3)} ${CURRENCY}\n` : ''}${t('receipt.total')}: ${total.toFixed(3)} ${CURRENCY}
-${t('receipt.paymentMethod')}: ${paymentMethod === 'cash' ? t('receipt.cash') : t('receipt.credit')}
+${amountPaid != null ? `${t('sell.amountReceived')}: ${amountPaid.toFixed(3)} ${CURRENCY}\n${t('sell.changeDue')}: ${(changeDue ?? 0).toFixed(3)} ${CURRENCY}\n` : ''}${t('receipt.paymentMethod')}: ${paymentMethod === 'cash' ? t('receipt.cash') : t('receipt.credit')}
 ${customer ? `${t('receipt.customer')}: ${customer.name}` : ''}
 ${t('receipt.thankYou')}
     `.trim();
@@ -381,7 +385,19 @@ ${t('receipt.thankYou')}
                   </div>
                 </div>
               </div>
-            </div>
+                </div>
+                {amountPaid != null && (
+                  <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', fontSize: '13px' }}>
+                      <span style={{ color: INK_LIGHT }}>Montant reçu / المبلغ المقبوض</span>
+                      <span style={{ fontWeight: 600 }}>{amountPaid.toFixed(3)}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: '14px' }}>
+                      <span style={{ color: INK_LIGHT }}>Monnaie rendue / الباقي</span>
+                      <span style={{ fontWeight: 700 }}>{(changeDue ?? 0).toFixed(3)}</span>
+                    </div>
+                  </>
+                )}
           </div>
 
           {/* Footer */}
