@@ -4,6 +4,7 @@ import { CURRENCY } from '@/data/sampleData';
 import { useT } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
 import { ReceiptPrinter } from './ReceiptPrinter';
+import { CashPaymentModal } from './CashPaymentModal';
 
 interface CheckoutResult {
   saleId: string;
@@ -78,6 +79,9 @@ export function CartSheet({
   const [lastBreakdown, setLastBreakdown] = useState<Record<string, { base: number; tax: number }> | undefined>();
   const [usePoints, setUsePoints] = useState(false);
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
+  const [showCashModal, setShowCashModal] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [lastPayment, setLastPayment] = useState<{ paid: number; change: number } | undefined>();
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
   const maxPointsDiscount = selectedCustomer ? selectedCustomer.points / pointsToDiscountRate : 0;
@@ -92,17 +96,25 @@ export function CartSheet({
 
   if (!isOpen) return null;
 
-  const handleCheckout = async (method: 'cash' | 'credit') => {
+  const cashTotalDue = finalTotal + (fiscalStampEnabled ? fiscalStampAmount : 0);
+
+  const handleCheckout = async (method: 'cash' | 'credit', payment?: { paid: number; change: number }) => {
+    if (busy) return;
+    setBusy(true);
     const customer = customers.find(c => c.id === selectedCustomerId);
     setLastPaymentMethod(method);
 
     const result = await onCheckout(method, customer, usePoints ? pointsToRedeem : 0);
+    setBusy(false);
+    if (!result) return;
+    setShowCashModal(false);
 
     const stamp = result?.fiscalStamp ?? (fiscalStampEnabled && method === 'cash' ? fiscalStampAmount : 0);
     const serverTotal = result?.total ?? (finalTotal + stamp);
 
     setLastItems([...items]);
     setLastTotals({ subtotal, tax, total: serverTotal, discount: globalDiscount + pointsDiscount, fiscalStamp: stamp });
+    setLastPayment(payment ? { paid: payment.paid, change: Math.max(0, payment.paid - serverTotal) } : undefined);
     setLastSaleId(result?.saleId || undefined);
     setLastInvoiceNumber(result?.invoiceNumber);
     setLastBreakdown(result?.taxBreakdown ?? taxBreakdown);
@@ -156,7 +168,7 @@ export function CartSheet({
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => handleCheckout('cash')}
+                  onClick={() => setShowCashModal(true)}
                   className="pos-button-success text-sm py-2.5"
                 >
                   <Banknote className="w-4 h-4" />
@@ -411,6 +423,16 @@ export function CartSheet({
         invoiceNumber={lastInvoiceNumber}
         fiscalStamp={lastTotals.fiscalStamp}
         taxBreakdown={lastBreakdown}
+        amountPaid={lastPaymentMethod === 'cash' ? lastPayment?.paid : undefined}
+        changeDue={lastPaymentMethod === 'cash' ? lastPayment?.change : undefined}
+      />
+
+      <CashPaymentModal
+        open={showCashModal}
+        totalDue={cashTotalDue}
+        busy={busy}
+        onClose={() => setShowCashModal(false)}
+        onConfirm={(paid, change) => handleCheckout('cash', { paid, change })}
       />
     </div>
   );
