@@ -212,6 +212,11 @@ export const translations = {
   // ===== Sell Tab =====
   sell: {
     title: { ar: 'البيع', fr: 'Vente' },
+    clearCart: { ar: 'إفراغ السلة', fr: 'Vider le panier' },
+    clearCartConfirm: { ar: 'هل تريد حذف كل المنتجات من السلة؟', fr: 'Supprimer tous les articles du panier ?' },
+    lineDiscount: { ar: 'خصم على السلعة', fr: 'Remise ligne' },
+    discountTnd: { ar: 'د.ت', fr: 'TND' },
+    discountPct: { ar: '%', fr: '%' },
     cashPayment: { ar: 'التحصيل النقدي', fr: 'Paiement espèces' },
     amountDue: { ar: 'المبلغ المطلوب', fr: 'Montant à payer' },
     amountReceived: { ar: 'المبلغ المقبوض', fr: 'Montant reçu' },

@@ -29,6 +29,8 @@ interface SellTabProps {
   globalDiscount: number;
   taxBreakdown?: Record<string, { base: number; tax: number }>;
   onSetDiscount: (discount: number) => void;
+  onClearCart?: () => void;
+  onUpdateItemDiscount?: (productId: string, discount: number) => void;
   onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<{ saleId: string; invoiceNumber?: number; fiscalStamp?: number; total?: number; taxBreakdown?: Record<string, { base: number; tax: number }> } | null>;
   customers: Customer[];
   loading?: boolean;
@@ -63,6 +65,8 @@ export function SellTab({
   globalDiscount,
   taxBreakdown,
   onSetDiscount,
+  onClearCart,
+  onUpdateItemDiscount,
   onCheckout,
   customers,
   loading = false,
@@ -204,6 +208,8 @@ export function SellTab({
         onUpdateQuantity={onUpdateQuantity}
         onRemoveItem={onRemoveItem}
         onSetDiscount={onSetDiscount}
+        onClearCart={onClearCart}
+        onUpdateItemDiscount={onUpdateItemDiscount}
         taxBreakdown={taxBreakdown}
         onCheckout={onCheckout}
         customers={customers}

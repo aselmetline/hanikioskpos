@@ -1,4 +1,4 @@
-import { ShoppingBag, Minus, Plus, Trash2, X, CreditCard, Banknote, MessageCircle, Award } from 'lucide-react';
+import { ShoppingBag, Minus, Plus, Trash2, X, CreditCard, Banknote, MessageCircle, Award, Percent, Check } from 'lucide-react';
 import { CartItem, Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { useT } from '@/contexts/LanguageContext';
@@ -25,6 +25,8 @@ interface CartSheetProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
   onSetDiscount: (discount: number) => void;
+  onClearCart?: () => void;
+  onUpdateItemDiscount?: (productId: string, discount: number) => void;
   onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<CheckoutResult | null>;
   customers: Customer[];
   kioskName?: string;
@@ -52,6 +54,8 @@ export function CartSheet({
   onUpdateQuantity,
   onRemoveItem,
   onSetDiscount,
+  onClearCart,
+  onUpdateItemDiscount,
   onCheckout,
   customers,
   kioskName,
@@ -82,6 +86,10 @@ export function CartSheet({
   const [showCashModal, setShowCashModal] = useState(false);
   const [busy, setBusy] = useState(false);
   const [lastPayment, setLastPayment] = useState<{ paid: number; change: number } | undefined>();
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [editingDiscountId, setEditingDiscountId] = useState<string | null>(null);
+  const [lineDiscountInput, setLineDiscountInput] = useState('');
+  const [lineDiscountMode, setLineDiscountMode] = useState<'tnd' | 'pct'>('tnd');
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
   const maxPointsDiscount = selectedCustomer ? selectedCustomer.points / pointsToDiscountRate : 0;
@@ -144,15 +152,38 @@ export function CartSheet({
     setDiscountInput('');
   };
 
+  const openLineDiscount = (productId: string) => {
+    if (editingDiscountId === productId) {
+      setEditingDiscountId(null);
+      return;
+    }
+    const it = items.find(i => i.product.id === productId);
+    setEditingDiscountId(productId);
+    setLineDiscountMode('tnd');
+    setLineDiscountInput(it && it.discount > 0 ? it.discount.toFixed(3) : '');
+  };
+
+  // Line discount in TND or %, capped to the line amount, rounded to millimes.
+  const applyLineDiscount = (item: CartItem) => {
+    const lineTotal = item.product.price * item.quantity;
+    const v = Math.max(0, parseFloat(lineDiscountInput.replace(',', '.')) || 0);
+    const raw = lineDiscountMode === 'pct' ? lineTotal * Math.min(v, 100) / 100 : v;
+    const capped = Math.round(Math.min(raw, lineTotal) * 1000) / 1000;
+    onUpdateItemDiscount?.(item.product.id, capped);
+    setEditingDiscountId(null);
+  };
+
+  const itemsDiscountTotal = items.reduce((s, i) => s + (i.discount || 0), 0);
+
   return (
     <div className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-sm animate-fade-in flex items-center justify-center p-4" onClick={onClose}>
       <div 
-        className="bg-card rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl animate-scale-in"
+        className="bg-card rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-card rounded-t-2xl border-b border-border p-4">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-card rounded-t-2xl border-b border-border p-4 shrink-0">
+          <div className="flex items-center justify-between">
             <button onClick={onClose} className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
               <X className="w-5 h-5" />
             </button>
@@ -160,41 +191,42 @@ export function CartSheet({
               <ShoppingBag className="w-5 h-5 text-primary" />
               <span className="font-bold text-lg">{t('sell.cart')} ({items.length})</span>
             </div>
-            <div className="w-10" />
+            {items.length > 0 && onClearCart ? (
+              <button
+                onClick={() => setConfirmClear(true)}
+                className="w-10 h-10 bg-destructive/10 text-destructive rounded-full flex items-center justify-center"
+                aria-label={t('sell.clearCart')}
+                title={t('sell.clearCart')}
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            ) : (
+              <div className="w-10" />
+            )}
           </div>
-          
-          {/* Payment Buttons in Header */}
-          {items.length > 0 && (
-            <div className="space-y-2">
+          {confirmClear && (
+            <div className="mt-3 p-3 rounded-xl bg-destructive/10 space-y-2">
+              <p className="text-sm font-bold text-destructive">{t('sell.clearCartConfirm')}</p>
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setShowCashModal(true)}
-                  className="pos-button-success text-sm py-2.5"
-                >
-                  <Banknote className="w-4 h-4" />
-                  {t('common.cash')}
+                <button onClick={() => setConfirmClear(false)} className="pos-button-outline text-sm py-2">
+                  {t('common.cancel')}
                 </button>
                 <button
-                  onClick={() => handleCheckout('credit')}
-                  className="pos-button-outline text-sm py-2.5"
+                  onClick={() => { onClearCart?.(); setConfirmClear(false); setEditingDiscountId(null); }}
+                  className="pos-button bg-destructive text-destructive-foreground text-sm py-2"
                 >
-                  <CreditCard className="w-4 h-4" />
-                  {t('common.credit')}
+                  {t('sell.clearCart')}
                 </button>
               </div>
-              <button
-                onClick={handleWhatsAppOrder}
-                className="w-full pos-button bg-success text-success-foreground py-2.5 text-sm"
-              >
-                <MessageCircle className="w-4 h-4" />
-                WhatsApp
-              </button>
             </div>
           )}
         </div>
 
+        <div className="flex-1 overflow-y-auto">
+
+
         {/* Cart Items */}
-        <div className="overflow-y-auto max-h-[35vh] p-4 space-y-3">
+        <div className="p-4 space-y-3">
           {items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <ShoppingBag className="w-12 h-12 mx-auto mb-2 opacity-50" />
@@ -202,7 +234,8 @@ export function CartSheet({
             </div>
           ) : (
             items.map((item) => (
-              <div key={item.product.id} className="pos-card flex items-center gap-3">
+              <div key={item.product.id} className="pos-card space-y-2">
+                <div className="flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <h4 className="font-bold truncate">{item.product.nameAr}</h4>
                   <p className="text-sm text-muted-foreground">
@@ -252,20 +285,69 @@ export function CartSheet({
                     </button>
                   </div>
                 )}
-                
+
                 <div className="text-left min-w-[80px]">
-                  <p className="font-bold text-success">
-                    {(item.product.price * item.quantity).toFixed(3)}
+                  {item.discount > 0 && (
+                    <p className="text-xs text-muted-foreground line-through" dir="ltr">
+                      {(item.product.price * item.quantity).toFixed(3)}
+                    </p>
+                  )}
+                  <p className="font-bold text-success" dir="ltr">
+                    {(item.product.price * item.quantity - item.discount).toFixed(3)}
                   </p>
                 </div>
 
-                
-                <button
-                  onClick={() => onRemoveItem(item.product.id)}
-                  className="w-8 h-8 bg-destructive/10 text-destructive rounded-lg flex items-center justify-center"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex flex-col gap-1">
+                  {onUpdateItemDiscount && (
+                    <button
+                      onClick={() => openLineDiscount(item.product.id)}
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.discount > 0 ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}
+                      aria-label={t('sell.lineDiscount')}
+                      title={t('sell.lineDiscount')}
+                    >
+                      <Percent className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => onRemoveItem(item.product.id)}
+                    className="w-8 h-8 bg-destructive/10 text-destructive rounded-lg flex items-center justify-center"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+                </div>
+
+                {editingDiscountId === item.product.id && (
+                  <div className="flex gap-2 items-center pt-1">
+                    <span className="text-xs font-bold whitespace-nowrap">{t('sell.lineDiscount')}</span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.001"
+                      min={0}
+                      autoFocus
+                      value={lineDiscountInput}
+                      onChange={(e) => setLineDiscountInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && applyLineDiscount(item)}
+                      className="pos-input text-sm flex-1 min-w-0"
+                      dir="ltr"
+                    />
+                    <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
+                      {(['tnd', 'pct'] as const).map(m => (
+                        <button
+                          key={m}
+                          onClick={() => setLineDiscountMode(m)}
+                          className={`px-2 py-1 text-xs font-bold ${lineDiscountMode === m ? 'bg-primary text-primary-foreground' : 'bg-background'}`}
+                        >
+                          {m === 'tnd' ? t('sell.discountTnd') : t('sell.discountPct')}
+                        </button>
+                      ))}
+                    </div>
+                    <button onClick={() => applyLineDiscount(item)} className="pos-button-success text-xs px-3 py-2 shrink-0">
+                      <Check className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -356,6 +438,12 @@ export function CartSheet({
                 <span>{t('common.subtotal')}</span>
                 <span>{subtotal.toFixed(3)} {CURRENCY}</span>
               </div>
+              {itemsDiscountTotal > 0 && (
+                <div className="flex justify-between text-sm text-destructive">
+                  <span>{t('sell.lineDiscount')}</span>
+                  <span>-{itemsDiscountTotal.toFixed(3)} {CURRENCY}</span>
+                </div>
+              )}
               {globalDiscount > 0 && (
                 <div className="flex justify-between text-sm text-destructive">
                   <span>{t('common.discount')}</span>
@@ -397,6 +485,27 @@ export function CartSheet({
             </div>
 
           </>
+        )}
+        </div>
+
+        {/* Payment buttons — below the totals so the cashier reviews first */}
+        {items.length > 0 && (
+          <div className="shrink-0 border-t border-border p-3 space-y-2 bg-card">
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => setShowCashModal(true)} className="pos-button-success text-base py-3">
+                <Banknote className="w-5 h-5" />
+                {t('common.cash')}
+              </button>
+              <button onClick={() => handleCheckout('credit')} className="pos-button-outline text-base py-3">
+                <CreditCard className="w-5 h-5" />
+                {t('common.credit')}
+              </button>
+            </div>
+            <button onClick={handleWhatsAppOrder} className="w-full pos-button bg-success text-success-foreground py-2 text-sm">
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp
+            </button>
+          </div>
         )}
       </div>
 
