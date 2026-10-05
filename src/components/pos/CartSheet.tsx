@@ -438,6 +438,12 @@ export function CartSheet({
                 <span>{t('common.subtotal')}</span>
                 <span>{subtotal.toFixed(3)} {CURRENCY}</span>
               </div>
+              {itemsDiscountTotal > 0 && (
+                <div className="flex justify-between text-sm text-destructive">
+                  <span>{t('sell.lineDiscount')}</span>
+                  <span>-{itemsDiscountTotal.toFixed(3)} {CURRENCY}</span>
+                </div>
+              )}
               {globalDiscount > 0 && (
                 <div className="flex justify-between text-sm text-destructive">
                   <span>{t('common.discount')}</span>
