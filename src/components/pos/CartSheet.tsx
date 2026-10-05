@@ -147,12 +147,12 @@ export function CartSheet({
   return (
     <div className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-sm animate-fade-in flex items-center justify-center p-4" onClick={onClose}>
       <div 
-        className="bg-card rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl animate-scale-in"
+        className="bg-card rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-card rounded-t-2xl border-b border-border p-4">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-card rounded-t-2xl border-b border-border p-4 shrink-0">
+          <div className="flex items-center justify-between">
             <button onClick={onClose} className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
               <X className="w-5 h-5" />
             </button>
@@ -160,38 +160,39 @@ export function CartSheet({
               <ShoppingBag className="w-5 h-5 text-primary" />
               <span className="font-bold text-lg">{t('sell.cart')} ({items.length})</span>
             </div>
-            <div className="w-10" />
+            {items.length > 0 && onClearCart ? (
+              <button
+                onClick={() => setConfirmClear(true)}
+                className="w-10 h-10 bg-destructive/10 text-destructive rounded-full flex items-center justify-center"
+                aria-label={t('sell.clearCart')}
+                title={t('sell.clearCart')}
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            ) : (
+              <div className="w-10" />
+            )}
           </div>
-          
-          {/* Payment Buttons in Header */}
-          {items.length > 0 && (
-            <div className="space-y-2">
+          {confirmClear && (
+            <div className="mt-3 p-3 rounded-xl bg-destructive/10 space-y-2">
+              <p className="text-sm font-bold text-destructive">{t('sell.clearCartConfirm')}</p>
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setShowCashModal(true)}
-                  className="pos-button-success text-sm py-2.5"
-                >
-                  <Banknote className="w-4 h-4" />
-                  {t('common.cash')}
+                <button onClick={() => setConfirmClear(false)} className="pos-button-outline text-sm py-2">
+                  {t('common.cancel')}
                 </button>
                 <button
-                  onClick={() => handleCheckout('credit')}
-                  className="pos-button-outline text-sm py-2.5"
+                  onClick={() => { onClearCart?.(); setConfirmClear(false); setEditingDiscountId(null); }}
+                  className="pos-button bg-destructive text-destructive-foreground text-sm py-2"
                 >
-                  <CreditCard className="w-4 h-4" />
-                  {t('common.credit')}
+                  {t('sell.clearCart')}
                 </button>
               </div>
-              <button
-                onClick={handleWhatsAppOrder}
-                className="w-full pos-button bg-success text-success-foreground py-2.5 text-sm"
-              >
-                <MessageCircle className="w-4 h-4" />
-                WhatsApp
-              </button>
             </div>
           )}
         </div>
+
+        <div className="flex-1 overflow-y-auto">
+
 
         {/* Cart Items */}
         <div className="overflow-y-auto max-h-[35vh] p-4 space-y-3">
