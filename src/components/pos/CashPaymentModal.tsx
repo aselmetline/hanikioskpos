@@ -93,7 +93,12 @@ export function CashPaymentModal({ open, totalDue, onClose, onConfirm, busy }: C
             </p>
           </div>
 
-          <button onClick={confirm} disabled={!canConfirm} className="pos-button-success w-full py-3 text-base disabled:opacity-40">
+          <button
+            onClick={confirm}
+            disabled={!canConfirm}
+            style={canConfirm ? undefined : { opacity: 0.4, cursor: 'not-allowed' }}
+            className="pos-button-success w-full py-3 text-base"
+          >
             <Check className="w-5 h-5" />
             {t('sell.confirmAndPrint')}
           </button>
