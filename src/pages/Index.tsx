@@ -182,6 +182,8 @@ const Index = () => {
             globalDiscount={cart.globalDiscount}
             taxBreakdown={cart.taxBreakdown}
             onSetDiscount={cart.setGlobalDiscount}
+            onClearCart={cart.clearCart}
+            onUpdateItemDiscount={cart.updateItemDiscount}
             onCheckout={handleCheckout}
             customers={customers.customers}
             loading={products.loading}
