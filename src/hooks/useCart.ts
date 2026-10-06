@@ -45,6 +45,11 @@ export function useCart(defaultTaxRate: number = 0.19, taxEnabled: boolean = tru
     setGlobalDiscount(0);
   }, []);
 
+  const loadCart = useCallback((newItems: CartItem[], discount: number = 0) => {
+    setItems(newItems);
+    setGlobalDiscount(discount);
+  }, []);
+
   const { subtotal, itemsDiscount, taxableAmount, tax, total, itemCount, taxBreakdown } = useMemo(() => {
     const subtotal = items.reduce((sum, item) =>
       sum + (item.product.price * item.quantity), 0
@@ -85,6 +90,7 @@ export function useCart(defaultTaxRate: number = 0.19, taxEnabled: boolean = tru
     updateQuantity,
     updateItemDiscount,
     clearCart,
+    loadCart,
     globalDiscount,
     setGlobalDiscount,
     subtotal,
