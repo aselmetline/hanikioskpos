@@ -95,6 +95,14 @@ export function CartSheet({
   const maxPointsDiscount = selectedCustomer ? selectedCustomer.points / pointsToDiscountRate : 0;
   const pointsDiscount = usePoints ? Math.min(pointsToRedeem / pointsToDiscountRate, maxPointsDiscount, total) : 0;
   const finalTotal = total - pointsDiscount;
+  // Credit overview for the selected customer (server re-checks the limit atomically)
+  const currentDebt = selectedCustomer?.creditBalance ?? 0;
+  const creditLimit = selectedCustomer?.creditLimit ?? 0;
+  const creditRemaining = creditLimit - currentDebt;
+  const creditExceededBy = selectedCustomer && creditLimit > 0
+    ? Math.max(Math.round((currentDebt + finalTotal - creditLimit) * 1000) / 1000, 0)
+    : 0;
+  const creditBlocked = creditExceededBy > 0;
 
   // Reset points when customer changes
   useEffect(() => {
@@ -367,6 +375,35 @@ export function CartSheet({
                   <option key={c.id} value={c.id}>{c.name} - {c.phone}</option>
                 ))}
               </select>
+              {selectedCustomer ? (
+                <div className="mt-2 rounded-xl border border-border bg-muted/40 p-2 text-xs space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('sell.currentDebt')}</span>
+                    <span className={`font-bold ${currentDebt > 0 ? 'text-destructive' : ''}`}>{currentDebt.toFixed(3)} {CURRENCY}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('sell.creditLimitLabel')}</span>
+                    <span className="font-bold">{creditLimit > 0 ? `${creditLimit.toFixed(3)} ${CURRENCY}` : t('sell.noCreditLimit')}</span>
+                  </div>
+                  {creditLimit > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t('sell.creditRemaining')}</span>
+                      <span className="font-bold text-success">{Math.max(creditRemaining, 0).toFixed(3)} {CURRENCY}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('sell.debtAfterSale')}</span>
+                    <span className="font-bold">{(currentDebt + finalTotal).toFixed(3)} {CURRENCY}</span>
+                  </div>
+                  {creditExceededBy > 0 && (
+                    <div className="mt-1 rounded-lg bg-destructive/10 text-destructive font-bold p-2">
+                      ⚠️ {t('sell.creditExceeded')} {creditExceededBy.toFixed(3)} {CURRENCY}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="mt-1 text-xs text-muted-foreground">{t('sell.creditNeedsCustomer')}</p>
+              )}
             </div>
 
             {/* Points Redemption - Show only if customer selected and has points */}
@@ -496,7 +533,12 @@ export function CartSheet({
                 <Banknote className="w-5 h-5" />
                 {t('common.cash')}
               </button>
-              <button onClick={() => handleCheckout('credit')} className="pos-button-outline text-base py-3">
+              <button
+                onClick={() => handleCheckout('credit')}
+                disabled={creditBlocked}
+                style={creditBlocked ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+                className="pos-button-outline text-base py-3"
+              >
                 <CreditCard className="w-5 h-5" />
                 {t('common.credit')}
               </button>
