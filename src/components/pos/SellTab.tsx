@@ -1,4 +1,4 @@
-import { ShoppingBag, ScanLine } from 'lucide-react';
+import { ShoppingBag, ScanLine, PauseCircle, PlayCircle, History, Trash2 } from 'lucide-react';
 import { Product, CartItem, Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
 import { SearchBar } from './SearchBar';
@@ -9,8 +9,12 @@ import { LoadingState } from './LoadingState';
 import { BarcodeScanner } from './BarcodeScanner';
 import { OpenAmountDialog } from './OpenAmountDialog';
 import { useT } from '@/contexts/LanguageContext';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+const PARKED_KEY = 'pos_parked_carts';
+interface ParkedCart { id: string; label: number; at: number; items: CartItem[]; discount: number; }
 
 interface SellTabProps {
   products: Product[];
@@ -30,6 +34,7 @@ interface SellTabProps {
   taxBreakdown?: Record<string, { base: number; tax: number }>;
   onSetDiscount: (discount: number) => void;
   onClearCart?: () => void;
+  onLoadCart?: (items: CartItem[], discount: number) => void;
   onUpdateItemDiscount?: (productId: string, discount: number) => void;
   onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<{ saleId: string; invoiceNumber?: number; fiscalStamp?: number; total?: number; taxBreakdown?: Record<string, { base: number; tax: number }> } | null>;
   customers: Customer[];
@@ -66,6 +71,7 @@ export function SellTab({
   taxBreakdown,
   onSetDiscount,
   onClearCart,
+  onLoadCart,
   onUpdateItemDiscount,
   onCheckout,
   customers,
@@ -87,6 +93,45 @@ export function SellTab({
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [openPriceProduct, setOpenPriceProduct] = useState<Product | null>(null);
+  const [showParked, setShowParked] = useState(false);
+  const [parked, setParked] = useState<ParkedCart[]>(() => {
+    try { return JSON.parse(localStorage.getItem(PARKED_KEY) || '[]'); } catch { return []; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem(PARKED_KEY, JSON.stringify(parked)); } catch { /* ignore */ }
+  }, [parked]);
+
+  const makeParked = (): ParkedCart => {
+    const used = new Set(parked.map(p => p.label));
+    let label = 1;
+    while (used.has(label)) label++;
+    return { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, label, at: Date.now(), items: cartItems, discount: globalDiscount };
+  };
+
+  const parkCurrent = () => {
+    if (cartItems.length === 0 || !onLoadCart) return;
+    const p = makeParked();
+    setParked(prev => [...prev, p]);
+    onLoadCart([], 0);
+    setIsCartOpen(false);
+    toast.success(`${t('sell.cartParked')} #${p.label}`);
+  };
+
+  const resumeParked = (id: string) => {
+    const target = parked.find(p => p.id === id);
+    if (!target || !onLoadCart) return;
+    let next = parked.filter(p => p.id !== id);
+    if (cartItems.length > 0) {
+      if (!window.confirm(t('sell.resumeReplaceConfirm'))) return;
+      next = [...next, makeParked()];
+    }
+    setParked(next);
+    onLoadCart(target.items, target.discount);
+    setShowParked(false);
+    setIsCartOpen(true);
+    toast.success(`${t('sell.cartResumed')} #${target.label}`);
+  };
 
   const lastHandledRef = useRef<{ code: string; at: number } | null>(null);
 
@@ -181,20 +226,80 @@ export function SellTab({
         )}
       </div>
 
-      {/* Floating Cart Button */}
-      {itemCount > 0 && (
-        <button
-          onClick={() => setIsCartOpen(true)}
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground rounded-2xl shadow-lg px-6 py-4 flex items-center gap-4 animate-slide-up z-40"
-        >
-          <div className="flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5" />
-            <span className="font-bold">{itemCount} {t('common.items')}</span>
-          </div>
-          <div className="w-px h-6 bg-primary-foreground/30" />
-          <span className="font-bold text-lg">{total.toFixed(3)} {CURRENCY}</span>
-        </button>
+      {/* Floating Cart + Park controls */}
+      {(itemCount > 0 || parked.length > 0) && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40 animate-slide-up">
+          {parked.length > 0 && (
+            <button
+              onClick={() => setShowParked(true)}
+              className="relative bg-secondary text-secondary-foreground rounded-2xl shadow-lg px-4 py-4 flex items-center gap-2 border border-border"
+              title={t('sell.parkedCarts')}
+            >
+              <History className="w-5 h-5" />
+              <span className="absolute -top-2 -end-2 bg-destructive text-destructive-foreground text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                {parked.length}
+              </span>
+            </button>
+          )}
+          {itemCount > 0 && (
+            <>
+              <button
+                onClick={parkCurrent}
+                className="bg-secondary text-secondary-foreground rounded-2xl shadow-lg px-4 py-4 flex items-center gap-2 border border-border"
+                title={t('sell.parkCart')}
+              >
+                <PauseCircle className="w-5 h-5" />
+                <span className="font-semibold text-sm hidden sm:inline">{t('sell.parkCart')}</span>
+              </button>
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="bg-primary text-primary-foreground rounded-2xl shadow-lg px-6 py-4 flex items-center gap-4"
+              >
+                <div className="flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5" />
+                  <span className="font-bold">{itemCount} {t('common.items')}</span>
+                </div>
+                <div className="w-px h-6 bg-primary-foreground/30" />
+                <span className="font-bold text-lg">{total.toFixed(3)} {CURRENCY}</span>
+              </button>
+            </>
+          )}
+        </div>
       )}
+
+      {/* Parked carts list */}
+      <Dialog open={showParked} onOpenChange={setShowParked}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('sell.parkedCarts')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+            {parked.map((p) => {
+              const count = p.items.reduce((s, i) => s + i.quantity, 0);
+              const sum = p.items.reduce((s, i) => s + i.product.price * i.quantity - i.discount, 0) - p.discount;
+              return (
+                <div key={p.id} className="flex items-center gap-2 p-3 rounded-xl border border-border bg-card">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold">{t('sell.cartLabel')} #{p.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(p.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {count} {t('common.items')} · {sum.toFixed(3)} {CURRENCY}
+                    </p>
+                  </div>
+                  <button onClick={() => resumeParked(p.id)} className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center gap-1">
+                    <PlayCircle className="w-4 h-4" />{t('sell.resume')}
+                  </button>
+                  <button
+                    onClick={() => { if (window.confirm(t('sell.deleteParkedConfirm'))) setParked(prev => prev.filter(x => x.id !== p.id)); }}
+                    className="p-2 rounded-lg text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Cart Sheet */}
       <CartSheet
