@@ -183,6 +183,7 @@ const Index = () => {
             taxBreakdown={cart.taxBreakdown}
             onSetDiscount={cart.setGlobalDiscount}
             onClearCart={cart.clearCart}
+            onLoadCart={cart.loadCart}
             onUpdateItemDiscount={cart.updateItemDiscount}
             onCheckout={handleCheckout}
             customers={customers.customers}
