@@ -8,7 +8,7 @@ import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { SellTab } from '@/components/pos/SellTab';
 import { InventoryTab } from '@/components/pos/InventoryTab';
 import { CustomersTab } from '@/components/pos/CustomersTab';
-import { ReportsTab } from '@/components/pos/ReportsTab';
+import { ReportsWithProfit } from '@/components/pos/reports/ReportsWithProfit';
 import { SettingsTab } from '@/components/pos/SettingsTab';
 import CashBoxTab from '@/components/pos/CashBoxTab';
 import PurchasesTab from '@/components/pos/PurchasesTab';
