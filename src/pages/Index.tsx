@@ -283,10 +283,14 @@ const Index = () => {
         )}
 
         {activeTab === 'reports' && (
-          <ReportsTab 
-            sales={salesHook.sales} 
+          <ReportsWithProfit
+            sales={salesHook.sales}
             purchases={purchases.purchases}
             expenses={expensesHook.expenses}
+            products={products.products}
+            customers={customers.customers}
+            supplierDebts={suppliersHook.suppliers.reduce((s, x) => s + Math.max(0, x.debtBalance), 0)}
+            cashBalance={cashBox.balance}
           />
         )}
 
