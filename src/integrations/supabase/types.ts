@@ -608,6 +608,50 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          from_cashbox: boolean
+          id: string
+          notes: string | null
+          supplier_id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number
+          created_at?: string
+          from_cashbox?: boolean
+          id?: string
+          notes?: string | null
+          supplier_id: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          from_cashbox?: boolean
+          id?: string
+          notes?: string | null
+          supplier_id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_transactions_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -821,6 +865,16 @@ export type Database = {
           p_customer_id: string
           p_notes?: string
           p_payment_method?: string
+        }
+        Returns: Json
+      }
+      record_supplier_transaction: {
+        Args: {
+          p_amount: number
+          p_from_cashbox?: boolean
+          p_notes?: string
+          p_supplier_id: string
+          p_type: string
         }
         Returns: Json
       }
