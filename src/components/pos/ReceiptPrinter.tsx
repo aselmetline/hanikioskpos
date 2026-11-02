@@ -8,7 +8,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
+import { CheckCircle2, MessageCircle, ChevronLeft, Eye } from 'lucide-react';
 import { exportElementToA4PDF } from '@/utils/pdfPaginate';
 import { FileText, Receipt as ReceiptIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -80,6 +81,8 @@ export function ReceiptPrinter({
   const receiptRef = useRef<HTMLDivElement>(null);
   const [printSize, setPrintSize] = useState<'a4' | '58mm'>('a4');
   const is58 = printSize === '58mm';
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => { if (open) setExpanded(false); }, [open]);
   const now = new Date();
   const displayInvoice = formatInvoiceNumber(invoiceNumber, saleId);
 
@@ -156,7 +159,32 @@ ${t('receipt.thankYou')}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className={expanded ? "max-w-3xl max-h-[90vh] overflow-y-auto" : "max-w-sm"}>
+        {!expanded && (
+          <div className="flex flex-col items-center text-center gap-3 py-2">
+            <CheckCircle2 className="w-14 h-14 text-success" />
+            <p className="text-lg font-bold">{t('receipt.saved')}</p>
+            <span className="font-mono text-primary font-bold" dir="ltr">{displayInvoice}</span>
+            <p className="text-sm text-muted-foreground">
+              {total.toFixed(3)} {CURRENCY} · {paymentMethod === 'cash' ? t('receipt.cash') : t('receipt.credit')}
+            </p>
+            <div className="grid grid-cols-3 gap-2 w-full mt-2">
+              <button onClick={handlePrint} className="pos-button-primary text-sm flex-col py-3">
+                <Printer className="w-5 h-5" /> {t('receipt.print')}
+              </button>
+              <button onClick={handleShare} className="pos-button-success text-sm flex-col py-3">
+                <MessageCircle className="w-5 h-5" /> {t('receipt.send')}
+              </button>
+              <button onClick={() => onOpenChange(false)} className="pos-button-outline text-sm flex-col py-3">
+                <ChevronLeft className="w-5 h-5" /> {t('receipt.finish')}
+              </button>
+            </div>
+            <button onClick={() => setExpanded(true)} className="text-xs text-muted-foreground underline flex items-center gap-1">
+              <Eye className="w-3 h-3" /> {t('receipt.viewFull')}
+            </button>
+          </div>
+        )}
+        <div className={expanded ? '' : 'hidden'}>
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between gap-2 flex-wrap">
             <span className="flex items-center gap-2">
@@ -419,6 +447,7 @@ ${t('receipt.thankYou')}
           <button onClick={handleShare} className="pos-button-outline text-sm">
             <Share2 className="w-4 h-4" /> {t('receipt.share')}
           </button>
+        </div>
         </div>
       </DialogContent>
     </Dialog>
