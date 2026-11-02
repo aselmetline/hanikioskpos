@@ -5,6 +5,7 @@ import { useT } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
 import { ReceiptPrinter } from './ReceiptPrinter';
 import { CashPaymentModal } from './CashPaymentModal';
+import { CustomerPicker } from './CustomerPicker';
 
 interface CheckoutResult {
   saleId: string;
@@ -365,16 +366,7 @@ export function CartSheet({
           <>
             {/* Customer Selection */}
             <div className="px-4 py-2 border-t border-border">
-              <select
-                value={selectedCustomerId}
-                onChange={(e) => setSelectedCustomerId(e.target.value)}
-                className="pos-input text-sm"
-              >
-                <option value="">{t('sell.noCustomer')}</option>
-                {customers.map(c => (
-                  <option key={c.id} value={c.id}>{c.name} - {c.phone}</option>
-                ))}
-              </select>
+              <CustomerPicker customers={customers} value={selectedCustomerId} onChange={setSelectedCustomerId} />
               {selectedCustomer ? (
                 <div className="mt-2 rounded-xl border border-border bg-muted/40 p-2 text-xs space-y-1">
                   <div className="flex justify-between">
