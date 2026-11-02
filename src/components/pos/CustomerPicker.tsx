@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Search, X, User } from 'lucide-react';
 import { Customer } from '@/types/pos';
-import { useT } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Props {
   customers: Customer[];
@@ -20,7 +20,7 @@ export function filterCustomers(customers: Customer[], query: string, limit = 8)
 }
 
 export function CustomerPicker({ customers, value, onChange }: Props) {
-  const { lang } = useT();
+  const { language: lang } = useLanguage();
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const selected = customers.find(c => c.id === value);
