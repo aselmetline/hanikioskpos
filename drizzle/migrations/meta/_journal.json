@@ -29,6 +29,13 @@
       "when": 1790839660220,
       "tag": "0003_create_ai_copilot_infrastructure",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793629237428,
+      "tag": "0004_supplier_transactions",
+      "breakpoints": true
     }
   ]
 }
