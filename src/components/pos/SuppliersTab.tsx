@@ -10,6 +10,10 @@ import { Plus, Search, Phone, MapPin, FileText, Trash2, Edit, Truck, Banknote } 
 import { Supplier } from '@/hooks/useSuppliers';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { SupplierStatementDialog } from './SupplierStatementDialog';
 
 interface SuppliersTabProps {
   suppliers: Supplier[];
@@ -32,6 +36,12 @@ export function SuppliersTab({
   const [debtSupplier, setDebtSupplier] = useState<Supplier | null>(null);
   const [debtAmount, setDebtAmount] = useState('');
   const [debtType, setDebtType] = useState<'add' | 'pay'>('add');
+  const [debtNotes, setDebtNotes] = useState('');
+  const [fromCashbox, setFromCashbox] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [statementSupplier, setStatementSupplier] = useState<Supplier | null>(null);
+  const { language } = useLanguage();
+  const ar = language === 'ar';
   const [form, setForm] = useState({ name: '', phone: '', address: '', notes: '' });
 
   const resetForm = () => setForm({ name: '', phone: '', address: '', notes: '' });
@@ -49,11 +59,21 @@ export function SuppliersTab({
   };
 
   const handleDebt = async () => {
-    if (!debtSupplier || !debtAmount) return;
-    const amount = parseFloat(debtAmount);
+    if (!debtSupplier || !debtAmount || saving) return;
+    const amount = Math.round(parseFloat(debtAmount) * 1000) / 1000;
     if (isNaN(amount) || amount <= 0) return;
-    await onUpdateDebt(debtSupplier.id, debtType === 'add' ? amount : -amount);
-    setDebtSupplier(null); setDebtAmount('');
+    setSaving(true);
+    const { error } = await supabase.rpc('record_supplier_transaction', {
+      p_supplier_id: debtSupplier.id,
+      p_type: debtType === 'add' ? 'debt' : 'payment',
+      p_amount: amount,
+      p_notes: debtNotes.trim() || null,
+      p_from_cashbox: debtType === 'pay' && fromCashbox,
+    });
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(ar ? 'تم الحفظ' : 'Enregistré');
+    setDebtSupplier(null); setDebtAmount(''); setDebtNotes(''); setFromCashbox(false);
   };
 
   const totalDebt = suppliers.reduce((sum, s) => sum + s.debtBalance, 0);
