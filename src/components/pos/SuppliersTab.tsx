@@ -10,6 +10,10 @@ import { Plus, Search, Phone, MapPin, FileText, Trash2, Edit, Truck, Banknote } 
 import { Supplier } from '@/hooks/useSuppliers';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { SupplierStatementDialog } from './SupplierStatementDialog';
 
 interface SuppliersTabProps {
   suppliers: Supplier[];
@@ -32,6 +36,12 @@ export function SuppliersTab({
   const [debtSupplier, setDebtSupplier] = useState<Supplier | null>(null);
   const [debtAmount, setDebtAmount] = useState('');
   const [debtType, setDebtType] = useState<'add' | 'pay'>('add');
+  const [debtNotes, setDebtNotes] = useState('');
+  const [fromCashbox, setFromCashbox] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [statementSupplier, setStatementSupplier] = useState<Supplier | null>(null);
+  const { language } = useLanguage();
+  const ar = language === 'ar';
   const [form, setForm] = useState({ name: '', phone: '', address: '', notes: '' });
 
   const resetForm = () => setForm({ name: '', phone: '', address: '', notes: '' });
@@ -49,11 +59,21 @@ export function SuppliersTab({
   };
 
   const handleDebt = async () => {
-    if (!debtSupplier || !debtAmount) return;
-    const amount = parseFloat(debtAmount);
+    if (!debtSupplier || !debtAmount || saving) return;
+    const amount = Math.round(parseFloat(debtAmount) * 1000) / 1000;
     if (isNaN(amount) || amount <= 0) return;
-    await onUpdateDebt(debtSupplier.id, debtType === 'add' ? amount : -amount);
-    setDebtSupplier(null); setDebtAmount('');
+    setSaving(true);
+    const { error } = await supabase.rpc('record_supplier_transaction', {
+      p_supplier_id: debtSupplier.id,
+      p_type: debtType === 'add' ? 'debt' : 'payment',
+      p_amount: amount,
+      p_notes: debtNotes.trim() || null,
+      p_from_cashbox: debtType === 'pay' && fromCashbox,
+    });
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(ar ? 'تم الحفظ' : 'Enregistré');
+    setDebtSupplier(null); setDebtAmount(''); setDebtNotes(''); setFromCashbox(false);
   };
 
   const totalDebt = suppliers.reduce((sum, s) => sum + s.debtBalance, 0);
@@ -140,6 +160,9 @@ export function SuppliersTab({
                     <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs" onClick={() => { setDebtSupplier(supplier); setDebtType('pay'); }}>
                       <Banknote className="w-3 h-3" /> {t('suppliers.payment')}
                     </Button>
+                    <Button size="sm" variant="ghost" className="px-2" title={ar ? 'كشف حساب' : 'Relevé'} onClick={() => setStatementSupplier(supplier)}>
+                      <FileText className="w-4 h-4" />
+                    </Button>
                     <Button size="sm" variant="ghost" className="px-2" onClick={() => { setForm({ name: supplier.name, phone: supplier.phone, address: supplier.address, notes: supplier.notes }); setEditSupplier(supplier); }}>
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -196,12 +219,25 @@ export function SuppliersTab({
               <Label>{t('common.amount')}</Label>
               <Input type="number" value={debtAmount} onChange={(e) => setDebtAmount(e.target.value)} placeholder="0.000" dir="ltr" step="0.001" />
             </div>
-            <Button className="w-full" onClick={handleDebt} variant={debtType === 'pay' ? 'default' : 'destructive'}>
+            <div>
+              <Label>{t('common.notes')}</Label>
+              <Input value={debtNotes} onChange={(e) => setDebtNotes(e.target.value)} placeholder={t('common.notes')} />
+            </div>
+            {debtType === 'pay' && (
+              <div className="flex items-center justify-between rounded-md border p-2">
+                <Label className="text-sm">{ar ? 'خصم المبلغ من الصندوق' : 'Déduire de la caisse'}</Label>
+                <Switch checked={fromCashbox} onCheckedChange={setFromCashbox} />
+              </div>
+            )}
+            <Button className="w-full" disabled={saving} onClick={handleDebt} variant={debtType === 'pay' ? 'default' : 'destructive'}>
               {t('common.confirm')}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      <SupplierStatementDialog supplier={statementSupplier} onClose={() => setStatementSupplier(null)} />
+
 
       {/* Delete Confirm */}
       <DeleteConfirmDialog
