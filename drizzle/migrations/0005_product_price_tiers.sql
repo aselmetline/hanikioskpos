@@ -1,0 +1,1 @@
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS price2 numeric, ADD COLUMN IF NOT EXISTS price3 numeric;
