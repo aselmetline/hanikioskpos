@@ -17,6 +17,8 @@ interface AddProductDialogProps {
     nameAr: string;
     price: number;
     cost?: number;
+    price2?: number;
+    price3?: number;
     category: string;
     barcode?: string;
     stock: number;
@@ -36,6 +38,8 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
     nameAr: '',
     price: '',
     cost: '',
+    price2: '',
+    price3: '',
     category: 'daily',
     barcode: '',
     stock: '',
@@ -65,6 +69,8 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
         nameAr: formData.nameAr.trim(),
         price: isOpenPrice ? 0 : parseFloat(formData.price),
         cost: formData.cost ? parseFloat(formData.cost) : undefined,
+        price2: !isOpenPrice && parseFloat(formData.price2) > 0 ? parseFloat(formData.price2) : undefined,
+        price3: !isOpenPrice && parseFloat(formData.price3) > 0 ? parseFloat(formData.price3) : undefined,
         category: formData.category,
         barcode: formData.barcode.trim() || undefined,
         stock: isOpenPrice ? 999999 : (parseInt(formData.stock) || 0),
@@ -83,6 +89,8 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
         nameAr: '',
         price: '',
         cost: '',
+    price2: '',
+    price3: '',
         category: 'daily',
         barcode: '',
         stock: '',
@@ -207,6 +215,29 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
               />
             </div>
           </div>
+
+          {!isOpenPrice && (
+            <div className="grid grid-cols-2 gap-3">
+              {(['price2', 'price3'] as const).map((k) => (
+                <div key={k} className="space-y-2">
+                  <Label htmlFor={`add-${k}`} className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" />
+                    <span>{t(k === 'price2' ? 'inventory.price2' : 'inventory.price3')}</span>
+                  </Label>
+                  <Input
+                    id={`add-${k}`}
+                    type="number"
+                    step="0.001"
+                    min="0"
+                    value={formData[k]}
+                    onChange={(e) => setFormData({ ...formData, [k]: e.target.value })}
+                    placeholder={t('inventory.optional')}
+                    dir="ltr"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
 
 
           {/* Category */}
