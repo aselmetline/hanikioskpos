@@ -36,6 +36,7 @@ interface SellTabProps {
   onClearCart?: () => void;
   onLoadCart?: (items: CartItem[], discount: number) => void;
   onUpdateItemDiscount?: (productId: string, discount: number) => void;
+  onSetItemTier?: (productId: string, tier: 1 | 2 | 3) => void;
   onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<{ saleId: string; invoiceNumber?: number; fiscalStamp?: number; total?: number; taxBreakdown?: Record<string, { base: number; tax: number }> } | null>;
   customers: Customer[];
   loading?: boolean;
@@ -73,6 +74,7 @@ export function SellTab({
   onClearCart,
   onLoadCart,
   onUpdateItemDiscount,
+  onSetItemTier,
   onCheckout,
   customers,
   loading = false,
@@ -315,6 +317,7 @@ export function SellTab({
         onSetDiscount={onSetDiscount}
         onClearCart={onClearCart}
         onUpdateItemDiscount={onUpdateItemDiscount}
+        onSetItemTier={onSetItemTier}
         taxBreakdown={taxBreakdown}
         onCheckout={onCheckout}
         customers={customers}

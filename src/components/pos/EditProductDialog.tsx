@@ -26,6 +26,8 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
     nameAr: '',
     price: '',
     cost: '',
+    price2: '',
+    price3: '',
     category: 'daily',
     barcode: '',
     stock: '',
@@ -42,6 +44,8 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
         nameAr: product.nameAr || '',
         price: product.price?.toString() || '',
         cost: product.cost?.toString() || '',
+        price2: product.price2?.toString() || '',
+        price3: product.price3?.toString() || '',
         category: product.category || 'daily',
         barcode: product.barcode || '',
         stock: product.stock?.toString() || '0',
@@ -73,6 +77,8 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
         nameAr: formData.nameAr.trim(),
         price: isOpenPrice ? 0 : parseFloat(formData.price),
         cost: formData.cost ? parseFloat(formData.cost) : undefined,
+        price2: !isOpenPrice && parseFloat(formData.price2) > 0 ? parseFloat(formData.price2) : undefined,
+        price3: !isOpenPrice && parseFloat(formData.price3) > 0 ? parseFloat(formData.price3) : undefined,
         category: formData.category,
         barcode: formData.barcode.trim() || undefined,
         stock: isOpenPrice ? 999999 : (parseInt(formData.stock) || 0),
@@ -195,6 +201,29 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
               />
             </div>
           </div>
+          {!isOpenPrice && (
+            <div className="grid grid-cols-2 gap-3">
+              {(['price2', 'price3'] as const).map((k) => (
+                <div key={k} className="space-y-2">
+                  <Label htmlFor={`edit-${k}`} className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" />
+                    <span>{t(k === 'price2' ? 'inventory.price2' : 'inventory.price3')}</span>
+                  </Label>
+                  <Input
+                    id={`edit-${k}`}
+                    type="number"
+                    step="0.001"
+                    min="0"
+                    value={formData[k]}
+                    onChange={(e) => setFormData({ ...formData, [k]: e.target.value })}
+                    placeholder={t('inventory.optional')}
+                    dir="ltr"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
 
           <div className="space-y-2">
             <Label>{t('editProduct.category')}</Label>

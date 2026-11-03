@@ -314,6 +314,8 @@ export type Database = {
           name: string
           name_ar: string
           price: number
+          price2: number | null
+          price3: number | null
           stock: number
           tax_rate: number
           unit: string
@@ -332,6 +334,8 @@ export type Database = {
           name: string
           name_ar: string
           price?: number
+          price2?: number | null
+          price3?: number | null
           stock?: number
           tax_rate?: number
           unit?: string
@@ -350,6 +354,8 @@ export type Database = {
           name?: string
           name_ar?: string
           price?: number
+          price2?: number | null
+          price3?: number | null
           stock?: number
           tax_rate?: number
           unit?: string

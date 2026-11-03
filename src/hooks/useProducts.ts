@@ -114,6 +114,8 @@ export function useProducts() {
           nameAr: p.name_ar,
           price: Number(p.price),
           cost: p.cost ? Number(p.cost) : undefined,
+          price2: p.price2 ? Number(p.price2) : undefined,
+          price3: p.price3 ? Number(p.price3) : undefined,
           category: p.category,
           barcode: p.barcode || undefined,
           image: p.image_url || undefined,
@@ -173,6 +175,8 @@ export function useProducts() {
         name_ar: product.nameAr,
         price: product.price,
         cost: product.cost || 0,
+        price2: product.price2 ?? null,
+        price3: product.price3 ?? null,
         category: product.category,
         barcode: product.barcode || null,
         image_url: product.image || null,
@@ -197,6 +201,8 @@ export function useProducts() {
       nameAr: data.name_ar,
       price: Number(data.price),
       cost: data.cost ? Number(data.cost) : undefined,
+      price2: data.price2 ? Number(data.price2) : undefined,
+      price3: data.price3 ? Number(data.price3) : undefined,
       category: data.category,
       barcode: data.barcode || undefined,
       image: data.image_url || undefined,
@@ -218,6 +224,8 @@ export function useProducts() {
     if (updates.nameAr !== undefined) dbUpdates.name_ar = updates.nameAr;
     if (updates.price !== undefined) dbUpdates.price = updates.price;
     if (updates.cost !== undefined) dbUpdates.cost = updates.cost;
+    if ('price2' in updates) dbUpdates.price2 = updates.price2 ?? null;
+    if ('price3' in updates) dbUpdates.price3 = updates.price3 ?? null;
     if (updates.category !== undefined) dbUpdates.category = updates.category;
     if (updates.barcode !== undefined) dbUpdates.barcode = updates.barcode;
     if (updates.image !== undefined) dbUpdates.image_url = updates.image;

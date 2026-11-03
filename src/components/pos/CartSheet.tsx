@@ -28,6 +28,7 @@ interface CartSheetProps {
   onSetDiscount: (discount: number) => void;
   onClearCart?: () => void;
   onUpdateItemDiscount?: (productId: string, discount: number) => void;
+  onSetItemTier?: (productId: string, tier: 1 | 2 | 3) => void;
   onCheckout: (paymentMethod: 'cash' | 'credit', customer?: Customer, pointsToRedeem?: number) => Promise<CheckoutResult | null>;
   customers: Customer[];
   kioskName?: string;
@@ -57,6 +58,7 @@ export function CartSheet({
   onSetDiscount,
   onClearCart,
   onUpdateItemDiscount,
+  onSetItemTier,
   onCheckout,
   customers,
   kioskName,
@@ -325,6 +327,26 @@ export function CartSheet({
                   </button>
                 </div>
                 </div>
+
+                {onSetItemTier && !item.product.isOpenPrice && (item.product.price2 || item.product.price3) && (
+                  <div className="flex gap-1 pt-1" role="group" aria-label={t('sell.priceTier')}>
+                    {([1, 2, 3] as const).map((tier) => {
+                      const price = tier === 1 ? (item.basePrice ?? item.product.price) : tier === 2 ? item.product.price2 : item.product.price3;
+                      if (!price) return null;
+                      const active = (item.tier ?? 1) === tier;
+                      return (
+                        <button
+                          key={tier}
+                          type="button"
+                          onClick={() => onSetItemTier(item.product.id, tier)}
+                          className={`flex-1 rounded-lg px-2 py-1 text-xs font-bold border ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted text-foreground border-border'}`}
+                        >
+                          {t('sell.priceShort')}{tier} · <span dir="ltr">{price.toFixed(3)}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {editingDiscountId === item.product.id && (
                   <div className="flex gap-2 items-center pt-1">

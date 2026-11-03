@@ -185,6 +185,7 @@ const Index = () => {
             onClearCart={cart.clearCart}
             onLoadCart={cart.loadCart}
             onUpdateItemDiscount={cart.updateItemDiscount}
+            onSetItemTier={cart.setItemTier}
             onCheckout={handleCheckout}
             customers={customers.customers}
             loading={products.loading}

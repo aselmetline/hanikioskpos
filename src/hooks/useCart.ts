@@ -40,6 +40,16 @@ export function useCart(defaultTaxRate: number = 0.19, taxEnabled: boolean = tru
     ));
   }, []);
 
+  const setItemTier = useCallback((productId: string, tier: 1 | 2 | 3) => {
+    setItems(prev => prev.map(item => {
+      if (item.product.id !== productId) return item;
+      const base = item.basePrice ?? item.product.price;
+      const price = tier === 1 ? base : tier === 2 ? item.product.price2 : item.product.price3;
+      if (!price || price <= 0) return item;
+      return { ...item, tier, basePrice: base, discount: 0, product: { ...item.product, price } };
+    }));
+  }, []);
+
   const clearCart = useCallback(() => {
     setItems([]);
     setGlobalDiscount(0);
@@ -89,6 +99,7 @@ export function useCart(defaultTaxRate: number = 0.19, taxEnabled: boolean = tru
     removeItem,
     updateQuantity,
     updateItemDiscount,
+    setItemTier,
     clearCart,
     loadCart,
     globalDiscount,

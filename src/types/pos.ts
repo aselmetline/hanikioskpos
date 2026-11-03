@@ -4,6 +4,9 @@ export interface Product {
   nameAr: string;
   price: number;
   cost?: number;
+  /** Optional alternative selling prices (tier 2 / tier 3) */
+  price2?: number;
+  price3?: number;
   category: string;
   barcode?: string;
   image?: string;
@@ -21,6 +24,10 @@ export interface CartItem {
   product: Product;
   quantity: number;
   discount: number;
+  /** Selected price tier (1 = default price) */
+  tier?: 1 | 2 | 3;
+  /** Original tier-1 price, kept when switching tiers */
+  basePrice?: number;
 }
 
 export interface Customer {
