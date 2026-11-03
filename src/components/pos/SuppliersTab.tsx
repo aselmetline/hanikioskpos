@@ -160,6 +160,9 @@ export function SuppliersTab({
                     <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs" onClick={() => { setDebtSupplier(supplier); setDebtType('pay'); }}>
                       <Banknote className="w-3 h-3" /> {t('suppliers.payment')}
                     </Button>
+                    <Button size="sm" variant="ghost" className="px-2" title={ar ? 'كشف حساب' : 'Relevé'} onClick={() => setStatementSupplier(supplier)}>
+                      <FileText className="w-4 h-4" />
+                    </Button>
                     <Button size="sm" variant="ghost" className="px-2" onClick={() => { setForm({ name: supplier.name, phone: supplier.phone, address: supplier.address, notes: supplier.notes }); setEditSupplier(supplier); }}>
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -216,12 +219,25 @@ export function SuppliersTab({
               <Label>{t('common.amount')}</Label>
               <Input type="number" value={debtAmount} onChange={(e) => setDebtAmount(e.target.value)} placeholder="0.000" dir="ltr" step="0.001" />
             </div>
-            <Button className="w-full" onClick={handleDebt} variant={debtType === 'pay' ? 'default' : 'destructive'}>
+            <div>
+              <Label>{t('common.notes')}</Label>
+              <Input value={debtNotes} onChange={(e) => setDebtNotes(e.target.value)} placeholder={t('common.notes')} />
+            </div>
+            {debtType === 'pay' && (
+              <div className="flex items-center justify-between rounded-md border p-2">
+                <Label className="text-sm">{ar ? 'خصم المبلغ من الصندوق' : 'Déduire de la caisse'}</Label>
+                <Switch checked={fromCashbox} onCheckedChange={setFromCashbox} />
+              </div>
+            )}
+            <Button className="w-full" disabled={saving} onClick={handleDebt} variant={debtType === 'pay' ? 'default' : 'destructive'}>
               {t('common.confirm')}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      <SupplierStatementDialog supplier={statementSupplier} onClose={() => setStatementSupplier(null)} />
+
 
       {/* Delete Confirm */}
       <DeleteConfirmDialog
