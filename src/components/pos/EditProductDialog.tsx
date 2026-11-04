@@ -1,3 +1,4 @@
+import { parseQuantity } from '@/lib/quantity';
 import { useState, useEffect } from 'react';
 import { X, Package, Barcode, DollarSign, Hash, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -81,9 +82,9 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
         price3: !isOpenPrice && parseFloat(formData.price3) > 0 ? parseFloat(formData.price3) : undefined,
         category: formData.category,
         barcode: formData.barcode.trim() || undefined,
-        stock: isOpenPrice ? 999999 : (parseInt(formData.stock) || 0),
+        stock: isOpenPrice ? 999999 : (parseQuantity(formData.stock) || 0),
         unit: isOpenPrice ? 'دينار' : formData.unit,
-        lowStockAlert: isOpenPrice ? 0 : (parseInt(formData.lowStockAlert) || 10),
+        lowStockAlert: isOpenPrice ? 0 : (formData.lowStockAlert === '' ? 10 : parseQuantity(formData.lowStockAlert)),
         taxRate: parseFloat(formData.taxRate),
         isOpenPrice,
       });
@@ -268,7 +269,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
               </Label>
               <Input
                 id="editStock"
-                type="number"
+                type="text" inputMode="decimal" step="any" pattern="[0-9٠-٩]+([.,٫،][0-9٠-٩]{1,3})?"
                 min="0"
                 value={formData.stock}
                 onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
@@ -319,7 +320,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
             </Label>
             <Input
               id="editLowStockAlert"
-              type="number"
+              type="text" inputMode="decimal" step="any" pattern="[0-9٠-٩]+([.,٫،][0-9٠-٩]{1,3})?"
               min="0"
               value={formData.lowStockAlert}
               onChange={(e) => setFormData({ ...formData, lowStockAlert: e.target.value })}

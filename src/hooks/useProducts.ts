@@ -1,3 +1,4 @@
+import { addQuantity, roundQuantity } from '@/lib/quantity';
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Product } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,15 +26,15 @@ function snapshotBase(product: Product, dbUpdates: Record<string, unknown>) {
     category: product.category,
     barcode: product.barcode ?? null,
     image_url: product.image ?? null,
-    stock: product.stock,
+    stock_decimal: product.stock,
     unit: product.unit,
-    low_stock_alert: product.lowStockAlert,
+    low_stock_alert_decimal: product.lowStockAlert,
     tax_rate: product.taxRate ?? 0.19,
     is_open_price: product.isOpenPrice ?? false,
   };
   const base: Record<string, unknown> = {};
   Object.keys(dbUpdates).forEach(k => { base[k] = map[k]; });
-  base.stock = product.stock;
+  base.stock_decimal = product.stock;
   return base;
 }
 
@@ -62,7 +63,7 @@ export function useProducts() {
       setProducts(prev =>
         prev.map(p => {
           const d = deltas.find(x => x.productId === p.id);
-          return d ? { ...p, stock: Math.max(0, p.stock - d.quantity) } : p;
+          return d ? { ...p, stock: Math.max(0, addQuantity(p.stock, -d.quantity)) } : p;
         }),
       );
     };
@@ -119,9 +120,9 @@ export function useProducts() {
           category: p.category,
           barcode: p.barcode || undefined,
           image: p.image_url || undefined,
-          stock: p.stock,
+          stock: Number(p.stock_decimal ?? p.stock),
           unit: p.unit,
-          lowStockAlert: p.low_stock_alert,
+          lowStockAlert: Number(p.low_stock_alert_decimal ?? p.low_stock_alert),
           taxRate: p.tax_rate != null ? Number(p.tax_rate) : 0.19,
           isOpenPrice: !!p.is_open_price,
         })));
@@ -180,9 +181,9 @@ export function useProducts() {
         category: product.category,
         barcode: product.barcode || null,
         image_url: product.image || null,
-        stock: product.stock,
+        stock_decimal: product.stock,
         unit: product.unit,
-        low_stock_alert: product.lowStockAlert,
+        low_stock_alert_decimal: product.lowStockAlert,
         tax_rate: product.taxRate ?? 0.19,
         is_open_price: product.isOpenPrice ?? false,
       })
@@ -206,9 +207,9 @@ export function useProducts() {
       category: data.category,
       barcode: data.barcode || undefined,
       image: data.image_url || undefined,
-      stock: data.stock,
+      stock: Number(data.stock_decimal ?? data.stock),
       unit: data.unit,
-      lowStockAlert: data.low_stock_alert,
+      lowStockAlert: Number(data.low_stock_alert_decimal ?? data.low_stock_alert),
       taxRate: data.tax_rate != null ? Number(data.tax_rate) : 0.19,
       isOpenPrice: !!data.is_open_price,
     };
@@ -229,9 +230,9 @@ export function useProducts() {
     if (updates.category !== undefined) dbUpdates.category = updates.category;
     if (updates.barcode !== undefined) dbUpdates.barcode = updates.barcode;
     if (updates.image !== undefined) dbUpdates.image_url = updates.image;
-    if (updates.stock !== undefined) dbUpdates.stock = updates.stock;
+    if (updates.stock !== undefined) dbUpdates.stock_decimal = roundQuantity(updates.stock);
     if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
-    if (updates.lowStockAlert !== undefined) dbUpdates.low_stock_alert = updates.lowStockAlert;
+    if (updates.lowStockAlert !== undefined) dbUpdates.low_stock_alert_decimal = roundQuantity(updates.lowStockAlert);
     if (updates.taxRate !== undefined) dbUpdates.tax_rate = updates.taxRate;
     if (updates.isOpenPrice !== undefined) dbUpdates.is_open_price = updates.isOpenPrice;
 
@@ -239,7 +240,7 @@ export function useProducts() {
     const current = productsRef.current.find(p => p.id === id);
     const base = current ? snapshotBase(current, dbUpdates) : {};
     const stockDelta =
-      updates.stock !== undefined && current ? updates.stock - current.stock : 0;
+      updates.stock !== undefined && current ? addQuantity(updates.stock, -current.stock) : 0;
 
     const applyLocally = () =>
       setProducts(prev => prev.map(p => (p.id === id ? { ...p, ...updates } : p)));
@@ -305,8 +306,8 @@ export function useProducts() {
     const product = products.find(p => p.id === id);
     if (!product) return;
 
-    const newStock = isAddition ? product.stock + quantity : Math.max(0, product.stock - quantity);
-    const stockDelta = newStock - product.stock;
+    const newStock = isAddition ? addQuantity(product.stock, quantity) : Math.max(0, addQuantity(product.stock, -quantity));
+    const stockDelta = addQuantity(newStock, -product.stock);
 
     const applyLocally = () =>
       setProducts(prev => prev.map(p => (p.id === id ? { ...p, stock: newStock } : p)));
@@ -319,8 +320,8 @@ export function useProducts() {
         userId: user.id,
         productId: id,
         kind: 'stock',
-        fields: { stock: newStock },
-        base: { stock: product.stock },
+        fields: { stock_decimal: newStock },
+        base: { stock_decimal: product.stock },
         stockDelta,
       });
       applyLocally();
@@ -334,7 +335,7 @@ export function useProducts() {
 
     const { error } = await supabase
       .from('products')
-      .update({ stock: newStock })
+      .update({ stock_decimal: newStock })
       .eq('id', id);
 
     if (error) {

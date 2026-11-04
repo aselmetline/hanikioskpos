@@ -33,7 +33,7 @@ export const useSales = () => {
       } else {
         const mappedSales: Sale[] = data.map(s => ({
           id: s.id,
-          items: (s.sale_items || []).map((item: { product_id: string | null; product_name: string; price: number; quantity: number; discount: number; tax_rate?: number }) => ({
+          items: (s.sale_items || []).map((item: { product_id: string | null; product_name: string; price: number; quantity: number; quantity_decimal?: number; product_unit?: string; discount: number; tax_rate?: number }) => ({
             product: {
               id: item.product_id || '',
               name: item.product_name,
@@ -41,11 +41,11 @@ export const useSales = () => {
               price: Number(item.price),
               category: '',
               stock: 0,
-              unit: '',
+              unit: item.product_unit || '',
               lowStockAlert: 0,
               taxRate: item.tax_rate != null ? Number(item.tax_rate) : 0.19,
             },
-            quantity: item.quantity,
+            quantity: Number(item.quantity_decimal ?? item.quantity),
             discount: Number(item.discount)
           })),
           subtotal: Number(s.subtotal),

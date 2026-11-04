@@ -203,6 +203,7 @@ export type Database = {
           source_product_id: string | null
           source_product_name: string
           source_quantity: number
+          source_quantity_decimal: number | null
           source_total_value: number
           source_unit_value: number
           target_product_id: string | null
@@ -219,6 +220,7 @@ export type Database = {
           source_product_id?: string | null
           source_product_name?: string
           source_quantity?: number
+          source_quantity_decimal?: number | null
           source_total_value?: number
           source_unit_value?: number
           target_product_id?: string | null
@@ -235,6 +237,7 @@ export type Database = {
           source_product_id?: string | null
           source_product_name?: string
           source_quantity?: number
+          source_quantity_decimal?: number | null
           source_total_value?: number
           source_unit_value?: number
           target_product_id?: string | null
@@ -311,12 +314,14 @@ export type Database = {
           image_url: string | null
           is_open_price: boolean
           low_stock_alert: number
+          low_stock_alert_decimal: number | null
           name: string
           name_ar: string
           price: number
           price2: number | null
           price3: number | null
           stock: number
+          stock_decimal: number | null
           tax_rate: number
           unit: string
           updated_at: string
@@ -331,12 +336,14 @@ export type Database = {
           image_url?: string | null
           is_open_price?: boolean
           low_stock_alert?: number
+          low_stock_alert_decimal?: number | null
           name: string
           name_ar: string
           price?: number
           price2?: number | null
           price3?: number | null
           stock?: number
+          stock_decimal?: number | null
           tax_rate?: number
           unit?: string
           updated_at?: string
@@ -351,12 +358,14 @@ export type Database = {
           image_url?: string | null
           is_open_price?: boolean
           low_stock_alert?: number
+          low_stock_alert_decimal?: number | null
           name?: string
           name_ar?: string
           price?: number
           price2?: number | null
           price3?: number | null
           stock?: number
+          stock_decimal?: number | null
           tax_rate?: number
           unit?: string
           updated_at?: string
@@ -397,8 +406,10 @@ export type Database = {
           id: string
           product_id: string | null
           product_name: string
+          product_unit: string | null
           purchase_id: string
           quantity: number
+          quantity_decimal: number | null
           total: number
         }
         Insert: {
@@ -406,8 +417,10 @@ export type Database = {
           id?: string
           product_id?: string | null
           product_name: string
+          product_unit?: string | null
           purchase_id: string
           quantity?: number
+          quantity_decimal?: number | null
           total?: number
         }
         Update: {
@@ -415,8 +428,10 @@ export type Database = {
           id?: string
           product_id?: string | null
           product_name?: string
+          product_unit?: string | null
           purchase_id?: string
           quantity?: number
+          quantity_decimal?: number | null
           total?: number
         }
         Relationships: [
@@ -481,7 +496,9 @@ export type Database = {
           price: number
           product_id: string | null
           product_name: string
+          product_unit: string | null
           quantity: number
+          quantity_decimal: number | null
           sale_id: string
           tax_rate: number
           total: number
@@ -492,7 +509,9 @@ export type Database = {
           price: number
           product_id?: string | null
           product_name: string
+          product_unit?: string | null
           quantity?: number
+          quantity_decimal?: number | null
           sale_id: string
           tax_rate?: number
           total?: number
@@ -503,7 +522,9 @@ export type Database = {
           price?: number
           product_id?: string | null
           product_name?: string
+          product_unit?: string | null
           quantity?: number
+          quantity_decimal?: number | null
           sale_id?: string
           tax_rate?: number
           total?: number
@@ -841,6 +862,15 @@ export type Database = {
       }
       next_invoice_number: { Args: { p_user_id: string }; Returns: number }
       process_internal_transfer: {
+        Args: {
+          p_notes?: string
+          p_source_product_id: string
+          p_source_quantity: number
+          p_target_product_id: string
+        }
+        Returns: Json
+      }
+      process_internal_transfer_decimal: {
         Args: {
           p_notes?: string
           p_source_product_id: string

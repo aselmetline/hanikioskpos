@@ -1,3 +1,4 @@
+import { parseQuantity } from '@/lib/quantity';
 import { useMemo, useState } from 'react';
 import { ArrowLeftRight, Repeat, History, Coins, Calculator } from 'lucide-react';
 import { Product } from '@/types/pos';
@@ -57,7 +58,7 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
 
   const source = products.find(p => p.id === sourceId);
   const target = products.find(p => p.id === targetId);
-  const qty = Math.floor(Number(quantity) || 0);
+  const qty = parseQuantity(quantity) || 0;
   const sourceUnit = source ? costOf(source) : 0;
   const targetUnit = target ? costOf(target) : 0;
 
@@ -137,9 +138,9 @@ export function TransfersTab({ products, transfers, loading = false, onTransfer 
           <div className="space-y-1.5">
             <Label>{t('transfers.quantity')}</Label>
             <Input
-              type="number"
-              min={1}
-              inputMode="numeric"
+              type="text"
+              step="any"
+              inputMode="decimal"
               value={quantity}
               onChange={e => setQuantity(e.target.value)}
             />

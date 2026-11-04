@@ -1,3 +1,4 @@
+import { formatQuantity } from '@/lib/quantity';
 import { Download, Printer, Share2 } from 'lucide-react';
 import { PurchaseItem } from '@/types/pos';
 import { Supplier } from '@/hooks/useSuppliers';
@@ -98,7 +99,7 @@ ${t('receipt.invoiceNumber')}: ${invoiceNumber}
 ${t('receipt.date')}: ${format(invoiceDate, 'dd/MM/yyyy')}
 ${supplier ? `${t('receipt.supplier')}: ${supplier.name}` : ''}
 ${'─'.repeat(20)}
-${items.map(item => `${productLabel(item)} x${item.quantity} @ ${item.cost.toFixed(3)} = ${item.total.toFixed(3)}`).join('\n')}
+${items.map(item => `${productLabel(item)} x${formatQuantity(item.quantity)} ${item.product.unit} @ ${item.cost.toFixed(3)} = ${item.total.toFixed(3)}`).join('\n')}
 ${'─'.repeat(20)}
 ${t('receipt.total')}: ${total.toFixed(3)} TND
     `.trim();
@@ -230,7 +231,7 @@ ${t('receipt.total')}: ${total.toFixed(3)} TND
                 {items.map((item, idx) => (
                   <div key={idx} style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', padding: '14px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', alignItems: 'center' }}>
                     <div style={{ fontWeight: 600 }}>{productLabel(item)}</div>
-                    <div style={{ textAlign: 'center', fontWeight: 600 }}>{item.quantity}</div>
+                    <div style={{ textAlign: 'center', fontWeight: 600 }}>{formatQuantity(item.quantity)} {item.product.unit}</div>
                     <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">{item.cost.toFixed(3)}</div>
                     <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left', fontWeight: 600 }} dir="ltr">{item.total.toFixed(3)}</div>
                   </div>

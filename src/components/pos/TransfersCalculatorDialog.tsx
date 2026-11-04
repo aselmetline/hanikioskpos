@@ -1,3 +1,4 @@
+import { parseQuantity } from '@/lib/quantity';
 import { useMemo, useState } from 'react';
 import { Calculator, Search, Check } from 'lucide-react';
 import { Product } from '@/types/pos';
@@ -58,7 +59,7 @@ export function TransfersCalculatorDialog({
   const [search, setSearch] = useState('');
 
   const source = products.find(p => p.id === sourceId);
-  const qty = Math.floor(Number(quantity) || 0);
+  const qty = parseQuantity(quantity) || 0;
   const srcUnit = source ? unitValue(source, basis) : 0;
   const totalValue = Number((srcUnit * qty).toFixed(3));
   const srcMissingCost = !!source && basis === 'cost' && !(source.cost && source.cost > 0);
@@ -120,9 +121,9 @@ export function TransfersCalculatorDialog({
             <div className="space-y-1.5">
               <Label>{t('transfers.quantity')}</Label>
               <Input
-                type="number"
-                min={1}
-                inputMode="numeric"
+                type="text"
+                step="any"
+                inputMode="decimal"
                 value={quantity}
                 onChange={e => setQuantity(e.target.value)}
               />

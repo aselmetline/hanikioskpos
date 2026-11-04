@@ -1,3 +1,4 @@
+import { parseQuantity } from '@/lib/quantity';
 import * as XLSX from 'xlsx';
 import { supabase } from '@/integrations/supabase/client';
 import { ProgressCallback } from './types';
@@ -35,9 +36,9 @@ export async function importFullBackup(
               cost: parseFloat(String(r['التكلفة'] || 0)),
               category: String(r['التصنيف'] || 'daily'),
               barcode: r['الباركود'] ? String(r['الباركود']) : null,
-              stock: parseInt(String(r['الكمية'] || 0)),
+              stock_decimal: parseQuantity(String(r['الكمية'] || 0)),
               unit: String(r['الوحدة'] || 'قطعة'),
-              low_stock_alert: parseInt(String(r['تنبيه المخزون'] || 10)),
+              low_stock_alert_decimal: parseQuantity(String(r['تنبيه المخزون'] || 10)),
             }));
             const { error } = await supabase.from('products').insert(products);
             if (!error) imported.push(`المنتجات (${products.length})`);
@@ -88,7 +89,8 @@ export async function importFullBackup(
                       sale_id: saleData.id,
                       product_name: String(i['المنتج'] || ''),
                       price: parseFloat(String(i['السعر'] || 0)),
-                      quantity: parseInt(String(i['الكمية'] || 1)),
+                      quantity_decimal: parseQuantity(String(i['الكمية'] ?? 1)),
+                      product_unit: String(i['الوحدة'] || ''),
                       discount: parseFloat(String(i['الخصم'] || 0)),
                       total: parseFloat(String(i['الإجمالي'] || 0)),
                     }));
@@ -125,7 +127,8 @@ export async function importFullBackup(
                       purchase_id: purchaseData.id,
                       product_name: String(i['المنتج'] || ''),
                       cost: parseFloat(String(i['التكلفة'] || 0)),
-                      quantity: parseInt(String(i['الكمية'] || 1)),
+                      quantity_decimal: parseQuantity(String(i['الكمية'] ?? 1)),
+                      product_unit: String(i['الوحدة'] || ''),
                       total: parseFloat(String(i['الإجمالي'] || 0)),
                     }));
                     await supabase.from('purchase_items').insert(items);

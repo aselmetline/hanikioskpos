@@ -1,3 +1,5 @@
+import { QuantityInput } from './QuantityInput';
+import { addQuantity, roundQuantity, formatQuantity } from '@/lib/quantity';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -51,7 +53,7 @@ export const EditPurchaseDialog: React.FC<Props> = ({ open, onOpenChange, purcha
     const cost = p.cost || p.price * 0.7;
     if (idx >= 0) {
       const next = [...items];
-      next[idx] = { ...next[idx], quantity: next[idx].quantity + 1, total: (next[idx].quantity + 1) * next[idx].cost };
+      next[idx] = { ...next[idx], quantity: addQuantity(next[idx].quantity, 1), total: roundQuantity(addQuantity(next[idx].quantity, 1) * next[idx].cost) };
       setItems(next);
     } else {
       setItems([...items, { product: p, cost, quantity: 1, total: cost }]);
@@ -60,10 +62,10 @@ export const EditPurchaseDialog: React.FC<Props> = ({ open, onOpenChange, purcha
   };
   const updateQty = (pid: string, q: number) => {
     if (q <= 0) { setItems(items.filter(i => i.product.id !== pid)); return; }
-    setItems(items.map(i => i.product.id === pid ? { ...i, quantity: q, total: i.cost * q } : i));
+    setItems(items.map(i => i.product.id === pid ? { ...i, quantity: q, total: roundQuantity(i.cost * q) } : i));
   };
   const updateCost = (pid: string, c: number) => {
-    setItems(items.map(i => i.product.id === pid ? { ...i, cost: c, total: c * i.quantity } : i));
+    setItems(items.map(i => i.product.id === pid ? { ...i, cost: c, total: roundQuantity(c * i.quantity) } : i));
   };
   const remove = (pid: string) => setItems(items.filter(i => i.product.id !== pid));
 
@@ -146,9 +148,9 @@ export const EditPurchaseDialog: React.FC<Props> = ({ open, onOpenChange, purcha
                     <TableCell className="text-center text-sm">{item.total.toFixed(3)}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => updateQty(item.product.id, item.quantity - 1)}><Minus className="w-3 h-3" /></Button>
-                        <Input type="number" value={item.quantity} onChange={(e) => updateQty(item.product.id, parseInt(e.target.value) || 1)} className="w-12 text-center h-7 text-xs" dir="ltr" min="1" />
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => updateQty(item.product.id, item.quantity + 1)}><Plus className="w-3 h-3" /></Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" disabled={item.quantity <= 0.001} onClick={() => updateQty(item.product.id, Math.max(0.001, addQuantity(item.quantity, -1)))}><Minus className="w-3 h-3" /></Button>
+                        <QuantityInput value={item.quantity} onChange={quantity => updateQty(item.product.id, quantity)} aria-label={t('common.quantity')} className="w-20 text-center h-8 text-xs" />
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => updateQty(item.product.id, addQuantity(item.quantity, 1))}><Plus className="w-3 h-3" /></Button>
                       </div>
                     </TableCell>
                     <TableCell>

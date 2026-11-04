@@ -1,3 +1,5 @@
+import { QuantityInput } from './QuantityInput';
+import { addQuantity, roundQuantity, formatQuantity } from '@/lib/quantity';
 import React, { useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -450,18 +452,11 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                           <TableCell className="text-center font-medium">{item.total.toFixed(3)}</TableCell>
                           <TableCell>
                             <div className="flex items-center justify-center gap-1">
-                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" disabled={item.quantity <= 0.001} onClick={() => onUpdateQuantity(item.product.id, Math.max(0.001, addQuantity(item.quantity, -1)))}>
                                 <Minus className="w-3 h-3" />
                               </Button>
-                              <Input
-                                type="number"
-                                value={item.quantity}
-                                onChange={(e) => onUpdateQuantity(item.product.id, parseInt(e.target.value) || 1)}
-                                className="w-14 text-center h-7 text-sm"
-                                dir="ltr"
-                                min="1"
-                              />
-                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}>
+                              <QuantityInput value={item.quantity} onChange={quantity => onUpdateQuantity(item.product.id, quantity)} aria-label={t('common.quantity')} className="w-20 text-center h-8 text-sm" />
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onUpdateQuantity(item.product.id, addQuantity(item.quantity, 1))}>
                                 <Plus className="w-3 h-3" />
                               </Button>
                             </div>
@@ -587,7 +582,7 @@ const PurchasesTab: React.FC<PurchasesTabProps> = ({
                               {purchase.items.map((item, idx) => (
                                 <TableRow key={idx}>
                                   <TableCell className="text-center text-sm">{item.total.toFixed(3)}</TableCell>
-                                  <TableCell className="text-center text-sm">{item.quantity}</TableCell>
+                                  <TableCell className="text-center text-sm">{formatQuantity(item.quantity)} {item.product.unit}</TableCell>
                                   <TableCell className="text-center text-sm">{item.cost.toFixed(3)}</TableCell>
                                   <TableCell className="text-right text-sm">{item.product.name}</TableCell>
                                 </TableRow>

@@ -1,3 +1,4 @@
+import { addQuantity } from './quantity';
 /**
  * Offline mutation queue for product / stock edits.
  *
@@ -104,7 +105,7 @@ export function enqueueMutation(params: {
       kind: existing.kind === 'stock' && params.kind === 'stock' ? 'stock' : 'update',
       fields: { ...existing.fields, ...(params.fields ?? {}) },
       base: { ...(params.base ?? {}), ...existing.base }, // keep the oldest baseline
-      stockDelta: existing.stockDelta + (params.stockDelta ?? 0),
+      stockDelta: addQuantity(existing.stockDelta, params.stockDelta ?? 0),
       editedAt: new Date().toISOString(),
     };
     write(queue.map((m) => (m.localId === existing.localId ? merged : m)));

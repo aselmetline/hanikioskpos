@@ -1,3 +1,4 @@
+import { parseQuantity } from '@/lib/quantity';
 import * as XLSX from 'xlsx';
 import { Product } from '@/types/pos';
 import { ExcelProduct } from './types';
@@ -46,9 +47,9 @@ export function parseExcelProducts(file: File): Promise<ExcelProduct[]> {
           cost: parseFloat(String(row['التكلفة'] || row['cost'] || row['Cost'] || 0)),
           category: String(row['التصنيف'] || row['category'] || row['Category'] || 'daily'),
           barcode: String(row['الباركود'] || row['barcode'] || row['Barcode'] || ''),
-          stock: parseInt(String(row['الكمية'] || row['stock'] || row['Stock'] || 0)),
+          stock: parseQuantity(String(row['الكمية'] || row['stock'] || row['Stock'] || 0)),
           unit: String(row['الوحدة'] || row['unit'] || row['Unit'] || 'قطعة'),
-          lowStockAlert: parseInt(String(row['تنبيه المخزون'] || row['lowStockAlert'] || row['LowStockAlert'] || 10))
+          lowStockAlert: parseQuantity(String(row['تنبيه المخزون'] || row['lowStockAlert'] || row['LowStockAlert'] || 10))
         }));
 
         resolve(products.filter(p => p.nameAr || p.name));

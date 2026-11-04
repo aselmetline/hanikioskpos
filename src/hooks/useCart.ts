@@ -1,3 +1,4 @@
+import { addQuantity, roundQuantity } from '@/lib/quantity';
 import { useState, useCallback, useMemo } from 'react';
 import { CartItem, Product } from '@/types/pos';
 
@@ -6,13 +7,16 @@ export function useCart(defaultTaxRate: number = 0.19, taxEnabled: boolean = tru
   const [globalDiscount, setGlobalDiscount] = useState(0);
 
   const addItem = useCallback((product: Product, quantity: number = 1) => {
+    if (!Number.isFinite(quantity) || quantity <= 0) return;
+    quantity = roundQuantity(Math.min(quantity, product.stock));
+    if (quantity <= 0) return;
     setItems(prev => {
       const existingIndex = prev.findIndex(item => item.product.id === product.id);
       if (existingIndex >= 0) {
         const updated = [...prev];
         updated[existingIndex] = {
           ...updated[existingIndex],
-          quantity: updated[existingIndex].quantity + quantity
+          quantity: Math.min(product.stock, addQuantity(updated[existingIndex].quantity, quantity))
         };
         return updated;
       }
@@ -25,12 +29,14 @@ export function useCart(defaultTaxRate: number = 0.19, taxEnabled: boolean = tru
   }, []);
 
   const updateQuantity = useCallback((productId: string, quantity: number) => {
+    if (!Number.isFinite(quantity)) return;
+    quantity = roundQuantity(quantity);
     if (quantity <= 0) {
       removeItem(productId);
       return;
     }
     setItems(prev => prev.map(item =>
-      item.product.id === productId ? { ...item, quantity } : item
+      item.product.id === productId ? { ...item, quantity: Math.min(quantity, item.product.stock) } : item
     ));
   }, [removeItem]);
 
@@ -88,7 +94,7 @@ export function useCart(defaultTaxRate: number = 0.19, taxEnabled: boolean = tru
     }
     const tax = taxTotal;
     const total = taxableAmount + tax;
-    const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    const itemCount = items.reduce((sum, item) => addQuantity(sum, item.quantity), 0);
 
     return { subtotal, itemsDiscount, taxableAmount, tax, total, itemCount, taxBreakdown: breakdown };
   }, [items, globalDiscount, defaultTaxRate, taxEnabled]);

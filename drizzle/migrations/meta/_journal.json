@@ -43,6 +43,13 @@
       "when": 1793693501272,
       "tag": "0005_product_price_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793776757056,
+      "tag": "0006_decimal_quantities_additive",
+      "breakpoints": true
     }
   ]
 }

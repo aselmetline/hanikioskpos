@@ -1,3 +1,4 @@
+import { addQuantity, roundQuantity } from '@/lib/quantity';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Purchase, PurchaseItem, Product } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,11 +46,11 @@ export const usePurchases = () => {
                 price: 0,
                 category: '',
                 stock: 0,
-                unit: '',
+                unit: String(item.product_unit || ''),
                 lowStockAlert: 0
               },
               cost: Number(item.cost),
-              quantity: Number(item.quantity),
+              quantity: Number(item.quantity_decimal ?? item.quantity),
               total: Number(item.total)
             })),
             total: Number(p.total),
@@ -84,33 +85,37 @@ export const usePurchases = () => {
   }, [user]);
 
   const addItemToPurchase = useCallback((product: Product, cost: number, quantity: number) => {
+    if (!Number.isFinite(quantity) || quantity <= 0) return;
+    quantity = roundQuantity(quantity);
     const existingIndex = currentItems.findIndex(item => item.product.id === product.id);
     
     if (existingIndex >= 0) {
       setCurrentItems(prev => prev.map((item, index) => 
         index === existingIndex 
-          ? { ...item, quantity: item.quantity + quantity, total: (item.quantity + quantity) * item.cost }
+          ? { ...item, quantity: addQuantity(item.quantity, quantity), total: roundQuantity(addQuantity(item.quantity, quantity) * item.cost) }
           : item
       ));
     } else {
-      const newItem: PurchaseItem = { product, cost, quantity, total: cost * quantity };
+      const newItem: PurchaseItem = { product, cost, quantity, total: roundQuantity(cost * quantity) };
       setCurrentItems(prev => [...prev, newItem]);
     }
   }, [currentItems]);
 
   const updateItemQuantity = useCallback((productId: string, quantity: number) => {
+    if (!Number.isFinite(quantity)) return;
+    quantity = roundQuantity(quantity);
     if (quantity <= 0) {
       setCurrentItems(prev => prev.filter(item => item.product.id !== productId));
       return;
     }
     setCurrentItems(prev => prev.map(item =>
-      item.product.id === productId ? { ...item, quantity, total: item.cost * quantity } : item
+      item.product.id === productId ? { ...item, quantity, total: roundQuantity(item.cost * quantity) } : item
     ));
   }, []);
 
   const updateItemCost = useCallback((productId: string, cost: number) => {
     setCurrentItems(prev => prev.map(item =>
-      item.product.id === productId ? { ...item, cost, total: cost * item.quantity } : item
+      item.product.id === productId ? { ...item, cost, total: roundQuantity(cost * item.quantity) } : item
     ));
   }, []);
 
@@ -152,7 +157,8 @@ export const usePurchases = () => {
       product_id: item.product.id,
       product_name: item.product.nameAr || item.product.name,
       cost: item.cost,
-      quantity: item.quantity,
+      quantity_decimal: item.quantity,
+      product_unit: item.product.unit,
       total: item.total
     }));
 
@@ -215,7 +221,8 @@ export const usePurchases = () => {
       product_id: item.product.id,
       product_name: item.product.nameAr || item.product.name,
       cost: item.cost,
-      quantity: item.quantity,
+      quantity_decimal: item.quantity,
+      product_unit: item.product.unit,
       total: item.total,
     }));
     const { error: itemsErr } = await supabase.from('purchase_items').insert(rows);

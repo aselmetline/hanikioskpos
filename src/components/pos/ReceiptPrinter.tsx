@@ -1,3 +1,4 @@
+import { formatQuantity } from '@/lib/quantity';
 import { Printer, Share2, Download } from 'lucide-react';
 import { CartItem, Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
@@ -134,7 +135,7 @@ ${language === 'fr' ? kioskNameFr : kioskName}
 ${t('receipt.invoiceNumber')}: ${displayInvoice}
 ${format(now, 'dd/MM/yyyy HH:mm')}
 ${'─'.repeat(20)}
-${items.map(item => `${productLabel(item)} x${item.quantity} = ${(item.product.price * item.quantity).toFixed(3)}`).join('\n')}
+${items.map(item => `${productLabel(item)} x${formatQuantity(item.quantity)} ${item.product.unit} = ${(item.product.price * item.quantity).toFixed(3)}`).join('\n')}
 ${'─'.repeat(20)}
 ${t('receipt.subtotal')}: ${subtotal.toFixed(3)} ${CURRENCY}
 ${discount > 0 ? `${t('receipt.discount')}: -${discount.toFixed(3)} ${CURRENCY}\n` : ''}${taxEnabled ? `${t('receipt.tax')} (${(taxRate * 100).toFixed(0)}%): ${tax.toFixed(3)} ${CURRENCY}\n` : ''}${t('receipt.total')}: ${total.toFixed(3)} ${CURRENCY}
@@ -345,7 +346,7 @@ ${t('receipt.thankYou')}
                 {items.map((item, idx) => (
                   <div key={idx} data-receipt-table-row style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 2fr', gap: '16px', padding: '14px 0', borderBottom: '1px solid rgba(10,20,40,0.1)', alignItems: 'center' }}>
                     <div style={{ fontWeight: 600 }}>{productLabel(item)}</div>
-                    <div style={{ textAlign: 'center', fontWeight: 600 }}>{item.quantity}</div>
+                    <div style={{ textAlign: 'center', fontWeight: 600 }}>{formatQuantity(item.quantity)} {item.product.unit}</div>
                     <div data-col-price style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir="ltr">{item.product.price.toFixed(3)}</div>
                     <div style={{ textAlign: dir === 'rtl' ? 'right' : 'left', fontWeight: 600 }} dir="ltr">{(item.product.price * item.quantity).toFixed(3)}</div>
                   </div>

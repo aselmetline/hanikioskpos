@@ -1,3 +1,4 @@
+import { addQuantity } from './quantity';
 /**
  * Conflict resolution for product / stock edits made offline.
  *
@@ -59,7 +60,7 @@ export function mergeProductMutation(input: MergeInput): MergeResult {
   const serverIsNewer = serverUpdatedAt > localEditedAt;
 
   for (const [field, localValue] of Object.entries(fields)) {
-    if (field === 'stock') continue; // handled as a delta below
+    if (field === 'stock' || field === 'stock_decimal') continue; // handled as a delta below
     const serverValue = server[field];
     const baseValue = base[field];
 
@@ -80,16 +81,16 @@ export function mergeProductMutation(input: MergeInput): MergeResult {
   }
 
   if (stockDelta) {
-    const serverStock = Number(server.stock ?? 0);
-    const merged = Math.max(0, serverStock + stockDelta);
-    if (merged !== serverStock) patch.stock = merged;
-    const baseStock = Number(base.stock ?? serverStock);
+    const serverStock = Number(server.stock_decimal ?? server.stock ?? 0);
+    const merged = Math.max(0, addQuantity(serverStock, stockDelta));
+    if (merged !== serverStock) patch.stock_decimal = merged;
+    const baseStock = Number(base.stock_decimal ?? base.stock ?? serverStock);
     if (!isEqual(serverStock, baseStock)) {
       // Stock moved elsewhere too — we merged instead of overwriting.
       conflicts.push({
         productId,
         field: 'stock',
-        localValue: baseStock + stockDelta,
+        localValue: addQuantity(baseStock, stockDelta),
         serverValue: merged,
         winner: 'local',
       });

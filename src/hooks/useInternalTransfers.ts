@@ -25,7 +25,7 @@ function mapRow(r: any): InternalTransfer {
     id: r.id,
     sourceProductId: r.source_product_id,
     sourceProductName: r.source_product_name,
-    sourceQuantity: r.source_quantity,
+    sourceQuantity: Number(r.source_quantity_decimal ?? r.source_quantity),
     sourceUnitValue: Number(r.source_unit_value),
     sourceTotalValue: Number(r.source_total_value),
     targetProductId: r.target_product_id,
@@ -70,7 +70,7 @@ export function useInternalTransfers() {
   /** Executes the internal conversion atomically on the server. */
   const createTransfer = useCallback(
     async (sourceProductId: string, sourceQuantity: number, targetProductId: string, notes?: string) => {
-      const { data, error } = await supabase.rpc('process_internal_transfer', {
+      const { data, error } = await supabase.rpc('process_internal_transfer_decimal', {
         p_source_product_id: sourceProductId,
         p_source_quantity: sourceQuantity,
         p_target_product_id: targetProductId,

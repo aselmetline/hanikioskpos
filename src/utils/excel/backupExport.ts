@@ -22,7 +22,7 @@ export async function exportFullBackup(userId: string, onProgress?: ProgressCall
     const sheet = XLSX.utils.json_to_sheet(products.map(p => ({
       'الاسم بالعربية': p.name_ar, 'الاسم بالإنجليزية': p.name, 'السعر': p.price,
       'التكلفة': p.cost || 0, 'التصنيف': p.category, 'الباركود': p.barcode || '',
-      'الكمية': p.stock, 'الوحدة': p.unit, 'تنبيه المخزون': p.low_stock_alert
+      'الكمية': p.stock_decimal ?? p.stock, 'الوحدة': p.unit, 'تنبيه المخزون': p.low_stock_alert_decimal ?? p.low_stock_alert
     })));
     XLSX.utils.book_append_sheet(workbook, sheet, 'المنتجات');
   }
@@ -61,7 +61,7 @@ export async function exportFullBackup(userId: string, onProgress?: ProgressCall
     if (saleItems?.length) {
       const itemSheet = XLSX.utils.json_to_sheet(saleItems.map(i => ({
         'معرف البيع': i.sale_id, 'المنتج': i.product_name, 'السعر': i.price,
-        'الكمية': i.quantity, 'الخصم': i.discount, 'الإجمالي': i.total
+        'الكمية': i.quantity_decimal ?? i.quantity, 'الوحدة': i.product_unit || '', 'الخصم': i.discount, 'الإجمالي': i.total
       })));
       XLSX.utils.book_append_sheet(workbook, itemSheet, 'تفاصيل المبيعات');
     }
@@ -87,7 +87,7 @@ export async function exportFullBackup(userId: string, onProgress?: ProgressCall
     if (purchaseItems?.length) {
       const itemSheet = XLSX.utils.json_to_sheet(purchaseItems.map(i => ({
         'معرف الشراء': i.purchase_id, 'المنتج': i.product_name,
-        'التكلفة': i.cost, 'الكمية': i.quantity, 'الإجمالي': i.total
+        'التكلفة': i.cost, 'الكمية': i.quantity_decimal ?? i.quantity, 'الوحدة': i.product_unit || '', 'الإجمالي': i.total
       })));
       XLSX.utils.book_append_sheet(workbook, itemSheet, 'تفاصيل المشتريات');
     }
