@@ -1,3 +1,4 @@
+import { baseId, isSubId, SUB_SUFFIX } from '@/lib/subUnits';
 import { useState, useEffect, useCallback } from 'react';
 import { Sale, CartItem, Customer } from '@/types/pos';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,9 +34,9 @@ export const useSales = () => {
       } else {
         const mappedSales: Sale[] = data.map(s => ({
           id: s.id,
-          items: (s.sale_items || []).map((item: { product_id: string | null; product_name: string; price: number; quantity: number; quantity_decimal?: number; product_unit?: string; discount: number; tax_rate?: number }) => ({
+          items: (s.sale_items || []).map((item: { product_id: string | null; product_name: string; price: number; quantity: number; quantity_decimal?: number; product_unit?: string; is_sub_unit?: boolean; discount: number; tax_rate?: number }) => ({
             product: {
-              id: item.product_id || '',
+              id: item.product_id ? item.product_id + (item.is_sub_unit ? SUB_SUFFIX : '') : '',
               name: item.product_name,
               nameAr: item.product_name,
               price: Number(item.price),
@@ -97,7 +98,8 @@ export const useSales = () => {
     if (!user || items.length === 0) return null;
 
     const payload = items.map(item => ({
-      product_id: item.product.id || null,
+      product_id: item.product.id ? baseId(item.product.id) : null,
+      sub_unit: isSubId(item.product.id || ''),
       product_name: item.product.nameAr || item.product.name,
       price: item.product.price,
       quantity: item.quantity,
@@ -139,7 +141,7 @@ export const useSales = () => {
       // Reflect the sold quantities on the locally cached stock right away.
       emitOfflineStockDeltas(
         items
-          .filter(i => !!i.product?.id)
+          .filter(i => !!i.product?.id && !isSubId(i.product.id))
           .map(i => ({ productId: i.product.id, quantity: i.quantity })),
       );
       toast.success(tx('offline.saleQueued'));

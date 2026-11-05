@@ -125,6 +125,11 @@ export function useProducts() {
           lowStockAlert: Number(p.low_stock_alert_decimal ?? p.low_stock_alert),
           taxRate: p.tax_rate != null ? Number(p.tax_rate) : 0.19,
           isOpenPrice: !!p.is_open_price,
+          hasSubUnits: !!p.has_sub_units,
+          subUnitName: p.sub_unit_name || undefined,
+          subUnitsCount: p.sub_units_count ?? undefined,
+          subUnitPrice: p.sub_unit_price != null ? Number(p.sub_unit_price) : undefined,
+          looseStock: Number(p.loose_stock ?? 0),
         })));
       }
       setLoading(false);
@@ -186,6 +191,11 @@ export function useProducts() {
         low_stock_alert_decimal: product.lowStockAlert,
         tax_rate: product.taxRate ?? 0.19,
         is_open_price: product.isOpenPrice ?? false,
+        has_sub_units: product.hasSubUnits ?? false,
+        sub_unit_name: product.subUnitName ?? 'سيجارة',
+        sub_units_count: product.subUnitsCount ?? 20,
+        sub_unit_price: product.subUnitPrice ?? null,
+        loose_stock: product.looseStock ?? 0,
       })
       .select()
       .single();
@@ -212,6 +222,11 @@ export function useProducts() {
       lowStockAlert: Number(data.low_stock_alert_decimal ?? data.low_stock_alert),
       taxRate: data.tax_rate != null ? Number(data.tax_rate) : 0.19,
       isOpenPrice: !!data.is_open_price,
+      hasSubUnits: !!data.has_sub_units,
+      subUnitName: data.sub_unit_name || undefined,
+      subUnitsCount: data.sub_units_count ?? undefined,
+      subUnitPrice: data.sub_unit_price != null ? Number(data.sub_unit_price) : undefined,
+      looseStock: Number(data.loose_stock ?? 0),
     };
 
     setProducts(prev => [newProduct, ...prev]);
@@ -235,6 +250,11 @@ export function useProducts() {
     if (updates.lowStockAlert !== undefined) dbUpdates.low_stock_alert_decimal = roundQuantity(updates.lowStockAlert);
     if (updates.taxRate !== undefined) dbUpdates.tax_rate = updates.taxRate;
     if (updates.isOpenPrice !== undefined) dbUpdates.is_open_price = updates.isOpenPrice;
+    if (updates.hasSubUnits !== undefined) dbUpdates.has_sub_units = updates.hasSubUnits;
+    if (updates.subUnitName !== undefined) dbUpdates.sub_unit_name = updates.subUnitName;
+    if (updates.subUnitsCount !== undefined) dbUpdates.sub_units_count = updates.subUnitsCount;
+    if ('subUnitPrice' in updates) dbUpdates.sub_unit_price = updates.subUnitPrice ?? null;
+    if (updates.looseStock !== undefined) dbUpdates.loose_stock = roundQuantity(updates.looseStock);
 
 
     const current = productsRef.current.find(p => p.id === id);

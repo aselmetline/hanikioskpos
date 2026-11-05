@@ -310,9 +310,11 @@ export type Database = {
           category: string
           cost: number | null
           created_at: string
+          has_sub_units: boolean
           id: string
           image_url: string | null
           is_open_price: boolean
+          loose_stock: number
           low_stock_alert: number
           low_stock_alert_decimal: number | null
           name: string
@@ -322,6 +324,9 @@ export type Database = {
           price3: number | null
           stock: number
           stock_decimal: number | null
+          sub_unit_name: string | null
+          sub_unit_price: number | null
+          sub_units_count: number | null
           tax_rate: number
           unit: string
           updated_at: string
@@ -332,9 +337,11 @@ export type Database = {
           category?: string
           cost?: number | null
           created_at?: string
+          has_sub_units?: boolean
           id?: string
           image_url?: string | null
           is_open_price?: boolean
+          loose_stock?: number
           low_stock_alert?: number
           low_stock_alert_decimal?: number | null
           name: string
@@ -344,6 +351,9 @@ export type Database = {
           price3?: number | null
           stock?: number
           stock_decimal?: number | null
+          sub_unit_name?: string | null
+          sub_unit_price?: number | null
+          sub_units_count?: number | null
           tax_rate?: number
           unit?: string
           updated_at?: string
@@ -354,9 +364,11 @@ export type Database = {
           category?: string
           cost?: number | null
           created_at?: string
+          has_sub_units?: boolean
           id?: string
           image_url?: string | null
           is_open_price?: boolean
+          loose_stock?: number
           low_stock_alert?: number
           low_stock_alert_decimal?: number | null
           name?: string
@@ -366,6 +378,9 @@ export type Database = {
           price3?: number | null
           stock?: number
           stock_decimal?: number | null
+          sub_unit_name?: string | null
+          sub_unit_price?: number | null
+          sub_units_count?: number | null
           tax_rate?: number
           unit?: string
           updated_at?: string
@@ -493,6 +508,7 @@ export type Database = {
         Row: {
           discount: number
           id: string
+          is_sub_unit: boolean
           price: number
           product_id: string | null
           product_name: string
@@ -506,6 +522,7 @@ export type Database = {
         Insert: {
           discount?: number
           id?: string
+          is_sub_unit?: boolean
           price: number
           product_id?: string | null
           product_name: string
@@ -519,6 +536,7 @@ export type Database = {
         Update: {
           discount?: number
           id?: string
+          is_sub_unit?: boolean
           price?: number
           product_id?: string | null
           product_name?: string

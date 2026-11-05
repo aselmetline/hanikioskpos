@@ -50,6 +50,13 @@
       "when": 1793776757056,
       "tag": "0006_decimal_quantities_additive",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793864876689,
+      "tag": "0007_product_sub_units",
+      "breakpoints": true
     }
   ]
 }

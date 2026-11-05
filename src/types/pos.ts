@@ -17,7 +17,13 @@ export interface Product {
   taxRate?: number;
   /** Open-price product: cashier types the amount in TND at sale time */
   isOpenPrice?: boolean;
-
+  /** Sell by pack and by single piece (e.g. cigarette) */
+  hasSubUnits?: boolean;
+  subUnitName?: string;
+  subUnitsCount?: number;
+  subUnitPrice?: number;
+  /** Loose pieces from the currently opened pack */
+  looseStock?: number;
 }
 
 export interface CartItem {

@@ -1,3 +1,4 @@
+import { baseId, isSubId, pieceCost } from '@/lib/subUnits';
 import type { Sale, Product, Customer } from '@/types/pos';
 
 /** Round to millimes (3 decimals) to avoid float drift. */
@@ -24,7 +25,13 @@ export function lineFigures(item: Sale['items'][number], costOf: (id: string, na
 export function makeCostLookup(products: Product[]) {
   const byId = new Map(products.map(p => [p.id, p]));
   const byName = new Map(products.map(p => [p.name, p]));
-  return (id: string, name: string) => (byId.get(id) ?? byName.get(name))?.cost ?? 0;
+  return (id: string, name: string) => {
+    if (isSubId(id)) {
+      const parent = byId.get(baseId(id));
+      return parent ? pieceCost(parent.cost ?? 0, parent.subUnitsCount ?? 0) : 0;
+    }
+    return (byId.get(id) ?? byName.get(name))?.cost ?? 0;
+  };
 }
 
 function finalize(map: Map<string, ProfitRow>): ProfitRow[] {
