@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { AppSettings } from '@/hooks/useSettings';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import { AppUpdateCard } from './AppUpdateCard';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -83,6 +84,8 @@ export function SettingsTab({ settings, onUpdateSettings, onResetSettings, onFac
 
   return (
     <div className="p-4 pb-24 space-y-4 overflow-y-auto max-h-[calc(100vh-140px)]">
+      <AppUpdateCard />
+
       {/* Language */}
       <Card>
         <CardHeader className="pb-3">
