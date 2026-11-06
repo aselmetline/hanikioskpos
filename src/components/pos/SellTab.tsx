@@ -1,3 +1,4 @@
+import { makeSubUnitProduct, SUB_SUFFIX } from '@/lib/subUnits';
 import { ShoppingBag, ScanLine, PauseCircle, PlayCircle, History, Trash2 } from 'lucide-react';
 import { Product, CartItem, Customer } from '@/types/pos';
 import { CURRENCY } from '@/data/sampleData';
@@ -214,6 +215,8 @@ export function SellTab({
                   product={product}
                   onAdd={handleProductSelect}
                   inCart={cartItems.find(i => i.product.id === product.id)?.quantity ?? 0}
+                  inCartPieces={cartItems.find(i => i.product.id === product.id + SUB_SUFFIX)?.quantity ?? 0}
+                  onAddPiece={(p) => onAddToCart(makeSubUnitProduct(p))}
                 />
               ))}
             </div>

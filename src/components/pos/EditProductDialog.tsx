@@ -1,3 +1,4 @@
+import { SubUnitFields, emptySubUnits, subUnitsToProduct, type SubUnitState } from './SubUnitFields';
 import { parseQuantity } from '@/lib/quantity';
 import { useState, useEffect } from 'react';
 import { X, Package, Barcode, DollarSign, Hash, AlertTriangle } from 'lucide-react';
@@ -22,6 +23,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
   const { t, dir, language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [isOpenPrice, setIsOpenPrice] = useState(false);
+  const [subUnits, setSubUnits] = useState<SubUnitState>(emptySubUnits);
   const [formData, setFormData] = useState({
     name: '',
     nameAr: '',
@@ -40,6 +42,13 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
   useEffect(() => {
     if (product) {
       setIsOpenPrice(!!product.isOpenPrice);
+      setSubUnits({
+        enabled: !!product.hasSubUnits,
+        name: product.subUnitName || 'سيجارة',
+        count: String(product.subUnitsCount ?? 20),
+        price: product.subUnitPrice?.toString() || '',
+        loose: String(product.looseStock ?? 0),
+      });
       setFormData({
         name: product.name || '',
         nameAr: product.nameAr || '',
@@ -87,6 +96,7 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
         lowStockAlert: isOpenPrice ? 0 : (formData.lowStockAlert === '' ? 10 : parseQuantity(formData.lowStockAlert)),
         taxRate: parseFloat(formData.taxRate),
         isOpenPrice,
+        ...(isOpenPrice ? { hasSubUnits: false } : subUnitsToProduct(subUnits)),
       });
 
       
@@ -331,6 +341,10 @@ export function EditProductDialog({ open, onOpenChange, product, onUpdateProduct
               {t('editProduct.lowStockHelp')}
             </p>
           </div>
+
+          {!isOpenPrice && (
+            <SubUnitFields value={subUnits} onChange={setSubUnits} packPrice={parseFloat(formData.price) || 0} unit={formData.unit} />
+          )}
 
           <div className="pt-4 pb-safe">
             <Button

@@ -1,3 +1,4 @@
+import { SubUnitFields, emptySubUnits, subUnitsToProduct, type SubUnitState } from './SubUnitFields';
 import { parseQuantity } from '@/lib/quantity';
 import { useState } from 'react';
 import { X, Package, Barcode, DollarSign, Hash, AlertTriangle } from 'lucide-react';
@@ -27,6 +28,11 @@ interface AddProductDialogProps {
     lowStockAlert: number;
     taxRate?: number;
     isOpenPrice?: boolean;
+    hasSubUnits?: boolean;
+    subUnitName?: string;
+    subUnitsCount?: number;
+    subUnitPrice?: number;
+    looseStock?: number;
   }) => Promise<unknown>;
 }
 
@@ -34,6 +40,7 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [isOpenPrice, setIsOpenPrice] = useState(false);
+  const [subUnits, setSubUnits] = useState<SubUnitState>(emptySubUnits);
   const [formData, setFormData] = useState({
     name: '',
     nameAr: '',
@@ -79,12 +86,14 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
         lowStockAlert: isOpenPrice ? 0 : (formData.lowStockAlert === '' ? 10 : parseQuantity(formData.lowStockAlert)),
         taxRate: parseFloat(formData.taxRate),
         isOpenPrice,
+        ...(isOpenPrice ? { hasSubUnits: false } : subUnitsToProduct(subUnits)),
       });
 
       toast.success('تم إضافة المنتج بنجاح');
 
       // Reset form
       setIsOpenPrice(false);
+      setSubUnits(emptySubUnits);
       setFormData({
         name: '',
         nameAr: '',
@@ -355,6 +364,10 @@ export function AddProductDialog({ open, onOpenChange, onAddProduct }: AddProduc
               {t('settings.lowStockThreshold')}
             </p>
           </div>
+
+          {!isOpenPrice && (
+            <SubUnitFields value={subUnits} onChange={setSubUnits} packPrice={parseFloat(formData.price) || 0} unit={formData.unit} />
+          )}
 
           {/* Submit Button */}
           <div className="pt-4 pb-safe">
